@@ -1,0 +1,26 @@
+[
+  {
+    "usuario": "admin",
+    "nombre": "Administrador Principal",
+    "correo": "admin@encuestas.com",
+    "credencial": "admin123",
+    "rol": "ADMIN",
+    "estado": "ACTIVO"
+  },
+  {
+    "usuario": "usuario1",
+    "nombre": "David Sarria",
+    "correo": "david@encuestas.com",
+    "credencial": "admin123",
+    "rol": "USUARIO",
+    "estado": "ACTIVO"
+  },
+  {
+    "usuario": "inactivo",
+    "nombre": "Usuario Inactivo",
+    "correo": "inactivo@encuestas.com",
+    "credencial": "admin123",
+    "rol": "USUARIO",
+    "estado": "INACTIVO"
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "usuario": "admin",
+    "fecha": "2026-08-28 22:49:51",
+    "registro_afectado": "Copia de ENCUESTA CARACTERIZACIÓN DE LA POBLACIÓN VÍCTIMA DEL CONFLICTO ARMADO (Respuestas).xlsx",
+    "campos_modificados": {
+      "total_registros": 183,
+      "columnas": 81
+    }
+  },
+  {
+    "id": 2,
+    "usuario": "admin",
+    "fecha": "2026-08-29 00:00:52",
+    "registro_afectado": "Copia de ENCUESTA CARACTERIZACIÓN DE LA POBLACIÓN VÍCTIMA DEL CONFLICTO ARMADO (Respuestas).xlsx",
+    "campos_modificados": {
+      "total_registros": 183,
+      "total_columnas": 81
+    }
+  }
+]
