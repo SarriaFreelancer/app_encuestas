@@ -7,8 +7,8 @@ import json
 import pandas as pd
 
 from app.schemas import (
-    LoginRequest, TokenResponse, UserPublic, SurveyMetadata, 
-    SurveyResponseCreate, SurveyResponseUpdate, AIQueryRequest, AIQueryResponse
+    LoginRequest, TokenResponse, UserPublic, UserRole, UserInDB, UserCreate, UserUpdate,
+    SurveyMetadata, SurveyResponseCreate, SurveyResponseUpdate, AIQueryRequest, AIQueryResponse
 )
 from app.repositories.base import BaseRepository
 from app.repositories.sheets_repository import PermissiveSheetsRepository
@@ -201,25 +201,152 @@ def ai_query(
 # --- AUDITORÍA & HISTORIAL ---
 @app.get("/api/auditoria")
 def get_audit_logs(current_user: UserPublic = Depends(get_current_user)):
-    if current_user.rol != "ADMIN":
+    if current_user.rol not in [UserRole.SUPERADMIN, UserRole.ADMIN]:
         raise HTTPException(status_code=403, detail="Acceso no autorizado.")
     return audit_service.get_logs()
 
-# --- USUARIOS ---
+# --- USUARIOS (CRUD COMPLETO Y MÁSCARA DE SUPERADMIN) ---
 @app.get("/api/usuarios", response_model=List[UserPublic])
 def list_users(
     current_user: UserPublic = Depends(get_current_user),
     repo: BaseRepository = Depends(get_repository)
 ):
-    if current_user.rol != "ADMIN":
+    if current_user.rol not in [UserRole.SUPERADMIN, UserRole.ADMIN]:
         raise HTTPException(status_code=403, detail="Acceso denegado.")
+    
     users = repo.get_users()
-    return [
-        UserPublic(
+    response_users = []
+    for u in users:
+        # A los administradores normales (no SUPERADMIN) NO se les muestra que existe el superadmin
+        if current_user.rol != UserRole.SUPERADMIN and u.rol == UserRole.SUPERADMIN:
+            continue
+
+        response_users.append(UserPublic(
             usuario=u.usuario,
             nombre=u.nombre,
             correo=u.correo,
             rol=u.rol,
             estado=u.estado
-        ) for u in users
-    ]
+        ))
+    return response_users
+
+@app.post("/api/usuarios", response_model=UserPublic)
+def create_user(
+    payload: UserCreate,
+    current_user: UserPublic = Depends(get_current_user),
+    repo: BaseRepository = Depends(get_repository)
+):
+    if current_user.rol not in [UserRole.SUPERADMIN, UserRole.ADMIN]:
+        raise HTTPException(status_code=403, detail="Acceso denegado.")
+
+    # Solo un SUPERADMIN puede crear a otro SUPERADMIN
+    if payload.rol == UserRole.SUPERADMIN and current_user.rol != UserRole.SUPERADMIN:
+        payload.rol = UserRole.ADMIN
+
+    user_db = UserInDB(
+        usuario=payload.usuario.strip(),
+        nombre=payload.nombre.strip(),
+        correo=payload.correo.strip(),
+        credencial=payload.contrasena.strip(), # En producción se puede hashear con get_password_hash
+        rol=payload.rol,
+        estado=payload.estado
+    )
+    try:
+        created = repo.add_user(user_db)
+        audit_service.log_action(
+            usuario=current_user.usuario,
+            accion="CREACIÓN_USUARIO",
+            modulo="USUARIOS",
+            detalles=f"Se creó el usuario: {created.usuario} con rol {created.rol}"
+        )
+        return UserPublic(
+            usuario=created.usuario,
+            nombre=created.nombre,
+            correo=created.correo,
+            rol=created.rol,
+            estado=created.estado
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.put("/api/usuarios/{username}", response_model=UserPublic)
+def update_user(
+    username: str,
+    payload: UserUpdate,
+    current_user: UserPublic = Depends(get_current_user),
+    repo: BaseRepository = Depends(get_repository)
+):
+    if current_user.rol not in [UserRole.SUPERADMIN, UserRole.ADMIN]:
+        raise HTTPException(status_code=403, detail="Acceso denegado.")
+
+    target_user = repo.get_user_by_username(username)
+    if not target_user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado.")
+
+    # Un admin normal no puede editar al superadmin
+    if target_user.rol == UserRole.SUPERADMIN and current_user.rol != UserRole.SUPERADMIN:
+        raise HTTPException(status_code=403, detail="No tienes permisos para modificar a este usuario.")
+
+    update_dict = {}
+    if payload.nombre is not None: update_dict["nombre"] = payload.nombre.strip()
+    if payload.correo is not None: update_dict["correo"] = payload.correo.strip()
+    if payload.contrasena is not None and payload.contrasena.strip():
+        update_dict["credencial"] = payload.contrasena.strip()
+    if payload.rol is not None:
+        if payload.rol == UserRole.SUPERADMIN and current_user.rol != UserRole.SUPERADMIN:
+            pass # No permitir promover a SUPERADMIN si quien edita no es SUPERADMIN
+        else:
+            update_dict["rol"] = payload.rol
+    if payload.estado is not None: update_dict["estado"] = payload.estado
+
+    updated = repo.update_user(username, update_dict)
+    if not updated:
+        raise HTTPException(status_code=500, detail="Error al actualizar el usuario.")
+
+    audit_service.log_action(
+        usuario=current_user.usuario,
+        accion="EDICIÓN_USUARIO",
+        modulo="USUARIOS",
+        detalles=f"Se editó el usuario: {username}"
+    )
+
+    return UserPublic(
+        usuario=updated.usuario,
+        nombre=updated.nombre,
+        correo=updated.correo,
+        rol=updated.rol,
+        estado=updated.estado
+    )
+
+@app.delete("/api/usuarios/{username}")
+def delete_user(
+    username: str,
+    current_user: UserPublic = Depends(get_current_user),
+    repo: BaseRepository = Depends(get_repository)
+):
+    if current_user.rol not in [UserRole.SUPERADMIN, UserRole.ADMIN]:
+        raise HTTPException(status_code=403, detail="Acceso denegado.")
+
+    if current_user.usuario.lower() == username.lower():
+        raise HTTPException(status_code=400, detail="No puedes eliminar tu propia cuenta.")
+
+    target_user = repo.get_user_by_username(username)
+    if not target_user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado.")
+
+    # Un admin normal no puede eliminar al superadmin
+    if target_user.rol == UserRole.SUPERADMIN and current_user.rol != UserRole.SUPERADMIN:
+        raise HTTPException(status_code=403, detail="No tienes permisos para eliminar a este usuario.")
+
+    deleted = repo.delete_user(username)
+    if not deleted:
+        raise HTTPException(status_code=500, detail="Error al eliminar el usuario.")
+
+    audit_service.log_action(
+        usuario=current_user.usuario,
+        accion="ELIMINACIÓN_USUARIO",
+        modulo="USUARIOS",
+        detalles=f"Se eliminó el usuario: {username}"
+    )
+
+    return {"message": f"Usuario {username} eliminado exitosamente."}

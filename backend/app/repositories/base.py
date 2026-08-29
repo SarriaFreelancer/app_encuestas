@@ -40,6 +40,21 @@ class BaseRepository(ABC):
         pass
 
     @abstractmethod
+    def add_user(self, user: UserInDB) -> UserInDB:
+        """Crea un nuevo usuario."""
+        pass
+
+    @abstractmethod
+    def update_user(self, username: str, user_update: Dict[str, Any]) -> Optional[UserInDB]:
+        """Actualiza la información de un usuario."""
+        pass
+
+    @abstractmethod
+    def delete_user(self, username: str) -> bool:
+        """Elimina un usuario."""
+        pass
+
+    @abstractmethod
     def add_column_if_not_exists(self, column_name: str) -> bool:
         """Agrega una nueva columna al encabezado si no existe."""
         pass

@@ -4,6 +4,7 @@ from typing import Optional, List, Dict, Any, Union
 from enum import Enum
 
 class UserRole(str, Enum):
+    SUPERADMIN = "SUPERADMIN"
     ADMIN = "ADMIN"
     USUARIO = "USUARIO"
 
@@ -25,6 +26,21 @@ class UserPublic(BaseModel):
     correo: str
     rol: UserRole
     estado: UserStatus
+
+class UserCreate(BaseModel):
+    usuario: str
+    nombre: str
+    correo: str
+    contrasena: str
+    rol: UserRole = UserRole.USUARIO
+    estado: UserStatus = UserStatus.ACTIVO
+
+class UserUpdate(BaseModel):
+    nombre: Optional[str] = None
+    correo: Optional[str] = None
+    contrasena: Optional[str] = None
+    rol: Optional[UserRole] = None
+    estado: Optional[UserStatus] = None
 
 class LoginRequest(BaseModel):
     usuario: str

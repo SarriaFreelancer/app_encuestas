@@ -1,5 +1,13 @@
 [
   {
+    "usuario": "superadmin",
+    "nombre": "Super Administrador",
+    "correo": "superadmin@encuestas.com",
+    "credencial": "superadmin123",
+    "rol": "SUPERADMIN",
+    "estado": "ACTIVO"
+  },
+  {
     "usuario": "admin",
     "nombre": "Administrador Principal",
     "correo": "admin@encuestas.com",

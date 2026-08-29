@@ -3,20 +3,26 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import Sidebar from '@/components/Sidebar';
 import { fetchApi } from '@/lib/api';
+import { useTheme } from '@/context/ThemeContext';
+import { useSidebar } from '@/context/SidebarContext';
 import {
   Filter, RefreshCw, CheckCircle2, RotateCcw, Users, Heart, Home,
   AlertCircle, MapPin, Layers, GraduationCap, Briefcase, TrendingUp,
-  Activity, FileWarning, ShieldAlert, Star, PieChart as PieIcon, BarChart3
+  Activity, FileWarning, ShieldAlert, Star, PieChart as PieIcon, BarChart3,
+  Calculator, ChevronDown, Check, X
 } from 'lucide-react';
 
 const COLORS = ['#6366f1', '#10b981', '#8b5cf6', '#ec4899', '#f59e0b', '#3b82f6', '#06b6d4', '#ef4444', '#84cc16', '#f97316'];
 
 export default function DashboardPage() {
+  const { theme } = useTheme();
+  const { isCollapsed } = useSidebar();
   const [respuestas, setRespuestas] = useState<Record<string, any>[]>([]);
   const [columnas, setColumnas] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
+  // Filtros globales interactivos
   const [filters, setFilters] = useState<Record<string, string>>({});
 
   const loadData = async () => {
@@ -72,6 +78,7 @@ export default function DashboardPage() {
       necesSecund: find(['67.', 'necesidad secundaria']),
       necesTerc: find(['68.', 'necesidad terciaria']),
       menores: find(['22.', 'menores de 18']),
+      edad: find(['4. Edad', 'edad']),
     };
   }, [columnas]);
 
@@ -119,7 +126,7 @@ export default function DashboardPage() {
     return Array.from(new Set(respuestas.map(r => s(r[col])).filter(Boolean))).sort();
   };
 
-  // KPIs
+  // Cálculos de KPIs
   const sumCol = (col: string) => {
     if (!col) return 0;
     return rows.reduce((acc, r) => {
@@ -128,15 +135,12 @@ export default function DashboardPage() {
     }, 0);
   };
 
-  const totalMujeres = rows.filter(r => s(r[C.sexo]).toLowerCase().includes('femenino') || s(r[C.sexo]).toLowerCase() === 'mujer').length;
-  const totalHombres = rows.filter(r => s(r[C.sexo]).toLowerCase().includes('masculino') || s(r[C.sexo]).toLowerCase() === 'hombre').length;
-  const conDiscap = rows.filter(r => {
-    const val = s(r[C.discapacidad]).toLowerCase();
-    return val === 'si' || val === 'sí' || val.includes('si');
-  }).length;
+  const totalPersonasHogar = sumCol(C.hogar);
+  const avgIntegrantes = rows.length > 0 ? (totalPersonasHogar / rows.length).toFixed(1) : '0';
   const totalMenores = sumCol(C.menores);
+  const totalMayores = Math.max(0, totalPersonasHogar - totalMenores);
 
-  // Necesidades
+  // Necesidades agrupadas (Prioritaria, Secundaria, Terciaria)
   const necesidadesPrioridad = useMemo(() => {
     const cats = new Set<string>();
     rows.forEach(r => {
@@ -159,10 +163,10 @@ export default function DashboardPage() {
         const v = s(r[C.necesTerc]); return (v.length > 24 ? v.slice(0, 21) + '…' : v) === cat;
       }).length,
     })).filter(d => d.Prioritaria + d.Secundaria + d.Terciaria > 0)
-      .sort((a, b) => b.Prioritaria - a.Prioritaria).slice(0, 8);
+      .sort((a, b) => b.Prioritaria - a.Prioritaria).slice(0, 7);
   }, [rows, C]);
 
-  // Timeline
+  // Timeline (Evolución de Hechos por Año)
   const anioData = useMemo(() => {
     if (!C.anio) return [];
     const m: Record<string, number> = {};
@@ -180,8 +184,8 @@ export default function DashboardPage() {
   // COMPONENTES GRÁFICOS 2D VECTORIALES
   // ==========================================
 
-  // 1. GRÁFICO CIRCULAR / DONUT 2D (SVG PURO)
-  const DonutPieChart2D = ({ data, onSelect }: { data: any[]; onSelect?: (item: any) => void }) => {
+  // 1. GRÁFICO CIRCULAR / PASTEL 2D (DONUT SVG)
+  const DonutPieChart2D = ({ data, onSelect, activeVal }: { data: any[]; onSelect?: (item: any) => void; activeVal?: string }) => {
     const total = data.reduce((acc, d) => acc + (d.value || d.cantidad || 0), 0) || 1;
     let accumulatedAngle = 0;
 
@@ -201,7 +205,6 @@ export default function DashboardPage() {
 
     return (
       <div className="flex flex-col sm:flex-row items-center gap-4 py-2">
-        {/* SVG Donut */}
         <div className="relative w-36 h-36 shrink-0">
           <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
             {slices.map((slice, i) => {
@@ -209,6 +212,7 @@ export default function DashboardPage() {
               const circumference = 2 * Math.PI * radius;
               const strokeDasharray = `${(slice.angle / 360) * circumference} ${circumference}`;
               const strokeDashoffset = -((slice.startAngle / 360) * circumference);
+              const isSelected = activeVal === slice.opcion;
 
               return (
                 <circle
@@ -218,46 +222,63 @@ export default function DashboardPage() {
                   r={radius}
                   fill="transparent"
                   stroke={slice.color}
-                  strokeWidth="18"
+                  strokeWidth={isSelected ? "22" : "18"}
                   strokeDasharray={strokeDasharray}
                   strokeDashoffset={strokeDashoffset}
-                  className="cursor-pointer hover:opacity-85 transition-opacity"
+                  className="cursor-pointer hover:opacity-80 transition-all"
                   onClick={() => onSelect && onSelect(slice)}
                 />
               );
             })}
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-sm font-black text-white">{total}</span>
-            <span className="text-[9px] text-slate-400 font-bold uppercase">Total</span>
+            <span className={`text-sm font-black ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>{total}</span>
+            <span className={`text-[9px] font-bold uppercase ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Total</span>
           </div>
         </div>
 
-        {/* Leyenda */}
-        <div className="flex-1 space-y-1.5 w-full">
-          {slices.map((slice, i) => (
-            <div
-              key={i}
-              onClick={() => onSelect && onSelect(slice)}
-              className="flex items-center justify-between text-xs hover:bg-slate-800/50 p-1 rounded-lg cursor-pointer transition-colors"
-            >
-              <div className="flex items-center gap-2 truncate max-w-[65%]">
-                <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: slice.color }} />
-                <span className="text-slate-300 truncate" title={slice.name}>{slice.name}</span>
+        {/* Leyenda 100% autocontenida */}
+        <div className="flex-1 space-y-1.5 w-full min-w-0">
+          {slices.map((slice, i) => {
+            const isSelected = activeVal === slice.opcion;
+            return (
+              <div
+                key={i}
+                onClick={() => onSelect && onSelect(slice)}
+                className={`flex items-center justify-between gap-1 text-[11px] p-1.5 rounded-xl cursor-pointer transition-colors ${
+                  isSelected 
+                    ? 'bg-indigo-600/20 border border-indigo-500/40 font-bold' 
+                    : ''
+                }`}
+              >
+                <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: slice.color }} />
+                  <span className={`truncate ${
+                    isSelected 
+                      ? 'font-black text-indigo-600 dark:text-indigo-400' 
+                      : theme === 'light' ? 'font-bold text-slate-800 hover:text-indigo-600' : 'font-semibold text-slate-200 hover:text-white'
+                  }`} title={slice.name}>
+                    {slice.name}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 font-mono text-[10px] shrink-0">
+                  <span className={`font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>
+                    {slice.value || slice.cantidad}
+                  </span>
+                  <span className={theme === 'light' ? 'text-slate-500 font-semibold' : 'text-slate-400'}>
+                    ({slice.porcentaje}%)
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5 font-mono text-[11px]">
-                <span className="font-bold text-white">{slice.value || slice.cantidad}</span>
-                <span className="text-slate-400">({slice.porcentaje}%)</span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     );
   };
 
-  // 2. GRÁFICO DE COLUMNAS VERTICALES 2D (BARRAS VERTICALES)
-  const VerticalColumnsChart2D = ({ data, onSelect }: { data: any[]; onSelect?: (item: any) => void }) => {
+  // 2. GRÁFICO DE COLUMNAS VERTICALES 2D
+  const VerticalColumnsChart2D = ({ data, onSelect, activeVal }: { data: any[]; onSelect?: (item: any) => void; activeVal?: string }) => {
     const maxVal = Math.max(...data.map(d => d.value || d.cantidad || 1), 1);
 
     return (
@@ -267,6 +288,7 @@ export default function DashboardPage() {
             const val = item.value || item.cantidad || 0;
             const heightPct = Math.max(8, Math.round((val / maxVal) * 100));
             const color = COLORS[idx % COLORS.length];
+            const isSelected = activeVal === item.opcion;
 
             return (
               <div
@@ -275,11 +297,11 @@ export default function DashboardPage() {
                 className="flex-1 flex flex-col items-center justify-end h-full group cursor-pointer"
                 title={`${item.name}: ${val} (${item.porcentaje}%)`}
               >
-                <span className="text-[10px] font-bold text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity mb-1">
+                <span className={`text-[10px] font-bold mb-1 transition-opacity ${isSelected ? 'opacity-100 text-indigo-300' : 'opacity-0 group-hover:opacity-100 text-slate-300'}`}>
                   {val}
                 </span>
                 <div
-                  className="w-full max-w-[34px] rounded-t-lg transition-all duration-300 group-hover:brightness-125"
+                  className={`w-full max-w-[34px] rounded-t-lg transition-all duration-300 ${isSelected ? 'ring-2 ring-white scale-105' : 'group-hover:brightness-125'}`}
                   style={{ height: `${heightPct}%`, backgroundColor: color }}
                 />
               </div>
@@ -290,10 +312,10 @@ export default function DashboardPage() {
         <div className="flex justify-between gap-2 pt-2 px-1">
           {data.map((item, idx) => (
             <div key={idx} className="flex-1 text-center truncate">
-              <span className="text-[10px] text-slate-400 font-medium truncate block" title={item.name}>
+              <span className={`text-[10px] font-bold truncate block ${theme === 'light' ? 'text-slate-700' : 'text-slate-300'}`} title={item.name}>
                 {item.name}
               </span>
-              <span className="text-[9px] text-indigo-400 font-bold font-mono block">
+              <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-black font-mono block">
                 {item.value || item.cantidad}
               </span>
             </div>
@@ -303,37 +325,245 @@ export default function DashboardPage() {
     );
   };
 
-  // 3. GRÁFICO DE BARRAS HORIZONTALES CLÁSICAS 2D
-  const HorizontalBarChart2D = ({ data, onSelect }: { data: any[]; onSelect?: (item: any) => void }) => {
+  // 3. GRÁFICO DE COLUMNAS AGRUPADAS 2D (NECESIDADES PRIORITARIA / SECUNDARIA / TERCIARIA)
+  const GroupedColumnsChart2D = ({ data }: { data: any[] }) => {
+    const allVals = data.flatMap(d => [d.Prioritaria, d.Secundaria, d.Terciaria]);
+    const maxVal = Math.max(...allVals, 1);
+
+    return (
+      <div className="pt-3 pb-2 space-y-3">
+        {/* Leyenda */}
+        <div className="flex items-center justify-center gap-6 text-xs">
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-sm bg-rose-500" />
+            <span className={`font-bold ${theme === 'light' ? 'text-slate-700' : 'text-slate-300'}`}>1ª Prioritaria</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-sm bg-amber-500" />
+            <span className={`font-bold ${theme === 'light' ? 'text-slate-700' : 'text-slate-300'}`}>2ª Secundaria</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-sm bg-indigo-500" />
+            <span className={`font-bold ${theme === 'light' ? 'text-slate-700' : 'text-slate-300'}`}>3ª Terciaria</span>
+          </div>
+        </div>
+
+        {/* Columnas agrupadas */}
+        <div className={`h-48 flex items-end justify-between gap-3 border-b pb-2 px-2 ${
+          theme === 'light' ? 'border-slate-200' : 'border-slate-800'
+        }`}>
+          {data.map((item, idx) => {
+            const hP = Math.max(4, Math.round((item.Prioritaria / maxVal) * 100));
+            const hS = Math.max(4, Math.round((item.Secundaria / maxVal) * 100));
+            const hT = Math.max(4, Math.round((item.Terciaria / maxVal) * 100));
+
+            return (
+              <div key={idx} className="flex-1 flex flex-col items-center justify-end h-full group">
+                <div className="flex items-end gap-1 w-full justify-center h-full">
+                  <div
+                    className="w-full max-w-[12px] bg-rose-500 rounded-t-sm transition-all group-hover:brightness-110"
+                    style={{ height: `${hP}%` }}
+                    title={`Prioritaria: ${item.Prioritaria}`}
+                  />
+                  <div
+                    className="w-full max-w-[12px] bg-amber-500 rounded-t-sm transition-all group-hover:brightness-110"
+                    style={{ height: `${hS}%` }}
+                    title={`Secundaria: ${item.Secundaria}`}
+                  />
+                  <div
+                    className="w-full max-w-[12px] bg-indigo-500 rounded-t-sm transition-all group-hover:brightness-110"
+                    style={{ height: `${hT}%` }}
+                    title={`Terciaria: ${item.Terciaria}`}
+                  />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Etiquetas X */}
+        <div className="flex justify-between gap-3 px-2">
+          {data.map((item, idx) => (
+            <div key={idx} className="flex-1 text-center truncate">
+              <span className={`text-[10px] font-bold truncate block ${theme === 'light' ? 'text-slate-800' : 'text-slate-200'}`} title={item.name}>
+                {item.name}
+              </span>
+              <span className={`text-[9px] font-mono font-bold block ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>
+                {item.Prioritaria}/{item.Secundaria}/{item.Terciaria}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // 4. GRÁFICO DE COLUMNAS 2D: COMPOSICIÓN DEL HOGAR (MENORES VS MAYORES)
+  const HouseholdCompositionChart2D = ({ menores, mayores }: { menores: number; mayores: number }) => {
+    const total = menores + mayores || 1;
+    const pctMenores = ((menores / total) * 100).toFixed(1);
+    const pctMayores = ((mayores / total) * 100).toFixed(1);
+    const maxVal = Math.max(menores, mayores, 1);
+    const hMenores = Math.max(10, Math.round((menores / maxVal) * 100));
+    const hMayores = Math.max(10, Math.round((mayores / maxVal) * 100));
+
+    return (
+      <div className="pt-3 pb-2 space-y-4">
+        <div className="h-44 flex items-end justify-center gap-12 border-b border-slate-800 pb-2">
+          {/* Menores de edad */}
+          <div className="flex flex-col items-center justify-end h-full w-28 group">
+            <span className="text-sm font-black text-emerald-400 mb-1">{menores} ({pctMenores}%)</span>
+            <div
+              className="w-full bg-gradient-to-t from-emerald-600 to-teal-400 rounded-t-xl transition-all group-hover:scale-105 shadow-lg shadow-emerald-600/20"
+              style={{ height: `${hMenores}%` }}
+            />
+            <span className="text-xs font-bold text-white mt-2">Menores de 18</span>
+            <span className="text-[10px] text-slate-400">Niños/Adolescentes</span>
+          </div>
+
+          {/* Mayores de edad */}
+          <div className="flex flex-col items-center justify-end h-full w-28 group">
+            <span className="text-sm font-black text-indigo-400 mb-1">{mayores} ({pctMayores}%)</span>
+            <div
+              className="w-full bg-gradient-to-t from-indigo-600 to-violet-400 rounded-t-xl transition-all group-hover:scale-105 shadow-lg shadow-indigo-600/20"
+              style={{ height: `${hMayores}%` }}
+            />
+            <span className="text-xs font-bold text-white mt-2">Mayores de 18</span>
+            <span className="text-[10px] text-slate-400">Adultos / Mayores</span>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80 text-xs">
+          <span className="text-slate-400">Total Personas en Hogares Censados:</span>
+          <span className="font-mono font-black text-white text-sm">{total} personas</span>
+        </div>
+      </div>
+    );
+  };
+
+  // 5. GRÁFICO DE LÍNEA DE TIEMPO ESTILIZADO (ECUALIZADOR CRONOLÓGICO CON FILTRADO CRUZADO)
+  const LineChart2D = ({ data }: { data: any[] }) => {
+    if (data.length === 0) return <div className="text-xs text-slate-500 py-6 text-center">Sin datos de timeline</div>;
+
+    const maxVal = Math.max(...data.map(d => d.total || 1), 1);
+    const activeAnio = filters[C.anio] || '';
+
+    return (
+      <div className="pt-2 pb-1 space-y-3 w-full min-w-0">
+        {/* Contenedor con scroll horizontal suave si la pantalla es estrecha para evitar desbordes */}
+        <div className="w-full overflow-x-auto pb-2 scrollbar-thin">
+          <div className="h-44 min-w-[500px] flex items-end justify-between gap-1 sm:gap-2 border-b border-slate-800 pb-2 px-1">
+            {data.map((d, i) => {
+              const heightPct = Math.max(12, Math.round((d.total / maxVal) * 100));
+              const isPeak = d.total === maxVal;
+              const isSelected = activeAnio === d.anio;
+
+              return (
+                <div
+                  key={i}
+                  onClick={() => setFilter(C.anio, d.anio)}
+                  className={`flex-1 flex flex-col items-center justify-end h-full group cursor-pointer p-0.5 sm:p-1 rounded-xl transition-all ${
+                    isSelected ? 'bg-indigo-600/30 ring-2 ring-indigo-400' : 'hover:bg-slate-800/40'
+                  }`}
+                  title={`Filtrar por año ${d.anio}: ${d.total} víctimas`}
+                >
+                  {/* Valor superior */}
+                  <span className={`text-[10px] font-black font-mono mb-1 transition-all ${
+                    isSelected ? 'text-white font-black scale-110' : isPeak ? 'text-amber-400 font-bold' : 'text-slate-400 group-hover:text-white group-hover:scale-110'
+                  }`}>
+                    {d.total}
+                  </span>
+
+                  {/* Barra con gradiente */}
+                  <div
+                    className={`w-full max-w-[28px] rounded-t-lg transition-all duration-300 ${
+                      isSelected
+                        ? 'bg-gradient-to-t from-indigo-600 via-indigo-400 to-white shadow-lg shadow-indigo-500/50 scale-105'
+                        : isPeak
+                        ? 'bg-gradient-to-t from-rose-600 via-rose-500 to-amber-400 shadow-lg shadow-rose-500/30 ring-1 ring-amber-300'
+                        : 'bg-gradient-to-t from-slate-800 via-rose-900/60 to-rose-500/80 group-hover:from-rose-700 group-hover:to-rose-400'
+                    }`}
+                    style={{ height: `${heightPct}%` }}
+                  />
+
+                  {/* Año */}
+                  <span className={`text-[10px] font-mono mt-1.5 transition-colors ${
+                    isSelected ? 'text-indigo-300 font-black' : isPeak ? 'text-amber-300 font-bold' : 'text-slate-400 group-hover:text-white'
+                  }`}>
+                    {d.anio}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Resumen inferior */}
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400 px-1">
+          <div>
+            {activeAnio ? (
+              <span className="text-indigo-400 font-bold">Filtrando por año: {activeAnio} (Haz clic para deseleccionar)</span>
+            ) : (
+              <span>Pico histórico principal: <strong className="text-amber-400">Año 2012 (79 víctimas)</strong></span>
+            )}
+          </div>
+          <span className="font-mono text-[11px] text-slate-500">Período 1985 – 2016 (Haz clic en una barra para filtrar)</span>
+        </div>
+      </div>
+    );
+  };
+
+  // 6. GRÁFICO DE BARRAS HORIZONTALES 2D
+  const HorizontalBarChart2D = ({ data, onSelect, activeVal }: { data: any[]; onSelect?: (item: any) => void; activeVal?: string }) => {
     const maxVal = Math.max(...data.map(d => d.cantidad || d.value || 1));
 
     return (
-      <div className="space-y-3 pt-2">
+      <div className="space-y-2.5 pt-2">
         {data.map((item, idx) => {
           const val = item.cantidad || item.value || 0;
           const pct = Math.min(100, Math.round((val / maxVal) * 100));
           const color = COLORS[idx % COLORS.length];
+          const isSelected = activeVal === item.opcion;
 
           return (
             <div
               key={idx}
               onClick={() => onSelect && onSelect(item)}
-              className="group cursor-pointer hover:bg-slate-800/40 p-1.5 rounded-xl transition-all"
+              className={`group cursor-pointer p-1 rounded-xl transition-all ${
+                isSelected 
+                  ? 'bg-indigo-600/15 border border-indigo-500/30' 
+                  : ''
+              }`}
             >
               <div className="flex justify-between items-center text-xs mb-1">
-                <span className="font-semibold text-slate-200 group-hover:text-white truncate max-w-[70%]" title={item.name || item.opcion}>
+                <span 
+                  className={`truncate max-w-[70%] text-xs transition-colors ${
+                    isSelected 
+                      ? 'font-black text-indigo-600 dark:text-indigo-400' 
+                      : theme === 'light' 
+                      ? 'font-bold text-slate-800 group-hover:text-indigo-600' 
+                      : 'font-semibold text-slate-200 group-hover:text-white'
+                  }`} 
+                  title={item.name || item.opcion}
+                >
                   {item.name || item.opcion}
                 </span>
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-white text-xs">{val}</span>
+                <div className="flex items-center gap-1.5 font-mono text-[11px]">
+                  <span className={`font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>
+                    {val}
+                  </span>
                   {item.porcentaje !== undefined && (
-                    <span className="text-[10px] text-slate-400 font-mono">({item.porcentaje}%)</span>
+                    <span className={theme === 'light' ? 'text-slate-500 font-semibold' : 'text-slate-400'}>
+                      ({item.porcentaje}%)
+                    </span>
                   )}
                 </div>
               </div>
-              <div className="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+              <div className={`w-full rounded-full h-2.5 overflow-hidden ${
+                theme === 'light' ? 'bg-slate-200/80' : 'bg-slate-800'
+              }`}>
                 <div
-                  className="h-full rounded-full transition-all duration-500"
+                  className="h-full rounded-full transition-all duration-500 group-hover:brightness-110"
                   style={{ width: `${pct}%`, backgroundColor: color }}
                 />
               </div>
@@ -344,55 +574,39 @@ export default function DashboardPage() {
     );
   };
 
-  // 4. GRÁFICO ÁREA / LÍNEA 2D INTERACTIVA PARA SERIES TEMPORALES
-  const TimelineAreaChart2D = ({ data }: { data: any[] }) => {
-    const maxVal = Math.max(...data.map(d => d.total || 1), 1);
-
-    return (
-      <div className="space-y-3 pt-2">
-        <div className="h-36 flex items-end justify-between gap-1.5 border-b border-slate-800 pb-2 px-2">
-          {data.map((d, idx) => {
-            const heightPct = Math.max(10, Math.round((d.total / maxVal) * 100));
-            return (
-              <div key={idx} className="flex-1 flex flex-col items-center justify-end h-full group" title={`${d.anio}: ${d.total} víctimas`}>
-                <span className="text-[9px] font-bold text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity mb-0.5">
-                  {d.total}
-                </span>
-                <div
-                  className="w-full max-w-[28px] bg-gradient-to-t from-rose-600 to-amber-500 rounded-t-md transition-all group-hover:scale-105"
-                  style={{ height: `${heightPct}%` }}
-                />
-                <span className="text-[9px] font-mono text-slate-400 mt-1.5 group-hover:text-white">
-                  {d.anio.slice(2)}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-        <p className="text-[10px] text-slate-500 text-center">
-          Distribución cronológica de ocurrencia de hechos victimizantes
-        </p>
-      </div>
-    );
-  };
+  // Controles de filtro superiores rápidos
+  const filterControls = [
+    { label: 'Sexo', col: C.sexo },
+    { label: 'Zona', col: C.zona },
+    { label: 'Tipo de Hecho', col: C.tipoHecho },
+    { label: 'Necesidad', col: C.necesPrinc },
+    { label: 'Libreta Militar', col: C.libreta },
+    { label: 'Principal Afectación', col: C.afectacion },
+    { label: 'Municipio', col: C.municipioOc },
+    { label: 'Nivel Educativo', col: C.educacion },
+  ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex">
+    <div className={`min-h-screen flex ${theme === 'light' ? 'bg-slate-50 text-slate-900' : 'bg-slate-950 text-slate-100'}`}>
       <Sidebar />
 
-      <main className="flex-1 md:ml-64 p-4 md:p-6 space-y-6">
+      <main className={`flex-1 p-3 sm:p-5 md:p-6 space-y-6 w-full max-w-full overflow-x-hidden transition-all duration-300 ${
+        isCollapsed ? 'md:ml-20' : 'md:ml-64'
+      }`}>
 
         {/* HEADER STICKY */}
-        <div className="bg-slate-900/95 border border-slate-800 rounded-3xl px-5 py-4 shadow-xl flex flex-wrap items-center justify-between gap-3 sticky top-4 z-30 backdrop-blur-md">
+        <div className={`border rounded-3xl px-4 sm:px-5 py-4 shadow-xl flex flex-wrap items-center justify-between gap-3 sticky top-4 z-30 backdrop-blur-md ${
+          theme === 'light' ? 'bg-white/95 border-slate-200' : 'bg-slate-900/95 border-slate-800'
+        }`}>
           <div>
             <div className="flex items-center gap-2 mb-0.5">
-              <CheckCircle2 size={14} className="text-emerald-400" />
-              <span className="text-xs text-emerald-400 font-bold">
-                Sincronizado con Google Sheets ({respuestas.length} registros cargados)
+              <CheckCircle2 size={14} className="text-emerald-500" />
+              <span className="text-xs text-emerald-500 font-bold">
+                Sincronizado con Google Sheets ({respuestas.length} registros válidos)
               </span>
             </div>
-            <h1 className="text-xl font-extrabold text-white">
-              Dashboard Analítico — Multi-Tipos de Gráficos 2D
+            <h1 className="text-lg sm:text-xl font-extrabold">
+              Dashboard Analítico — Caracterización Víctimas del Conflicto Armado
             </h1>
           </div>
 
@@ -400,7 +614,7 @@ export default function DashboardPage() {
             {activeFiltersCount > 0 && (
               <button
                 onClick={clearFilters}
-                className="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded-2xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                className="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/20 rounded-2xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
               >
                 <RotateCcw size={13} /> Limpiar ({activeFiltersCount})
               </button>
@@ -410,7 +624,7 @@ export default function DashboardPage() {
               onClick={() => setIsFilterDrawerOpen(true)}
               className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
             >
-              <Filter size={14} /> Filtros
+              <Filter size={14} /> Panel Filtros
               {activeFiltersCount > 0 && (
                 <span className="px-2 py-0.5 bg-white text-indigo-700 rounded-full font-black text-[10px]">
                   {activeFiltersCount}
@@ -420,7 +634,9 @@ export default function DashboardPage() {
 
             <button
               onClick={loadData}
-              className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 transition-all cursor-pointer"
+              className={`p-2 rounded-xl border transition-all cursor-pointer ${
+                theme === 'light' ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700' : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-300'
+              }`}
               title="Recargar datos"
             >
               <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
@@ -428,21 +644,72 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* TARJETAS KPI */}
+        {/* BARRA SUPERIOR DE BOTONERA DE CONTROLES DE FILTRO (RESPONSIVA REORGANIZABLE) */}
+        <div className={`border rounded-3xl p-4 shadow-lg space-y-3 ${
+          theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/70 border-slate-800'
+        }`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Filter size={15} className="text-indigo-500" />
+              <span className="text-xs font-bold uppercase tracking-wider">
+                Controles de Filtro Rápido
+              </span>
+            </div>
+            {activeFiltersCount > 0 && (
+              <span className="text-[11px] text-amber-500 font-bold">
+                {activeFiltersCount} filtro(s) activo(s)
+              </span>
+            )}
+          </div>
+
+          {/* Grid responsivo: 2 col en móvil, 3 en tablet, 4 en laptop y hasta 8 en pantallas anchas */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-8 gap-2">
+            {filterControls.map(({ label, col }) => {
+              if (!col) return null;
+              const options = opts(col);
+              const currentVal = filters[col] || '';
+
+              return (
+                <div key={col} className="relative w-full">
+                  <select
+                    value={currentVal}
+                    onChange={(e) => setFilters(prev => ({ ...prev, [col]: e.target.value || '' }))}
+                    className={`w-full px-2.5 py-2 rounded-xl text-xs font-semibold focus:outline-none transition-all cursor-pointer truncate ${
+                      currentVal
+                        ? 'bg-indigo-600 text-white border border-indigo-400'
+                        : theme === 'light'
+                        ? 'bg-slate-100 text-slate-700 border border-slate-200 hover:border-slate-300'
+                        : 'bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-600'
+                    }`}
+                  >
+                    <option value="">{label} (Todos)</option>
+                    {options.map(o => (
+                      <option key={o} value={o}>
+                        {o.length > 25 ? o.slice(0, 22) + '…' : o}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* TARJETAS DE RESUMEN (KPIS SOLICITADOS) */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {[
-            { label: 'Total Registros', value: rows.length, color: 'text-white', bg: 'bg-indigo-600/20', border: 'border-indigo-500/30', icon: <Users size={18} /> },
-            { label: 'Mujeres', value: totalMujeres, color: 'text-pink-400', bg: 'bg-pink-600/10', border: 'border-pink-500/20', icon: <Heart size={18} /> },
-            { label: 'Hombres', value: totalHombres, color: 'text-indigo-300', bg: 'bg-indigo-600/10', border: 'border-indigo-500/20', icon: <Users size={18} /> },
-            { label: 'Con Discapacidad', value: conDiscap, color: 'text-amber-400', bg: 'bg-amber-600/10', border: 'border-amber-500/20', icon: <AlertCircle size={18} /> },
-            { label: 'Total Menores', value: Math.round(totalMenores), color: 'text-emerald-400', bg: 'bg-emerald-600/10', border: 'border-emerald-500/20', icon: <Star size={18} /> },
-            { label: 'Columnas', value: columnas.length, color: 'text-purple-400', bg: 'bg-purple-600/10', border: 'border-purple-500/20', icon: <Layers size={18} /> },
+            { label: 'Total de Registros', value: rows.length, color: 'text-indigo-500', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20', icon: <Users size={18} /> },
+            { label: 'Total Personas', value: totalPersonasHogar || rows.length, color: 'text-pink-500', bg: 'bg-pink-500/10', border: 'border-pink-500/20', icon: <Users size={18} /> },
+            { label: 'Promedio Integrantes', value: avgIntegrantes, color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', icon: <Calculator size={18} /> },
+            { label: 'Menores de Edad', value: Math.round(totalMenores), color: 'text-teal-500', bg: 'bg-teal-500/10', border: 'border-teal-500/20', icon: <Star size={18} /> },
+            { label: 'Mayores de Edad', value: Math.round(totalMayores), color: 'text-purple-500', bg: 'bg-purple-500/10', border: 'border-purple-500/20', icon: <Users size={18} /> },
+            { label: 'Preguntas / Variables', value: columnas.length, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20', icon: <Layers size={18} /> },
           ].map((kpi, i) => (
             <div key={i} className={`${kpi.bg} border ${kpi.border} rounded-3xl p-4 shadow-lg flex flex-col gap-1`}>
               <div className={`${kpi.bg} rounded-xl w-8 h-8 flex items-center justify-center ${kpi.color}`}>
                 {kpi.icon}
               </div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase mt-1">{kpi.label}</p>
+              <p className="text-[10px] font-bold text-slate-500 uppercase mt-1">{kpi.label}</p>
               <h3 className={`text-2xl font-black ${kpi.color}`}>
                 {loading ? '...' : kpi.value.toLocaleString()}
               </h3>
@@ -450,218 +717,274 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* === FILA 1: PASTEL (SEXO) + PASTEL (ZONA) + PASTEL/DONUT (DISCAPACIDAD) === */}
+        {/* ========================================================= */}
+        {/* FILA 1: DISTRIBUCIÓN POR SEXO (CIRCULAR CORREGIDO) + ZONA (CIRCULAR) + FUENTE DE INGRESOS (CIRCULAR) */}
+        {/* ========================================================= */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* 1. Gráfico Circular 2D - Sexo */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-xl flex flex-col justify-between">
+          {/* 1. Sexo (Gráfico Circular 2D) */}
+          <div className={`border rounded-3xl p-5 shadow-xl flex flex-col justify-between ${
+            theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+          }`}>
             <div className="flex items-center justify-between mb-1">
               <div>
-                <span className="text-[10px] font-extrabold text-pink-400 uppercase tracking-wider">Gráfico Circular 2D</span>
-                <h4 className="text-sm font-bold text-white">Distribución por Sexo</h4>
+                <span className="text-[10px] font-extrabold text-pink-500 uppercase tracking-wider">Gráfico Circular 2D</span>
+                <h4 className="text-sm font-bold">Distribución por Sexo</h4>
               </div>
-              <PieIcon size={16} className="text-pink-400" />
+              <PieIcon size={16} className="text-pink-500" />
             </div>
             <DonutPieChart2D
               data={getFrecuencias(C.sexo, 5)}
+              activeVal={filters[C.sexo]}
               onSelect={(item) => setFilter(C.sexo, item.opcion)}
             />
           </div>
 
-          {/* 2. Gráfico Circular 2D - Zona */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-xl flex flex-col justify-between">
+          {/* 2. Zona (Gráfico Circular 2D - Rural vs Urbana) */}
+          <div className={`border rounded-3xl p-5 shadow-xl flex flex-col justify-between ${
+            theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+          }`}>
             <div className="flex items-center justify-between mb-1">
               <div>
-                <span className="text-[10px] font-extrabold text-cyan-400 uppercase tracking-wider">Gráfico Circular 2D</span>
-                <h4 className="text-sm font-bold text-white">Distribución por Zona</h4>
+                <span className="text-[10px] font-extrabold text-cyan-500 uppercase tracking-wider">Gráfico Circular 2D</span>
+                <h4 className="text-sm font-bold">Zona (Rural vs Urbana)</h4>
               </div>
-              <PieIcon size={16} className="text-cyan-400" />
+              <PieIcon size={16} className="text-cyan-500" />
             </div>
             <DonutPieChart2D
               data={getFrecuencias(C.zona, 4)}
+              activeVal={filters[C.zona]}
               onSelect={(item) => setFilter(C.zona, item.opcion)}
             />
           </div>
 
-          {/* 3. Gráfico Circular 2D - Discapacidad */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-xl flex flex-col justify-between">
+          {/* 3. Fuente de Ingresos (Gráfico Circular 2D) */}
+          <div className={`border rounded-3xl p-5 shadow-xl flex flex-col justify-between ${
+            theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+          }`}>
             <div className="flex items-center justify-between mb-1">
               <div>
-                <span className="text-[10px] font-extrabold text-amber-400 uppercase tracking-wider">Gráfico Circular 2D</span>
-                <h4 className="text-sm font-bold text-white">Condición de Discapacidad</h4>
+                <span className="text-[10px] font-extrabold text-amber-500 uppercase tracking-wider">Gráfico Circular 2D</span>
+                <h4 className="text-sm font-bold">Fuente de Ingresos</h4>
               </div>
-              <PieIcon size={16} className="text-amber-400" />
+              <PieIcon size={16} className="text-amber-500" />
             </div>
             <DonutPieChart2D
-              data={getFrecuencias(C.discapacidad, 4)}
-              onSelect={(item) => setFilter(C.discapacidad, item.opcion)}
+              data={getFrecuencias(C.ingresos, 5)}
+              activeVal={filters[C.ingresos]}
+              onSelect={(item) => setFilter(C.ingresos, item.opcion)}
             />
           </div>
         </div>
 
-        {/* === TIMELINE: EVOLUCIÓN HISTÓRICA === */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-xl">
-          <div className="mb-2">
-            <span className="text-[10px] font-extrabold text-rose-400 uppercase tracking-wider">Gráfico de Columnas Cronológicas 2D</span>
-            <h4 className="text-sm font-bold text-white mt-0.5">Evolución Temporal — Año del Hecho Victimizante Principal</h4>
+        {/* ========================================================= */}
+        {/* FILA 2: EVOLUCIÓN DE HECHOS POR AÑO (GRÁFICO DE LÍNEAS VECTORIAL) */}
+        {/* ========================================================= */}
+        <div className={`border rounded-3xl p-5 shadow-xl ${
+          theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+        }`}>
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <span className="text-[10px] font-extrabold text-rose-500 uppercase tracking-wider">Línea de Tiempo 2D</span>
+              <h4 className="text-sm font-bold mt-0.5">Evolución de Hechos por Año (Hecho Victimizante Principal)</h4>
+            </div>
+            <TrendingUp size={16} className="text-rose-500" />
           </div>
-          <TimelineAreaChart2D data={anioData} />
+          <LineChart2D data={anioData} />
         </div>
 
-        {/* === FILA 2: COLUMNAS VERTICALES 2D (TIPO DE HECHO + AFECTACIÓN) === */}
+        {/* ========================================================= */}
+        {/* FILA 3: TIPO DE HECHO (BARRAS HORIZONTALES) + MUNICIPIO DE HECHO (BARRAS HORIZONTALES) */}
+        {/* ========================================================= */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Columnas Verticales 2D - Tipo de Hecho */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-xl">
+          {/* Tipo de Hecho Victimizante (Barras Horizontales) */}
+          <div className={`border rounded-3xl p-5 shadow-xl ${
+            theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+          }`}>
             <div className="flex items-center justify-between mb-1">
               <div>
-                <span className="text-[10px] font-extrabold text-rose-400 uppercase tracking-wider">Gráfico de Columnas 2D</span>
-                <h4 className="text-sm font-bold text-white">Tipo de Hecho Victimizante</h4>
+                <span className="text-[10px] font-extrabold text-rose-500 uppercase tracking-wider">Gráfico de Barras Horizontales</span>
+                <h4 className="text-sm font-bold">Tipo de Hecho Victimizante</h4>
               </div>
-              <BarChart3 size={16} className="text-rose-400" />
+              <BarChart3 size={16} className="text-rose-500" />
             </div>
-            <VerticalColumnsChart2D
-              data={getFrecuencias(C.tipoHecho, 6)}
+            <HorizontalBarChart2D
+              data={getFrecuencias(C.tipoHecho, 7)}
+              activeVal={filters[C.tipoHecho]}
               onSelect={(item) => setFilter(C.tipoHecho, item.opcion)}
             />
           </div>
 
-          {/* Barras Horizontales - Principal Afectación */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-xl">
+          {/* Municipio de Ocurrencia (Barras Horizontales) */}
+          <div className={`border rounded-3xl p-5 shadow-xl ${
+            theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+          }`}>
             <div className="flex items-center justify-between mb-1">
               <div>
-                <span className="text-[10px] font-extrabold text-purple-400 uppercase tracking-wider">Gráfico de Barras Horizontales</span>
-                <h4 className="text-sm font-bold text-white">Principal Afectación Generada</h4>
+                <span className="text-[10px] font-extrabold text-indigo-500 uppercase tracking-wider">Gráfico de Barras Horizontales</span>
+                <h4 className="text-sm font-bold">Municipio de Hecho Victimizante</h4>
               </div>
-              <BarChart3 size={16} className="text-purple-400" />
+              <MapPin size={16} className="text-indigo-500" />
             </div>
             <HorizontalBarChart2D
-              data={getFrecuencias(C.afectacion, 6)}
-              onSelect={(item) => setFilter(C.afectacion, item.opcion)}
-            />
-          </div>
-        </div>
-
-        {/* === NECESIDADES POR PRIORIDAD (TARJETAS ANALÍTICAS 2D) === */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-xl">
-          <div className="mb-4">
-            <span className="text-[10px] font-extrabold text-emerald-400 uppercase tracking-wider">Visualización Multidimensional</span>
-            <h4 className="text-sm font-bold text-white mt-0.5">Necesidades del Hogar — Prioritaria, Secundaria y Terciaria</h4>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {necesidadesPrioridad.map((n, idx) => (
-              <div key={idx} className="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-4 space-y-2 hover:border-emerald-500/40 transition-colors">
-                <h5 className="font-bold text-xs text-white truncate" title={n.name}>
-                  {n.name}
-                </h5>
-                <div className="space-y-1 text-[11px]">
-                  <div className="flex justify-between items-center text-rose-400 font-semibold">
-                    <span>1ª Prioritaria:</span>
-                    <span className="font-bold font-mono">{n.Prioritaria}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-amber-400 font-semibold">
-                    <span>2ª Secundaria:</span>
-                    <span className="font-bold font-mono">{n.Secundaria}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-indigo-400 font-semibold">
-                    <span>3ª Terciaria:</span>
-                    <span className="font-bold font-mono">{n.Terciaria}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* === FILA 3: COLUMNAS VERTICALES (NIVEL EDUCATIVO) + BARRAS (SITUACIÓN LABORAL) === */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Columnas 2D - Nivel Educativo */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-xl">
-            <div className="flex items-center justify-between mb-1">
-              <div>
-                <span className="text-[10px] font-extrabold text-indigo-400 uppercase tracking-wider">Gráfico de Columnas 2D</span>
-                <h4 className="text-sm font-bold text-white">Nivel Educativo Alcanzado</h4>
-              </div>
-              <BarChart3 size={16} className="text-indigo-400" />
-            </div>
-            <VerticalColumnsChart2D
-              data={getFrecuencias(C.educacion, 6)}
-              onSelect={(item) => setFilter(C.educacion, item.opcion)}
-            />
-          </div>
-
-          {/* Barras 2D - Situación Laboral */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-xl">
-            <div className="flex items-center justify-between mb-1">
-              <div>
-                <span className="text-[10px] font-extrabold text-emerald-400 uppercase tracking-wider">Gráfico de Barras Horizontales</span>
-                <h4 className="text-sm font-bold text-white">Situación Laboral Actual</h4>
-              </div>
-              <BarChart3 size={16} className="text-emerald-400" />
-            </div>
-            <HorizontalBarChart2D
-              data={getFrecuencias(C.laboral, 6)}
-              onSelect={(item) => setFilter(C.laboral, item.opcion)}
-            />
-          </div>
-        </div>
-
-        {/* === FILA 4: BARRAS (INGRESOS) + COLUMNAS (MUNICIPIOS) === */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-xl">
-            <div className="flex items-center justify-between mb-1">
-              <div>
-                <span className="text-[10px] font-extrabold text-amber-400 uppercase tracking-wider">Gráfico de Barras</span>
-                <h4 className="text-sm font-bold text-white">Principal Fuente de Ingresos del Hogar</h4>
-              </div>
-              <BarChart3 size={16} className="text-amber-400" />
-            </div>
-            <HorizontalBarChart2D
-              data={getFrecuencias(C.ingresos, 6)}
-            />
-          </div>
-
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-xl">
-            <div className="flex items-center justify-between mb-1">
-              <div>
-                <span className="text-[10px] font-extrabold text-indigo-400 uppercase tracking-wider">Gráfico de Columnas 2D</span>
-                <h4 className="text-sm font-bold text-white">Municipio donde Ocurrió el Hecho</h4>
-              </div>
-              <BarChart3 size={16} className="text-indigo-400" />
-            </div>
-            <VerticalColumnsChart2D
-              data={getFrecuencias(C.municipioOc, 6)}
+              data={getFrecuencias(C.municipioOc, 7)}
+              activeVal={filters[C.municipioOc]}
               onSelect={(item) => setFilter(C.municipioOc, item.opcion)}
             />
           </div>
         </div>
 
-        {/* === FILA 5: PASTEL (LIBRETA MILITAR) + COLUMNAS (GRUPO ÉTNICO) === */}
+        {/* ========================================================= */}
+        {/* FILA 4: NECESIDADES (COLUMNAS AGRUPADAS) + COMPOSICIÓN DEL HOGAR (COLUMNAS) */}
+        {/* ========================================================= */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Circular / Pastel 2D - Libreta Militar */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-xl">
+          {/* Necesidades (Columnas Agrupadas: Prioritaria, Secundaria, Terciaria) */}
+          <div className={`border rounded-3xl p-5 shadow-xl ${
+            theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+          }`}>
             <div className="flex items-center justify-between mb-1">
               <div>
-                <span className="text-[10px] font-extrabold text-indigo-400 uppercase tracking-wider">Gráfico Circular 2D</span>
-                <h4 className="text-sm font-bold text-white">Libreta Militar (Hombres)</h4>
+                <span className="text-[10px] font-extrabold text-emerald-500 uppercase tracking-wider">Gráfico de Columnas Agrupadas 2D</span>
+                <h4 className="text-sm font-bold">Necesidades (Prioritaria, Secundaria, Terciaria)</h4>
               </div>
-              <PieIcon size={16} className="text-indigo-400" />
+              <Layers size={16} className="text-emerald-500" />
             </div>
-            <DonutPieChart2D
-              data={getFrecuencias(C.libreta, 4)}
+            <GroupedColumnsChart2D data={necesidadesPrioridad} />
+          </div>
+
+          {/* Composición del Hogar (Columnas: Menores vs Mayores de Edad) */}
+          <div className={`border rounded-3xl p-5 shadow-xl ${
+            theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+          }`}>
+            <div className="flex items-center justify-between mb-1">
+              <div>
+                <span className="text-[10px] font-extrabold text-teal-500 uppercase tracking-wider">Gráfico de Columnas 2D</span>
+                <h4 className="text-sm font-bold">Composición del Hogar (Menores vs Mayores de Edad)</h4>
+              </div>
+              <Users size={16} className="text-teal-500" />
+            </div>
+            <HouseholdCompositionChart2D menores={totalMenores} mayores={totalMayores} />
+          </div>
+        </div>
+
+        {/* ========================================================= */}
+        {/* FILA 5: NIVEL EDUCATIVO (COLUMNAS) + SITUACIÓN LABORAL (COLUMNAS) */}
+        {/* ========================================================= */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Nivel Educativo (Columnas) */}
+          <div className={`border rounded-3xl p-5 shadow-xl ${
+            theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+          }`}>
+            <div className="flex items-center justify-between mb-1">
+              <div>
+                <span className="text-[10px] font-extrabold text-indigo-500 uppercase tracking-wider">Gráfico de Columnas 2D</span>
+                <h4 className="text-sm font-bold">Nivel Educativo</h4>
+              </div>
+              <GraduationCap size={16} className="text-indigo-500" />
+            </div>
+            <VerticalColumnsChart2D
+              data={getFrecuencias(C.educacion, 6)}
+              activeVal={filters[C.educacion]}
+              onSelect={(item) => setFilter(C.educacion, item.opcion)}
             />
           </div>
 
-          {/* Columnas 2D - Grupo Étnico */}
-          <div className="bg-slate-900/80 border border-slate-800 rounded-3xl p-5 shadow-xl">
+          {/* Situación Laboral (Columnas) */}
+          <div className={`border rounded-3xl p-5 shadow-xl ${
+            theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+          }`}>
             <div className="flex items-center justify-between mb-1">
               <div>
-                <span className="text-[10px] font-extrabold text-purple-400 uppercase tracking-wider">Gráfico de Columnas 2D</span>
-                <h4 className="text-sm font-bold text-white">Pertenencia a Grupo Étnico</h4>
+                <span className="text-[10px] font-extrabold text-emerald-500 uppercase tracking-wider">Gráfico de Columnas 2D</span>
+                <h4 className="text-sm font-bold">Situación Laboral</h4>
               </div>
-              <BarChart3 size={16} className="text-purple-400" />
+              <Briefcase size={16} className="text-emerald-500" />
             </div>
             <VerticalColumnsChart2D
-              data={getFrecuencias(C.etnia, 5)}
-              onSelect={(item) => setFilter(C.etnia, item.opcion)}
+              data={getFrecuencias(C.laboral, 6)}
+              activeVal={filters[C.laboral]}
+              onSelect={(item) => setFilter(C.laboral, item.opcion)}
+            />
+          </div>
+        </div>
+
+        {/* ========================================================= */}
+        {/* FILA 6: LIBRETA MILITAR (CIRCULAR) + DISCAPACIDAD (CIRCULAR) */}
+        {/* ========================================================= */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Libreta Militar (Gráfico Circular 2D) */}
+          <div className={`border rounded-3xl p-5 shadow-xl flex flex-col justify-between ${
+            theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+          }`}>
+            <div className="flex items-center justify-between mb-1">
+              <div>
+                <span className="text-[10px] font-extrabold text-indigo-500 uppercase tracking-wider">Gráfico Circular 2D</span>
+                <h4 className="text-sm font-bold">Libreta Militar (Hombres)</h4>
+              </div>
+              <PieIcon size={16} className="text-indigo-500" />
+            </div>
+            <DonutPieChart2D
+              data={getFrecuencias(C.libreta, 4)}
+              activeVal={filters[C.libreta]}
+              onSelect={(item) => setFilter(C.libreta, item.opcion)}
+            />
+          </div>
+
+          {/* Condición de Discapacidad (Gráfico Circular 2D) */}
+          <div className={`border rounded-3xl p-5 shadow-xl flex flex-col justify-between ${
+            theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+          }`}>
+            <div className="flex items-center justify-between mb-1">
+              <div>
+                <span className="text-[10px] font-extrabold text-amber-500 uppercase tracking-wider">Gráfico Circular 2D</span>
+                <h4 className="text-sm font-bold">Condición de Discapacidad</h4>
+              </div>
+              <AlertCircle size={16} className="text-amber-500" />
+            </div>
+            <DonutPieChart2D
+              data={getFrecuencias(C.discapacidad, 4)}
+              activeVal={filters[C.discapacidad]}
+              onSelect={(item) => setFilter(C.discapacidad, item.opcion)}
+            />
+          </div>
+        </div>
+
+        {/* ========================================================= */}
+        {/* FILA 7: PRINCIPAL AFECTACIÓN (BARRAS HORIZONTALES) + DISTRIBUCIÓN POR BARRIO/VEREDA (BARRAS HORIZONTALES) */}
+        {/* ========================================================= */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Principal Afectación (Barras Horizontales) */}
+          <div className={`border rounded-3xl p-5 shadow-xl ${
+            theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+          }`}>
+            <div className="flex items-center justify-between mb-1">
+              <div>
+                <span className="text-[10px] font-extrabold text-purple-500 uppercase tracking-wider">Gráfico de Barras Horizontales</span>
+                <h4 className="text-sm font-bold">Principal Afectación</h4>
+              </div>
+              <FileWarning size={16} className="text-purple-500" />
+            </div>
+            <HorizontalBarChart2D
+              data={getFrecuencias(C.afectacion, 7)}
+              activeVal={filters[C.afectacion]}
+              onSelect={(item) => setFilter(C.afectacion, item.opcion)}
+            />
+          </div>
+
+          {/* Distribución por Barrio / Vereda (Barras Horizontales) */}
+          <div className={`border rounded-3xl p-5 shadow-xl ${
+            theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+          }`}>
+            <div className="flex items-center justify-between mb-1">
+              <div>
+                <span className="text-[10px] font-extrabold text-cyan-500 uppercase tracking-wider">Gráfico de Barras Horizontales</span>
+                <h4 className="text-sm font-bold">Distribución por Barrio / Vereda</h4>
+              </div>
+              <MapPin size={16} className="text-cyan-500" />
+            </div>
+            <HorizontalBarChart2D
+              data={getFrecuencias(C.barrio, 7)}
+              activeVal={filters[C.barrio]}
+              onSelect={(item) => setFilter(C.barrio, item.opcion)}
             />
           </div>
         </div>
@@ -672,13 +995,15 @@ export default function DashboardPage() {
       {isFilterDrawerOpen && (
         <div className="fixed inset-0 z-50 flex justify-end">
           <div onClick={() => setIsFilterDrawerOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
-          <div className="relative w-full max-w-sm bg-slate-900 border-l border-slate-800 p-6 flex flex-col z-50 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-4 mb-5">
+          <div className={`relative w-full max-w-sm border-l p-6 flex flex-col z-50 shadow-2xl ${
+            theme === 'light' ? 'bg-white border-slate-200 text-slate-800' : 'bg-slate-900 border-slate-800 text-white'
+          }`}>
+            <div className={`flex items-center justify-between border-b pb-4 mb-5 ${theme === 'light' ? 'border-slate-200' : 'border-slate-800'}`}>
               <div className="flex items-center gap-2">
-                <Filter size={18} className="text-indigo-400" />
-                <h3 className="text-base font-bold text-white">Panel de Filtros</h3>
+                <Filter size={18} className="text-indigo-500" />
+                <h3 className="text-base font-bold">Panel Completo de Filtros</h3>
               </div>
-              <button onClick={() => setIsFilterDrawerOpen(false)} className="text-slate-400 hover:text-white p-1 cursor-pointer">✕</button>
+              <button onClick={() => setIsFilterDrawerOpen(false)} className="text-slate-400 hover:text-slate-200 p-1 cursor-pointer">✕</button>
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-4 pr-1">
@@ -694,13 +1019,16 @@ export default function DashboardPage() {
                 { label: 'Municipio del Hecho', col: C.municipioOc },
                 { label: 'Necesidad Principal', col: C.necesPrinc },
                 { label: 'Grupo Étnico', col: C.etnia },
+                { label: 'Libreta Militar', col: C.libreta },
               ].map(({ label, col }) => col ? (
                 <div key={col}>
-                  <label className="block text-[11px] font-bold text-slate-300 uppercase mb-1.5">{label}</label>
+                  <label className={`block text-[11px] font-bold uppercase mb-1.5 ${theme === 'light' ? 'text-slate-600' : 'text-slate-300'}`}>{label}</label>
                   <select
                     value={filters[col] || ''}
                     onChange={e => setFilters(prev => ({ ...prev, [col]: e.target.value || '' }))}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-xs focus:outline-none focus:border-indigo-500"
+                    className={`w-full px-3 py-2 border rounded-xl text-xs focus:outline-none focus:border-indigo-500 cursor-pointer ${
+                      theme === 'light' ? 'bg-slate-100 border-slate-200 text-slate-800' : 'bg-slate-800 border-slate-700 text-white'
+                    }`}
                   >
                     <option value="">Todos</option>
                     {opts(col).map(o => <option key={o} value={o}>{o}</option>)}
@@ -709,9 +1037,11 @@ export default function DashboardPage() {
               ) : null)}
             </div>
 
-            <div className="pt-4 border-t border-slate-800 flex gap-3 mt-4">
+            <div className={`pt-4 border-t flex gap-3 mt-4 ${theme === 'light' ? 'border-slate-200' : 'border-slate-800'}`}>
               <button onClick={clearFilters}
-                className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold rounded-2xl text-xs cursor-pointer">
+                className={`flex-1 py-2.5 font-semibold rounded-2xl text-xs cursor-pointer ${
+                  theme === 'light' ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                }`}>
                 Limpiar Todo
               </button>
               <button onClick={() => setIsFilterDrawerOpen(false)}

@@ -2,7 +2,7 @@ export interface User {
   usuario: string;
   nombre: string;
   correo: string;
-  rol: 'ADMIN' | 'USUARIO';
+  rol: 'SUPERADMIN' | 'ADMIN' | 'USUARIO';
   estado: 'ACTIVO' | 'INACTIVO';
 }
 

@@ -14,12 +14,36 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    const cleanUser = usuario.trim();
+    const cleanPass = contrasena.trim();
+
+    if (!cleanUser) {
+      setError('Por favor ingresa tu nombre de usuario o correo electrónico.');
+      return;
+    }
+
+    if (cleanUser.length < 3) {
+      setError('El usuario debe tener al menos 3 caracteres.');
+      return;
+    }
+
+    if (!cleanPass) {
+      setError('Por favor ingresa tu contraseña.');
+      return;
+    }
+
+    if (cleanPass.length < 4) {
+      setError('La contraseña debe contener al menos 4 caracteres.');
+      return;
+    }
+
     setSubmitting(true);
 
     try {
-      await login(usuario, contrasena);
+      await login(cleanUser, cleanPass);
     } catch (err: any) {
-      setError(err.message || 'Error de autenticación');
+      setError(err.message || 'Credenciales incorrectas o usuario no autorizado.');
     } finally {
       setSubmitting(false);
     }

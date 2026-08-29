@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 export async function fetchApi(endpoint: string, options: RequestInit = {}) {
   const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
@@ -12,16 +12,45 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-    ...options,
-    headers,
-  });
+  // Controlador de Timeout a 12 segundos para evitar estados infinitos de carga
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 12000);
 
-  const data = await response.json();
+  try {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      ...options,
+      headers,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
 
-  if (!response.ok) {
-    throw new Error(data.detail || 'Ocurrió un error en la solicitud');
+    const text = await response.text();
+    let data: any = null;
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch (err) {
+      if (!response.ok) {
+        throw new Error(`Error ${response.status}: El servidor backend no está respondiendo.`);
+      }
+      throw new Error('Respuesta inválida del servidor');
+    }
+
+    if (!response.ok) {
+      if (response.status === 401 && typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+      }
+      throw new Error(data?.detail || `Error del servidor (${response.status})`);
+    }
+
+    return data;
+  } catch (err: any) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      throw new Error('La solicitud tardó demasiado tiempo en responder (Timeout).');
+    }
+    throw err;
   }
-
-  return data;
 }

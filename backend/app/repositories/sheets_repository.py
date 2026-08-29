@@ -1,5 +1,6 @@
 import os
 import json
+import re
 from typing import List, Dict, Any, Optional
 import pandas as pd
 from app.repositories.base import BaseRepository
@@ -20,27 +21,54 @@ class PermissiveSheetsRepository(BaseRepository):
         self._init_mock_data()
 
     def _init_mock_data(self):
+        initial_users = [
+            {
+                "usuario": "superadmin",
+                "nombre": "Super Administrador",
+                "correo": "superadmin@encuestas.com",
+                "credencial": "superadmin123",
+                "rol": "SUPERADMIN",
+                "estado": "ACTIVO"
+            },
+            {
+                "usuario": "admin",
+                "nombre": "Administrador Principal",
+                "correo": "admin@encuestas.com",
+                "credencial": "admin123",
+                "rol": "ADMIN",
+                "estado": "ACTIVO"
+            },
+            {
+                "usuario": "usuario1",
+                "nombre": "David Sarria",
+                "correo": "david@encuestas.com",
+                "credencial": "admin123",
+                "rol": "USUARIO",
+                "estado": "ACTIVO"
+            }
+        ]
+
         if not os.path.exists(USERS_FILE):
-            initial_users = [
-                {
-                    "usuario": "admin",
-                    "nombre": "Administrador Principal",
-                    "correo": "admin@encuestas.com",
-                    "credencial": "admin123",
-                    "rol": "ADMIN",
-                    "estado": "ACTIVO"
-                },
-                {
-                    "usuario": "usuario1",
-                    "nombre": "David Sarria",
-                    "correo": "david@encuestas.com",
-                    "credencial": "admin123",
-                    "rol": "USUARIO",
-                    "estado": "ACTIVO"
-                }
-            ]
             with open(USERS_FILE, "w", encoding="utf-8") as f:
                 json.dump(initial_users, f, ensure_ascii=False, indent=2)
+        else:
+            # Asegurar que los usuarios por defecto en código existan
+            with open(USERS_FILE, "r", encoding="utf-8") as f:
+                try:
+                    existing = json.load(f)
+                except Exception:
+                    existing = []
+            
+            existing_usernames = {u["usuario"].lower() for u in existing}
+            modified = False
+            for init_u in initial_users:
+                if init_u["usuario"].lower() not in existing_usernames:
+                    existing.append(init_u)
+                    modified = True
+            
+            if modified:
+                with open(USERS_FILE, "w", encoding="utf-8") as f:
+                    json.dump(existing, f, ensure_ascii=False, indent=2)
 
         if not os.path.exists(RESPONSES_FILE):
             initial_responses = {
@@ -82,6 +110,49 @@ class PermissiveSheetsRepository(BaseRepository):
                 return u
         return None
 
+    def add_user(self, user: UserInDB) -> UserInDB:
+        with open(USERS_FILE, "r", encoding="utf-8") as f:
+            users_data = json.load(f)
+        
+        # Verificar si ya existe
+        for u in users_data:
+            if u["usuario"].lower() == user.usuario.lower():
+                raise ValueError(f"El usuario '{user.usuario}' ya existe.")
+
+        users_data.append(user.model_dump())
+        with open(USERS_FILE, "w", encoding="utf-8") as f:
+            json.dump(users_data, f, ensure_ascii=False, indent=2)
+        return user
+
+    def update_user(self, username: str, user_update: Dict[str, Any]) -> Optional[UserInDB]:
+        with open(USERS_FILE, "r", encoding="utf-8") as f:
+            users_data = json.load(f)
+        
+        target = None
+        for u in users_data:
+            if u["usuario"].lower() == username.lower():
+                for k, v in user_update.items():
+                    if v is not None:
+                        u[k] = v
+                target = UserInDB(**u)
+                break
+        
+        if target:
+            with open(USERS_FILE, "w", encoding="utf-8") as f:
+                json.dump(users_data, f, ensure_ascii=False, indent=2)
+        return target
+
+    def delete_user(self, username: str) -> bool:
+        with open(USERS_FILE, "r", encoding="utf-8") as f:
+            users_data = json.load(f)
+        
+        filtered = [u for u in users_data if u["usuario"].lower() != username.lower()]
+        if len(filtered) < len(users_data):
+            with open(USERS_FILE, "w", encoding="utf-8") as f:
+                json.dump(filtered, f, ensure_ascii=False, indent=2)
+            return True
+        return False
+
     def get_headers(self, sheet_name: str = "RESPUESTAS") -> List[str]:
         with open(RESPONSES_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
@@ -90,14 +161,42 @@ class PermissiveSheetsRepository(BaseRepository):
     def get_all_responses(self) -> List[Dict[str, Any]]:
         with open(RESPONSES_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
-        return data.get("rows", [])
+        raw_rows = data.get("rows", [])
+        headers = data.get("headers", [])
+        
+        # Filtra únicamente filas COMPLETAMENTE vacías (conserva campos vacíos en filas con datos)
+        valid_rows = []
+        for r in raw_rows:
+            has_data = any(str(r.get(h, "")).strip() != "" for h in headers if h != "__row_index")
+            if has_data:
+                valid_rows.append(r)
+        return valid_rows
 
     def get_response_by_id(self, identifier_col: str, identifier_val: str) -> Optional[Dict[str, Any]]:
         rows = self.get_all_responses()
-        clean_val = str(identifier_val).strip()
+        headers = self.get_headers("RESPUESTAS")
+        clean_val = re.sub(r'\D', '', str(identifier_val).strip())
+        raw_val = str(identifier_val).strip().lower()
+
+        # Identificar columnas candidatas de cédula / documento
+        doc_cols = []
+        if identifier_col and identifier_col in headers:
+            doc_cols.append(identifier_col)
+        
+        for h in headers:
+            h_clean = h.lower()
+            if ('documento' in h_clean or 'cédula' in h_clean or 'cedula' in h_clean) and 'tipo' not in h_clean:
+                if h not in doc_cols:
+                    doc_cols.append(h)
+
         for r in rows:
-            if str(r.get(identifier_col, "")).strip() == clean_val:
-                return r
+            for col in doc_cols:
+                val = str(r.get(col, "")).strip()
+                val_digits = re.sub(r'\D', '', val)
+                
+                # Coincidencia por dígitos puros o texto exacto
+                if (clean_val and val_digits == clean_val) or (raw_val and val.lower() == raw_val):
+                    return r
         return None
 
     def add_response(self, record: Dict[str, Any]) -> Dict[str, Any]:
@@ -106,6 +205,10 @@ class PermissiveSheetsRepository(BaseRepository):
         
         headers = data["headers"]
         rows = data["rows"]
+
+        # Ignorar si el registro está 100% vacío
+        if not any(str(record.get(h, "")).strip() != "" for h in headers):
+            raise ValueError("No se puede guardar una fila completamente vacía.")
 
         new_row_index = len(rows) + 2
         formatted_record = {"__row_index": new_row_index}
@@ -123,10 +226,18 @@ class PermissiveSheetsRepository(BaseRepository):
 
     def replace_all_data(self, headers: List[str], records: List[Dict[str, Any]]) -> int:
         """
-        Guarda el 100% de las filas y columnas del Excel sin omitir ningún campo ni dato.
+        Guarda el dataset ignorando únicamente filas que estén completamente vacías.
+        Conserva todos los campos vacíos en filas que tengan algún dato en otras columnas.
         """
         rows = []
-        for idx, r in enumerate(records, start=2):
+        valid_records = []
+        for r in records:
+            # Comprobar si la fila tiene al menos un dato
+            has_data = any(str(r.get(h, "")).strip() != "" for h in headers if h != "__row_index")
+            if has_data:
+                valid_records.append(r)
+
+        for idx, r in enumerate(valid_records, start=2):
             formatted = {"__row_index": idx}
             for h in headers:
                 formatted[h] = str(r.get(h, ""))
