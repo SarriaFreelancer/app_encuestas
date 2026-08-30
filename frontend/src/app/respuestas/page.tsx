@@ -43,6 +43,10 @@ export default function RespuestasPage() {
 
   useEffect(() => {
     loadData();
+    const interval = setInterval(() => {
+      loadData();
+    }, 25000);
+    return () => clearInterval(interval);
   }, []);
 
   // Filtrar respuestas por búsqueda

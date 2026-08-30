@@ -43,6 +43,11 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadData();
+    // Re-sincronización periódica automática con Google Sheets cada 25 segundos
+    const interval = setInterval(() => {
+      loadData();
+    }, 25000);
+    return () => clearInterval(interval);
   }, []);
 
   // Mapeo inteligente de columnas

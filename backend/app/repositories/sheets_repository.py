@@ -153,21 +153,94 @@ class PermissiveSheetsRepository(BaseRepository):
             return True
         return False
 
+    _last_sync_time = 0
+    _sync_interval = 15  # Cada 15 segundos revisa si hubo nuevas filas o se eliminaron filas en Google Sheets
+    GOOGLE_SHEETS_CSV_URL = "https://docs.google.com/spreadsheets/d/18hVTcC1_ylED47qIfeuHm1rP7cyNW-9wJykhQoNoIrY/export?format=csv&gid=1325247630"
+
+    def _sync_with_google_sheets(self, force: bool = False):
+        import time
+        import urllib.request
+        import csv
+        import io
+
+        now = time.time()
+        if not force and (now - PermissiveSheetsRepository._last_sync_time < PermissiveSheetsRepository._sync_interval):
+            return
+
+        PermissiveSheetsRepository._last_sync_time = now
+
+        try:
+            req = urllib.request.Request(self.GOOGLE_SHEETS_CSV_URL, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req, timeout=8) as response:
+                raw_bytes = response.read()
+
+            text_utf8 = raw_bytes.decode('utf-8', errors='replace')
+            reader = csv.reader(io.StringIO(text_utf8))
+            rows_list = list(reader)
+
+            if not rows_list or len(rows_list) < 1:
+                return
+
+            def _fix_encoding(s: str) -> str:
+                if not isinstance(s, str):
+                    return s
+                try:
+                    return s.encode('latin-1').decode('utf-8')
+                except Exception:
+                    replaces = {
+                        'Ã¡': 'á', 'Ã©': 'é', 'Ã­': 'í', 'Ã³': 'ó', 'Ãº': 'ú',
+                        'Ã±': 'ñ', 'Ã‘': 'Ñ', 'Â¿': '¿', 'Â¡': '¡', 'Â': '',
+                        'IndÃ­gena': 'Indígena', 'FÃ­sica': 'Física', 'condiciÃ³n': 'condición'
+                    }
+                    res = s
+                    for k, v in replaces.items():
+                        res = res.replace(k, v)
+                    return res
+
+            clean_headers = [_fix_encoding(h.strip()) for h in rows_list[0]]
+            clean_rows = []
+
+            for idx, r in enumerate(rows_list[1:], start=2):
+                # Validar que la fila contenga datos reales de la encuesta (no únicamente columnas de fórmulas como 'Visible')
+                has_survey_data = False
+                for i, h in enumerate(clean_headers):
+                    if h.lower() != 'visible':
+                        val = r[i].strip() if i < len(r) else ''
+                        if val != '':
+                            has_survey_data = True
+                            break
+
+                if has_survey_data:
+                    row_dict = {'__row_index': idx}
+                    for i, h in enumerate(clean_headers):
+                        val = r[i].strip() if i < len(r) else ''
+                        row_dict[h] = _fix_encoding(val)
+                    clean_rows.append(row_dict)
+
+            new_dataset = {'headers': clean_headers, 'rows': clean_rows}
+            with open(RESPONSES_FILE, 'w', encoding='utf-8') as f:
+                json.dump(new_dataset, f, ensure_ascii=False, indent=2)
+
+        except Exception as e:
+            # Si no hay internet o falla la petición temporalmente, continúa con la caché local
+            pass
+
     def get_headers(self, sheet_name: str = "RESPUESTAS") -> List[str]:
+        self._sync_with_google_sheets()
         with open(RESPONSES_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
         return data.get("headers", [])
 
     def get_all_responses(self) -> List[Dict[str, Any]]:
+        self._sync_with_google_sheets()
         with open(RESPONSES_FILE, "r", encoding="utf-8") as f:
             data = json.load(f)
         raw_rows = data.get("rows", [])
         headers = data.get("headers", [])
         
-        # Filtra únicamente filas COMPLETAMENTE vacías (conserva campos vacíos en filas con datos)
         valid_rows = []
         for r in raw_rows:
-            has_data = any(str(r.get(h, "")).strip() != "" for h in headers if h != "__row_index")
+            has_data = any(str(r.get(h, "")).strip() != "" for h in headers if h != "__row_index" and h.lower() != "visible")
             if has_data:
                 valid_rows.append(r)
         return valid_rows
