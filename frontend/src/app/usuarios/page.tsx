@@ -6,6 +6,7 @@ import { fetchApi } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { User } from '@/types';
+import { showSuccessAlert, showErrorAlert, showConfirmAlert } from '@/lib/alerts';
 import { 
   Users, UserPlus, Edit3, Trash2, Shield, CheckCircle, XCircle, 
   Search, ShieldAlert, KeyRound, AlertTriangle
@@ -124,16 +125,20 @@ export default function UsuariosPage() {
   };
 
   const handleDelete = async (username: string) => {
-    if (!confirm(`¿Estás seguro de que deseas eliminar permanentemente al usuario ${username}?`)) {
-      return;
-    }
+    const res = await showConfirmAlert(
+      '¿Eliminar usuario?', 
+      `¿Estás seguro de que deseas eliminar permanentemente al usuario ${username}?`,
+      'Sí, eliminar',
+      'Cancelar'
+    );
+    if (!res.isConfirmed) return;
+
     try {
       await fetchApi(`/usuarios/${username}`, { method: 'DELETE' });
-      setSuccessMsg(`Usuario ${username} eliminado.`);
+      await showSuccessAlert('Usuario eliminado', `El usuario ${username} fue eliminado correctamente.`);
       loadUsers();
-      setTimeout(() => setSuccessMsg(''), 4000);
     } catch (err: any) {
-      alert(err.message || 'Error al eliminar usuario');
+      showErrorAlert('Error al eliminar', err.message || 'Error al eliminar usuario');
     }
   };
 

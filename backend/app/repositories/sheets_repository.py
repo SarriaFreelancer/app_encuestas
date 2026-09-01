@@ -9,6 +9,7 @@ from app.schemas import UserInDB, UserRole, UserStatus
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
 USERS_FILE = os.path.join(DATA_DIR, "usuarios.json")
 RESPONSES_FILE = os.path.join(DATA_DIR, "respuestas.json")
+EDITS_FILE = os.path.join(DATA_DIR, "ediciones_manuales.json")
 
 class PermissiveSheetsRepository(BaseRepository):
     """
@@ -156,6 +157,33 @@ class PermissiveSheetsRepository(BaseRepository):
     _last_sync_time = 0
     _sync_interval = 15  # Cada 15 segundos revisa si hubo nuevas filas o se eliminaron filas en Google Sheets
     GOOGLE_SHEETS_CSV_URL = "https://docs.google.com/spreadsheets/d/18hVTcC1_ylED47qIfeuHm1rP7cyNW-9wJykhQoNoIrY/export?format=csv&gid=1325247630"
+    GOOGLE_APPS_SCRIPT_URL = os.getenv("GOOGLE_APPS_SCRIPT_URL", "")
+
+    def _send_to_google_apps_script(self, action: str, data: Dict[str, Any], doc_number: str = ""):
+        """
+        Envía la actualización o creación a Google Apps Script para modificar la celda en la hoja en la nube.
+        """
+        if not self.GOOGLE_APPS_SCRIPT_URL:
+            return
+
+        import urllib.request
+        import json
+
+        try:
+            payload = json.dumps({
+                "action": action,
+                "documento": doc_number,
+                "datos": data
+            }).encode('utf-8')
+
+            req = urllib.request.Request(
+                self.GOOGLE_APPS_SCRIPT_URL,
+                data=payload,
+                headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'}
+            )
+            urllib.request.urlopen(req, timeout=10)
+        except Exception as e:
+            print(f"[Google Apps Script Webhook Error]: {e}")
 
     def _sync_with_google_sheets(self, force: bool = False):
         import time
@@ -197,11 +225,18 @@ class PermissiveSheetsRepository(BaseRepository):
                         res = res.replace(k, v)
                     return res
 
-            clean_headers = [_fix_encoding(h.strip()) for h in rows_list[0]]
-            clean_rows = []
+            # 1. Cargar ediciones manuales locales guardadas para este documento
+            manual_edits = {}
+            if os.path.exists(EDITS_FILE):
+                try:
+                    with open(EDITS_FILE, 'r', encoding='utf-8') as ef:
+                        manual_edits = json.load(ef)
+                except Exception:
+                    manual_edits = {}
+
+            doc_cols = [h for h in clean_headers if ('documento' in h.lower() or 'cédula' in h.lower() or 'cedula' in h.lower()) and 'tipo' not in h.lower()]
 
             for idx, r in enumerate(rows_list[1:], start=2):
-                # Validar que la fila contenga datos reales de la encuesta (no únicamente columnas de fórmulas como 'Visible')
                 has_survey_data = False
                 for i, h in enumerate(clean_headers):
                     if h.lower() != 'visible':
@@ -215,6 +250,21 @@ class PermissiveSheetsRepository(BaseRepository):
                     for i, h in enumerate(clean_headers):
                         val = r[i].strip() if i < len(r) else ''
                         row_dict[h] = _fix_encoding(val)
+
+                    # Buscar si este documento tiene ediciones manuales guardadas
+                    doc_key = ""
+                    for dc in doc_cols:
+                        raw_doc = str(row_dict.get(dc, "")).strip()
+                        clean_d = re.sub(r'\D', '', raw_doc)
+                        if clean_d:
+                            doc_key = clean_d
+                            break
+
+                    if doc_key and doc_key in manual_edits:
+                        for k, v in manual_edits[doc_key].items():
+                            if k != '__row_index':
+                                row_dict[k] = str(v)
+
                     clean_rows.append(row_dict)
 
             new_dataset = {'headers': clean_headers, 'rows': clean_rows}
@@ -295,6 +345,18 @@ class PermissiveSheetsRepository(BaseRepository):
         with open(RESPONSES_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
 
+        # Enviar a Google Apps Script para insertar fila en vivo en Google Sheets
+        doc_cols = [h for h in headers if ('documento' in h.lower() or 'cédula' in h.lower() or 'cedula' in h.lower()) and 'tipo' not in h.lower()]
+        target_doc = ""
+        for dc in doc_cols:
+            raw_doc = str(formatted_record.get(dc, "")).strip()
+            clean_d = re.sub(r'\D', '', raw_doc)
+            if clean_d:
+                target_doc = clean_d
+                break
+
+        self._send_to_google_apps_script("create", formatted_record, target_doc)
+
         return formatted_record
 
     def replace_all_data(self, headers: List[str], records: List[Dict[str, Any]]) -> int:
@@ -331,8 +393,10 @@ class PermissiveSheetsRepository(BaseRepository):
             data = json.load(f)
         
         rows = data["rows"]
+        headers = data.get("headers", [])
         target_row = None
 
+        # 1. Intentar encontrar por row_index
         for idx, r in enumerate(rows):
             if r.get("__row_index") == row_index:
                 for k, v in record.items():
@@ -342,12 +406,67 @@ class PermissiveSheetsRepository(BaseRepository):
                 rows[idx] = r
                 break
 
+        # 2. Si no se encontró por índice de fila, buscar por Documento / Cédula
         if not target_row:
-            raise ValueError(f"No se encontró la fila {row_index}")
+            doc_cols = [h for h in headers if ('documento' in h.lower() or 'cédula' in h.lower() or 'cedula' in h.lower()) and 'tipo' not in h.lower()]
+            record_doc = ""
+            for dc in doc_cols:
+                if record.get(dc):
+                    record_doc = re.sub(r'\D', '', str(record.get(dc)).strip())
+                    break
+
+            if record_doc:
+                for idx, r in enumerate(rows):
+                    for dc in doc_cols:
+                        val_digits = re.sub(r'\D', '', str(r.get(dc, "")).strip())
+                        if val_digits and val_digits == record_doc:
+                            for k, v in record.items():
+                                if k != "__row_index":
+                                    r[k] = str(v)
+                            target_row = r
+                            rows[idx] = r
+                            break
+                    if target_row:
+                        break
+
+        if not target_row:
+            raise ValueError(f"No se encontró el registro para actualizar (índice: {row_index})")
 
         data["rows"] = rows
         with open(RESPONSES_FILE, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
+
+        # 3. Guardar en el archivo persistente de ediciones manuales indexado por número de documento
+        doc_cols = [h for h in headers if ('documento' in h.lower() or 'cédula' in h.lower() or 'cedula' in h.lower()) and 'tipo' not in h.lower()]
+        target_doc = ""
+        for dc in doc_cols:
+            raw_doc = str(target_row.get(dc, "")).strip()
+            clean_d = re.sub(r'\D', '', raw_doc)
+            if clean_d:
+                target_doc = clean_d
+                break
+
+        if target_doc:
+            manual_edits = {}
+            if os.path.exists(EDITS_FILE):
+                try:
+                    with open(EDITS_FILE, 'r', encoding='utf-8') as ef:
+                        manual_edits = json.load(ef)
+                except Exception:
+                    manual_edits = {}
+
+            if target_doc not in manual_edits:
+                manual_edits[target_doc] = {}
+
+            for k, v in record.items():
+                if k != '__row_index':
+                    manual_edits[target_doc][k] = str(v)
+
+            with open(EDITS_FILE, 'w', encoding='utf-8') as ef:
+                json.dump(manual_edits, ef, ensure_ascii=False, indent=2)
+
+        # Enviar actualización a Google Apps Script para modificar la celda exacta en Google Sheets
+        self._send_to_google_apps_script("update", target_row, target_doc)
 
         return target_row
 

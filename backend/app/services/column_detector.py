@@ -17,12 +17,12 @@ class ColumnDetectorService:
 
     def get_survey_metadata(self) -> SurveyMetadata:
         headers = self.repository.get_headers("RESPUESTAS")
+        all_responses = self.repository.get_all_responses()
         
         # 1. Detectar preguntas y su numeración más alta
         preguntas = []
         max_num = 0
 
-        # Patrón para encontrar 'PREGUNTA X' o 'Pregunta X' o 'P X'
         pattern = re.compile(r'PREGUNTA\s*(\d+)', re.IGNORECASE)
 
         for h in headers:
@@ -33,28 +33,66 @@ class ColumnDetectorService:
                 if num > max_num:
                     max_num = num
 
-        # Si no había preguntas numeradas pero hay preguntas en texto
         siguiente_num = max_num + 1 if max_num > 0 else 2
         siguiente_pregunta = f"PREGUNTA {siguiente_num}"
 
-        # 2. Mapear configuraciones por defecto
+        # 2. Mapear opciones únicas para cada columna a partir de los datos registrados
+        column_options: Dict[str, List[str]] = {}
+        for h in headers:
+            h_lower = h.lower()
+            unique_vals = set()
+            is_multi = "puede marcar" in h_lower or "varias opciones" in h_lower
+
+            for r in all_responses:
+                val = str(r.get(h, "")).strip()
+                if val and val.lower() not in ["", "none", "nan", "null"]:
+                    if is_multi:
+                        parts = [p.strip() for p in val.split(",") if p.strip()]
+                        for p in parts:
+                            unique_vals.add(p)
+                    else:
+                        unique_vals.add(val)
+
+            # Si es un campo categórico con opciones finitas (entre 2 y 35 opciones distintas)
+            is_id_or_free = any(k in h_lower for k in [
+                "nombre", "cédula", "cedula", "documento", "número de documento", "numero de documento",
+                "teléfono", "telefono", "correo", "dirección", "direccion", "marca temporal"
+            ])
+
+            if (1 < len(unique_vals) <= 35 and not is_id_or_free) or is_multi or "autoriza" in h_lower or "sexo" in h_lower or "zona" in h_lower or "régimen" in h_lower or "regimen" in h_lower:
+                column_options[h] = sorted(list(unique_vals))
+
+        # 3. Mapear configuraciones por defecto
         configs = []
-        identificador = "CÉDULA" # Valor por defecto preferido
+        identificador = "NÚMERO DE DOCUMENTO"
 
         for h in headers:
             h_upper = h.upper()
-            es_id = "CÉDULA" in h_upper or "CEDULA" in h_upper or "DOCUMENTO" in h_upper or "ID" == h_upper
+            h_lower = h.lower()
+            
+            es_id = ("DOCUMENTO" in h_upper or "CÉDULA" in h_upper or "CEDULA" in h_upper) and "TIPO" not in h_upper
             if es_id:
                 identificador = h
 
-            es_preg = bool(pattern.search(h)) or "PREGUNTA" in h_upper
-            autocompletar = h_upper in ["NOMBRE", "APELLIDO", "TELÉFONO", "TELEFONO", "CORREO", "CIUDAD"]
+            es_preg = bool(pattern.search(h)) or bool(re.match(r'^\d+\.', h.strip())) or "PREGUNTA" in h_upper
+            es_multi = "puede marcar" in h_lower or "varias opciones" in h_lower
             
-            tipo = ColumnType.TEXTO
-            if "FECHA" in h_upper:
+            # Detectar tipo de control
+            opciones = column_options.get(h)
+            if opciones and len(opciones) > 0:
+                tipo = ColumnType.OPCION
+            elif "FECHA" in h_upper or "NACIMIENTO" in h_upper:
                 tipo = ColumnType.FECHA
-            elif "CÉDULA" in h_upper or "TELÉFONO" in h_upper:
+            elif "EDAD" in h_upper or "NÚMERO" in h_upper or "TELEFONO" in h_upper or "TELÉFONO" in h_upper:
                 tipo = ColumnType.NUMERO
+            else:
+                tipo = ColumnType.TEXTO
+
+            # Campos obligatorios clave
+            obligatorio = es_id or any(k in h_lower for k in [
+                "nombre completo", "tipo de documento", "fecha de nacimiento", "edad",
+                "sexo", "zona", "autoriza el tratamiento", "hecho victimizante"
+            ])
 
             configs.append(
                 ColumnConfig(
@@ -62,9 +100,10 @@ class ColumnDetectorService:
                     tipo=tipo,
                     es_pregunta=es_preg,
                     es_identificador=es_id,
-                    autocompletar=autocompletar,
-                    editable=not es_id,
-                    obligatorio=es_id or autocompletar
+                    autocompletar=es_id or ("nombre" in h_lower),
+                    editable=True,
+                    obligatorio=obligatorio,
+                    opciones=opciones
                 )
             )
 

@@ -6,6 +6,7 @@ import { fetchApi } from '@/lib/api';
 import { SurveyMetadata } from '@/types';
 import { useTheme } from '@/context/ThemeContext';
 import { useSidebar } from '@/context/SidebarContext';
+import { showSuccessAlert, showErrorAlert } from '@/lib/alerts';
 import { Search, Edit3, X, Save, ChevronLeft, ChevronRight, Loader2, Database, Rows } from 'lucide-react';
 
 export default function RespuestasPage() {
@@ -79,11 +80,11 @@ export default function RespuestasPage() {
         })
       });
 
-      alert('Registro actualizado correctamente.');
+      await showSuccessAlert('¡Actualizado con éxito!', 'El registro y sus celdas han sido actualizados en la base de datos.');
       setRegistroEditar(null);
       loadData();
     } catch (err: any) {
-      alert('Error al actualizar: ' + err.message);
+      showErrorAlert('Error al actualizar', err.message);
     } finally {
       setSaving(false);
     }

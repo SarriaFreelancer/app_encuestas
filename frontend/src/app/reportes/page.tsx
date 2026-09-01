@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import { fetchApi } from '@/lib/api';
+import { showSuccessAlert, showErrorAlert, showWarningAlert } from '@/lib/alerts';
 import { FileText, Download, Filter, Printer, Loader2 } from 'lucide-react';
 
 export default function ReportesPage() {
@@ -14,7 +15,7 @@ export default function ReportesPage() {
     try {
       const data = await fetchApi('/encuestas/respuestas');
       if (!data || data.length === 0) {
-        alert('No hay datos para exportar');
+        showWarningAlert('Sin datos', 'No hay registros disponibles para exportar.');
         return;
       }
 
@@ -40,8 +41,10 @@ export default function ReportesPage() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      showSuccessAlert('Reporte generado', 'El archivo CSV ha sido descargado correctamente.');
     } catch (err: any) {
-      alert('Error al exportar: ' + err.message);
+      showErrorAlert('Error al exportar', err.message);
     } finally {
       setDownloading(false);
     }

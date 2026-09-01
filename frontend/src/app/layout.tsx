@@ -13,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <body className="antialiased font-sans select-none">
+      <body className="antialiased font-sans">
         <SecurityGuard />
         <AuthProvider>
           <ThemeProvider>

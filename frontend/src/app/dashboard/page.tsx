@@ -209,8 +209,8 @@ export default function DashboardPage() {
     });
 
     return (
-      <div className="flex flex-col sm:flex-row items-center gap-4 py-2">
-        <div className="relative w-36 h-36 shrink-0">
+      <div className="flex flex-col xl:flex-row items-center gap-3 py-2 w-full min-w-0">
+        <div className="relative w-28 h-28 sm:w-32 sm:h-32 shrink-0 my-1">
           <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
             {slices.map((slice, i) => {
               const radius = 38;
@@ -237,27 +237,27 @@ export default function DashboardPage() {
             })}
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className={`text-sm font-black ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>{total}</span>
-            <span className={`text-[9px] font-bold uppercase ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Total</span>
+            <span className={`text-xs sm:text-sm font-black ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>{total}</span>
+            <span className={`text-[8px] sm:text-[9px] font-bold uppercase ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Total</span>
           </div>
         </div>
 
-        {/* Leyenda 100% autocontenida */}
-        <div className="flex-1 space-y-1.5 w-full min-w-0">
+        {/* Leyenda 100% autocontenida y fluida */}
+        <div className="flex-1 space-y-1 w-full min-w-0">
           {slices.map((slice, i) => {
             const isSelected = activeVal === slice.opcion;
             return (
               <div
                 key={i}
                 onClick={() => onSelect && onSelect(slice)}
-                className={`flex items-center justify-between gap-1 text-[11px] p-1.5 rounded-xl cursor-pointer transition-colors ${
+                className={`flex items-center justify-between gap-1 text-[10px] sm:text-[11px] p-1.5 rounded-xl cursor-pointer transition-colors ${
                   isSelected 
                     ? 'bg-indigo-600/20 border border-indigo-500/40 font-bold' 
                     : ''
                 }`}
               >
                 <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: slice.color }} />
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: slice.color }} />
                   <span className={`truncate ${
                     isSelected 
                       ? 'font-black text-indigo-600 dark:text-indigo-400' 
@@ -266,7 +266,7 @@ export default function DashboardPage() {
                     {slice.name}
                   </span>
                 </div>
-                <div className="flex items-center gap-1 font-mono text-[10px] shrink-0">
+                <div className="flex items-center gap-1 font-mono text-[9px] sm:text-[10px] shrink-0">
                   <span className={`font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>
                     {slice.value || slice.cantidad}
                   </span>
@@ -723,9 +723,9 @@ export default function DashboardPage() {
         </div>
 
         {/* ========================================================= */}
-        {/* FILA 1: DISTRIBUCIÓN POR SEXO (CIRCULAR CORREGIDO) + ZONA (CIRCULAR) + FUENTE DE INGRESOS (CIRCULAR) */}
+        {/* FILA 1: DISTRIBUCIÓN POR SEXO (CIRCULAR) + ZONA (CIRCULAR) + FUENTE DE INGRESOS (CIRCULAR) */}
         {/* ========================================================= */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {/* 1. Sexo (Gráfico Circular 2D) */}
           <div className={`border rounded-3xl p-5 shadow-xl flex flex-col justify-between ${
             theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'

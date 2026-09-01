@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import { fetchApi } from '@/lib/api';
+import { showErrorAlert } from '@/lib/alerts';
 import { SurveyMetadata } from '@/types';
 import { GitCompare, Table, RefreshCw, BarChart2, CheckSquare } from 'lucide-react';
 
@@ -36,7 +37,7 @@ export default function AnalisisCruzadoPage() {
       const data = await fetchApi(`/analisis/crosstab?col_a=${encodeURIComponent(colA)}&col_b=${encodeURIComponent(colB)}`);
       setCrosstabData(data);
     } catch (err: any) {
-      alert('Error en el cruce de variables: ' + err.message);
+      showErrorAlert('Error en cruce de variables', err.message);
     } finally {
       setLoading(false);
     }

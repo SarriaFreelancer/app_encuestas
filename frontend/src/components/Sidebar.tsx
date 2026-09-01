@@ -26,9 +26,9 @@ export default function Sidebar() {
     { label: 'Respuestas', href: '/respuestas', icon: ClipboardList },
     { label: 'Buscar persona', href: '/buscar', icon: Search },
     { label: 'Reportes', href: '/reportes', icon: FileText },
+    { label: 'Nueva encuesta', href: '/encuesta/nueva', icon: FilePlus },
     { label: 'Usuarios', href: '/usuarios', icon: Users, adminOnly: true },
     // Módulos exclusivos de SUPERADMIN (Ocultos para admin y operadores)
-    { label: 'Nueva encuesta', href: '/encuesta/nueva', icon: FilePlus, superAdminOnly: true },
     { label: 'Análisis cruzado', href: '/analisis-cruzado', icon: GitCompare, superAdminOnly: true },
     { label: 'Consulta IA', href: '/consulta-ia', icon: Bot, superAdminOnly: true },
     { label: 'Auditoría', href: '/auditoria', icon: History, superAdminOnly: true },

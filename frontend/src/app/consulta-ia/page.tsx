@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import { fetchApi } from '@/lib/api';
+import { showErrorAlert } from '@/lib/alerts';
 import { AIQueryResponse } from '@/types';
 import { Bot, Send, Sparkles, Loader2, Database } from 'lucide-react';
 
@@ -31,7 +32,7 @@ export default function ConsultaIAPage() {
       });
       setResultado(data);
     } catch (err: any) {
-      alert('Error en la consulta IA: ' + err.message);
+      showErrorAlert('Error en consulta IA', err.message);
     } finally {
       setLoading(false);
     }

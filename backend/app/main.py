@@ -159,6 +159,21 @@ def buscar_por_cedula(cedula: str, repo: BaseRepository = Depends(get_repository
 
 @app.post("/api/encuestas/respuestas")
 def crear_respuesta(payload: SurveyResponseCreate, repo: BaseRepository = Depends(get_repository)):
+    detector = ColumnDetectorService(repo)
+    meta = detector.get_survey_metadata()
+    id_field = meta.identificador_campo
+
+    # Obtener el valor del documento en el payload
+    doc_val = payload.datos.get(id_field) or payload.datos.get("NÚMERO DE DOCUMENTO") or payload.datos.get("CÉDULA") or payload.datos.get("Número de documento")
+    
+    if doc_val and str(doc_val).strip():
+        existente = repo.get_response_by_id(id_field, str(doc_val).strip())
+        if existente:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Ya existe una encuesta registrada con el documento '{doc_val}'. Puede buscarla en el módulo de búsqueda o editarla."
+            )
+
     nuevo = repo.add_response(payload.datos)
     return {"message": "Registro guardado correctamente", "registro": nuevo}
 
