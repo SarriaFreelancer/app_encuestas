@@ -5,6 +5,7 @@ import Sidebar from '@/components/Sidebar';
 import { fetchApi } from '@/lib/api';
 import { useTheme } from '@/context/ThemeContext';
 import { useSidebar } from '@/context/SidebarContext';
+import { soloDigitos, validarDocumento } from '@/lib/validations';
 import {
   Search, User, IdCard, AlertCircle, CheckCircle2,
   Calendar, FileText, Loader2, Sparkles, X, ChevronRight
@@ -15,16 +16,35 @@ export default function BuscarPersonaPage() {
   const { isCollapsed } = useSidebar();
   
   const [cedula, setCedula] = useState('');
+  const [cedulaError, setCedulaError] = useState('');
   const [loading, setLoading] = useState(false);
   const [busquedaRealizada, setBusquedaRealizada] = useState(false);
   const [registro, setRegistro] = useState<Record<string, any> | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
 
+  const handleCedulaChange = (val: string) => {
+    const onlyNums = soloDigitos(val);
+    setCedula(onlyNums);
+    if (onlyNums.length > 0) {
+      const { error } = validarDocumento(onlyNums);
+      setCedulaError(error);
+    } else {
+      setCedulaError('');
+    }
+  };
+
   const handleBuscar = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanCedula = cedula.trim();
-    if (!cleanCedula) return;
 
+    // Validar antes de buscar
+    const { valid, error } = validarDocumento(cleanCedula);
+    if (!valid) {
+      setCedulaError(error);
+      return;
+    }
+
+    setCedulaError('');
     setLoading(true);
     setBusquedaRealizada(true);
     setRegistro(null);
@@ -46,6 +66,7 @@ export default function BuscarPersonaPage() {
 
   const handleLimpiar = () => {
     setCedula('');
+    setCedulaError('');
     setBusquedaRealizada(false);
     setRegistro(null);
     setErrorMsg('');
@@ -94,29 +115,48 @@ export default function BuscarPersonaPage() {
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">
               Número de Cédula o Documento de Identidad
             </label>
-            <div className="flex flex-col sm:flex-row items-center gap-3">
-              <div className="relative flex-1 w-full">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input
-                  type="text"
-                  required
-                  value={cedula}
-                  onChange={(e) => setCedula(e.target.value)}
-                  placeholder="Ej. 34602464 o 1234567890"
-                  className={`w-full pl-11 pr-10 py-3.5 rounded-2xl border text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500/50 ${
-                    theme === 'light'
-                      ? 'bg-slate-50 border-slate-300 text-slate-800 placeholder:text-slate-400'
-                      : 'bg-slate-800/80 border-slate-700 text-white placeholder:text-slate-500'
-                  }`}
-                />
-                {cedula && (
-                  <button
-                    type="button"
-                    onClick={handleLimpiar}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 p-1"
-                  >
-                    <X size={16} />
-                  </button>
+            <div className="flex flex-col sm:flex-row items-start gap-3">
+              <div className="flex-1 w-full">
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    required
+                    value={cedula}
+                    onChange={(e) => handleCedulaChange(e.target.value)}
+                    placeholder="Solo números (ej. 1234567890)"
+                    className={`w-full pl-11 pr-10 py-3.5 rounded-2xl border text-sm font-semibold transition-all focus:outline-none focus:ring-2 ${
+                      cedulaError
+                        ? 'border-rose-500 bg-rose-500/5 focus:ring-rose-500/50 text-rose-400'
+                        : theme === 'light'
+                        ? 'bg-slate-50 border-slate-300 text-slate-800 placeholder:text-slate-400 focus:ring-indigo-500/50'
+                        : 'bg-slate-800/80 border-slate-700 text-white placeholder:text-slate-500 focus:ring-indigo-500/50'
+                    }`}
+                  />
+                  {cedula && (
+                    <button
+                      type="button"
+                      onClick={handleLimpiar}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200 p-1"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+
+                {/* Error inline de validación */}
+                {cedulaError && (
+                  <p className="mt-1.5 flex items-center gap-1.5 text-xs font-bold text-rose-500">
+                    <AlertCircle size={13} /> {cedulaError}
+                  </p>
+                )}
+
+                {/* Hint cuando es válido y tiene valor */}
+                {!cedulaError && cedula.length >= 5 && (
+                  <p className="mt-1.5 flex items-center gap-1.5 text-xs font-bold text-emerald-500">
+                    <CheckCircle2 size={13} /> Formato de documento válido
+                  </p>
                 )}
               </div>
 

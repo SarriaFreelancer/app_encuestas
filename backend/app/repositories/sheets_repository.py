@@ -225,6 +225,9 @@ class PermissiveSheetsRepository(BaseRepository):
                         res = res.replace(k, v)
                     return res
 
+            clean_headers = [h.strip() for h in rows_list[0] if h.strip() != '']
+            clean_rows = []
+
             # 1. Cargar ediciones manuales locales guardadas para este documento
             manual_edits = {}
             if os.path.exists(EDITS_FILE):
@@ -241,7 +244,7 @@ class PermissiveSheetsRepository(BaseRepository):
                 for i, h in enumerate(clean_headers):
                     if h.lower() != 'visible':
                         val = r[i].strip() if i < len(r) else ''
-                        if val != '':
+                        if val != '' and val != '0':
                             has_survey_data = True
                             break
 

@@ -190,13 +190,14 @@ export default function DashboardPage() {
   // ==========================================
 
   // 1. GRÁFICO CIRCULAR / PASTEL 2D (DONUT SVG)
-  const DonutPieChart2D = ({ data, onSelect, activeVal }: { data: any[]; onSelect?: (item: any) => void; activeVal?: string }) => {
-    const total = data.reduce((acc, d) => acc + (d.value || d.cantidad || 0), 0) || 1;
+  const DonutPieChart2D = ({ data, onSelect, activeVal, totalOverride }: { data: any[]; onSelect?: (item: any) => void; activeVal?: string; totalOverride?: number }) => {
+    const sumValues = data.reduce((acc, d) => acc + (d.value || d.cantidad || 0), 0);
+    const total = totalOverride ?? (sumValues || 1);
     let accumulatedAngle = 0;
 
     const slices = data.map((d, idx) => {
       const val = d.value || d.cantidad || 0;
-      const angle = (val / total) * 360;
+      const angle = (val / (sumValues || 1)) * 360;
       const startAngle = accumulatedAngle;
       accumulatedAngle += angle;
       return {
@@ -774,8 +775,9 @@ export default function DashboardPage() {
               <PieIcon size={16} className="text-amber-500" />
             </div>
             <DonutPieChart2D
-              data={getFrecuencias(C.ingresos, 5)}
+              data={getFrecuencias(C.ingresos, 6)}
               activeVal={filters[C.ingresos]}
+              totalOverride={rows.length}
               onSelect={(item) => setFilter(C.ingresos, item.opcion)}
             />
           </div>
@@ -928,7 +930,7 @@ export default function DashboardPage() {
               <PieIcon size={16} className="text-indigo-500" />
             </div>
             <DonutPieChart2D
-              data={getFrecuencias(C.libreta, 4)}
+              data={getFrecuencias(C.libreta, 6)}
               activeVal={filters[C.libreta]}
               onSelect={(item) => setFilter(C.libreta, item.opcion)}
             />

@@ -1,19 +1,30 @@
-"use client";
+﻿"use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import { Lock, User as UserIcon, AlertCircle, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { Lock, User as UserIcon, AlertCircle, Loader2, Clock } from 'lucide-react';
 
 export default function LoginPage() {
   const [usuario, setUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [inactivityMsg, setInactivityMsg] = useState(false);
   const { login } = useAuth();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('motivo') === 'inactividad') {
+      setInactivityMsg(true);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setInactivityMsg(false);
 
     const cleanUser = usuario.trim();
     const cleanPass = contrasena.trim();
@@ -22,24 +33,20 @@ export default function LoginPage() {
       setError('Por favor ingresa tu nombre de usuario o correo electrónico.');
       return;
     }
-
     if (cleanUser.length < 3) {
       setError('El usuario debe tener al menos 3 caracteres.');
       return;
     }
-
     if (!cleanPass) {
       setError('Por favor ingresa tu contraseña.');
       return;
     }
-
     if (cleanPass.length < 4) {
       setError('La contraseña debe contener al menos 4 caracteres.');
       return;
     }
 
     setSubmitting(true);
-
     try {
       await login(cleanUser, cleanPass);
     } catch (err: any) {
@@ -51,7 +58,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Elementos decorativos de fondo */}
+      {/* Decorativos de fondo */}
       <div className="absolute -top-40 -left-40 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl" />
       <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl" />
 
@@ -64,6 +71,18 @@ export default function LoginPage() {
           <p className="text-sm text-slate-400 mt-1">Ingresa tus credenciales para continuar</p>
         </div>
 
+        {/* Aviso de cierre por inactividad */}
+        {inactivityMsg && (
+          <div className="mb-5 p-4 bg-amber-500/10 border border-amber-500/25 rounded-2xl flex items-start gap-3 text-amber-400 text-sm">
+            <Clock size={18} className="shrink-0 mt-0.5" />
+            <div>
+              <p className="font-bold mb-0.5">Sesión cerrada por inactividad</p>
+              <p className="text-xs text-amber-300/80">Tu sesión se cerró automáticamente por seguridad. Ingresa de nuevo para continuar.</p>
+            </div>
+          </div>
+        )}
+
+        {/* Error de login */}
         {error && (
           <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center gap-3 text-rose-400 text-sm">
             <AlertCircle size={20} className="shrink-0" />
@@ -122,10 +141,16 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-slate-800 text-center">
+        <div className="mt-8 pt-6 border-t border-slate-800 text-center space-y-2">
           <p className="text-xs text-slate-500">
             Conectado a Google Sheets API | Plataforma Inteligente
           </p>
+          <Link
+            href="/privacidad"
+            className="text-xs text-slate-600 hover:text-indigo-400 transition-colors underline underline-offset-2"
+          >
+            Política de privacidad y cookies
+          </Link>
         </div>
       </div>
     </div>

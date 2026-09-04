@@ -7,7 +7,7 @@ import { SurveyMetadata } from '@/types';
 import { useTheme } from '@/context/ThemeContext';
 import { useSidebar } from '@/context/SidebarContext';
 import { showSuccessAlert, showErrorAlert } from '@/lib/alerts';
-import { Search, Edit3, X, Save, ChevronLeft, ChevronRight, Loader2, Database, Rows } from 'lucide-react';
+import { Search, Edit3, X, Save, ChevronLeft, ChevronRight, Loader2, Database, Rows, ShieldCheck, ShieldX, Shield } from 'lucide-react';
 
 export default function RespuestasPage() {
   const { theme } = useTheme();
@@ -17,6 +17,7 @@ export default function RespuestasPage() {
   const [metadata, setMetadata] = useState<SurveyMetadata | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [filtroAutorizacion, setFiltroAutorizacion] = useState<'todos' | 'si' | 'no'>('todos');
   
   // Modal de Edición
   const [registroEditar, setRegistroEditar] = useState<Record<string, any> | null>(null);
@@ -50,11 +51,29 @@ export default function RespuestasPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Filtrar respuestas por búsqueda
+  // Detectar la columna de autorización dinámicamente
+  const columnaAutorizacion = metadata?.columnas.find(col =>
+    col.toLowerCase().includes('autoriza')
+  ) ?? null;
+
+  // Filtrar respuestas por búsqueda y por autorización
   const filtered = respuestas.filter(r => {
-    if (!search) return true;
-    const query = search.toLowerCase();
-    return Object.values(r).some(val => String(val).toLowerCase().includes(query));
+    // Filtro de texto
+    if (search) {
+      const query = search.toLowerCase();
+      const coincide = Object.values(r).some(val => String(val).toLowerCase().includes(query));
+      if (!coincide) return false;
+    }
+
+    // Filtro de autorización
+    if (filtroAutorizacion !== 'todos' && columnaAutorizacion) {
+      const val = String(r[columnaAutorizacion] ?? '').toLowerCase().trim();
+      const autoriza = val.startsWith('s') || val === '1' || val === 'true' || val === 'yes';
+      if (filtroAutorizacion === 'si' && !autoriza) return false;
+      if (filtroAutorizacion === 'no' && autoriza) return false;
+    }
+
+    return true;
   });
 
   const totalPages = Math.ceil(filtered.length / pageSize) || 1;
@@ -169,6 +188,45 @@ export default function RespuestasPage() {
                 50
               </button>
             </div>
+
+            {/* Filtro de Autorización (visible solo si existe la columna) */}
+            {columnaAutorizacion && (
+              <div className="flex items-center gap-1.5 p-1 rounded-2xl border border-slate-700/60 bg-slate-800/40">
+                <span className="text-[11px] font-bold text-slate-400 pl-2 pr-1 flex items-center gap-1">
+                  <Shield size={13} /> Autoriza:
+                </span>
+                <button
+                  onClick={() => { setFiltroAutorizacion('todos'); setPage(1); }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                    filtroAutorizacion === 'todos'
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  Todos
+                </button>
+                <button
+                  onClick={() => { setFiltroAutorizacion('si'); setPage(1); }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1 ${
+                    filtroAutorizacion === 'si'
+                      ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
+                      : 'text-slate-400 hover:text-emerald-400'
+                  }`}
+                >
+                  <ShieldCheck size={13} /> Sí
+                </button>
+                <button
+                  onClick={() => { setFiltroAutorizacion('no'); setPage(1); }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1 ${
+                    filtroAutorizacion === 'no'
+                      ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30'
+                      : 'text-slate-400 hover:text-rose-400'
+                  }`}
+                >
+                  <ShieldX size={13} /> No
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -221,15 +279,31 @@ export default function RespuestasPage() {
                         <td className="py-3 px-4 font-mono font-bold text-center text-slate-400 sticky left-0 z-10 bg-inherit shadow-[1px_0_0_rgba(0,0,0,0.05)]">
                           {rowGlobalIndex}
                         </td>
-                        {metadata?.columnas.map((col, cIdx) => (
-                          <td key={cIdx} className="py-3 px-4 whitespace-nowrap max-w-xs truncate" title={String(row[col] || '')}>
-                            {row[col] ? (
-                              <span className="font-medium">{String(row[col])}</span>
-                            ) : (
-                              <span className="text-slate-500 italic font-mono text-[11px]">-</span>
-                            )}
-                          </td>
-                        ))}
+                        {metadata?.columnas.map((col, cIdx) => {
+                          const val = row[col] ? String(row[col]) : '';
+                          const esColAutorizacion = col === columnaAutorizacion;
+                          const valLower = val.toLowerCase().trim();
+                          const autoriza = valLower.startsWith('s') || valLower === '1' || valLower === 'true' || valLower === 'yes';
+
+                          return (
+                            <td key={cIdx} className="py-3 px-4 whitespace-nowrap max-w-xs truncate" title={val}>
+                              {esColAutorizacion && val ? (
+                                <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black ${
+                                  autoriza
+                                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                                    : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
+                                }`}>
+                                  {autoriza ? <ShieldCheck size={11} /> : <ShieldX size={11} />}
+                                  {val}
+                                </span>
+                              ) : val ? (
+                                <span className="font-medium">{val}</span>
+                              ) : (
+                                <span className="text-slate-500 italic font-mono text-[11px]">-</span>
+                              )}
+                            </td>
+                          );
+                        })}
                         <td className="py-3 px-4 text-center whitespace-nowrap sticky right-0 z-10 bg-inherit shadow-[-1px_0_0_rgba(0,0,0,0.05)]">
                           <button
                             onClick={() => setRegistroEditar({ ...row })}

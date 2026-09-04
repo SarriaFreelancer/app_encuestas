@@ -1,9 +1,11 @@
-"use client";
+﻿"use client";
 
 import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { SidebarProvider } from '@/context/SidebarContext';
 import { SecurityGuard } from '@/components/SecurityGuard';
+import { SessionGuard } from '@/components/SessionGuard';
+import { CookieConsentBanner } from '@/components/CookieConsentBanner';
 import './globals.css';
 
 export default function RootLayout({
@@ -19,9 +21,11 @@ export default function RootLayout({
           <ThemeProvider>
             <SidebarProvider>
               {children}
+              <SessionGuard />
             </SidebarProvider>
           </ThemeProvider>
         </AuthProvider>
+        <CookieConsentBanner />
       </body>
     </html>
   );

@@ -7,6 +7,10 @@ import { SurveyMetadata, ColumnConfig } from '@/types';
 import { useTheme } from '@/context/ThemeContext';
 import { useSidebar } from '@/context/SidebarContext';
 import { showSuccessAlert, showErrorAlert, showWarningAlert } from '@/lib/alerts';
+import {
+  validarCampo, validarDocumento, esDocumento, esSoloNumeros,
+  esNombre, esCorreo, soloDigitos, soloLetras, type FieldValidation
+} from '@/lib/validations';
 import { 
   FilePlus, Save, Search, CheckCircle2, AlertCircle, Loader2, 
   UserCheck, HelpCircle, CheckSquare, ListChecks, Calendar, Hash, Type
@@ -25,6 +29,8 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
 
   // Estado de respuestas del formulario
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [submittedOnce, setSubmittedOnce] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -83,12 +89,26 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
   };
 
   const handleInputChange = (campo: string, valor: any) => {
-    setFormData(prev => ({ ...prev, [campo]: valor }));
+    let sanitized = String(valor);
 
-    // Si es campo de documento, verificar
-    const lower = campo.toLowerCase();
-    if (lower.includes('documento') || lower.includes('cédula') || lower.includes('cedula')) {
-      verificarDuplicado(String(valor));
+    // Sanitizar según tipo de campo
+    if (esDocumento(campo) || esSoloNumeros(campo)) {
+      sanitized = soloDigitos(sanitized);
+    } else if (esNombre(campo)) {
+      sanitized = soloLetras(sanitized);
+    }
+
+    setFormData(prev => ({ ...prev, [campo]: sanitized }));
+
+    // Validar y actualizar errores (solo si ya intentó enviar o el campo tiene valor)
+    if (submittedOnce || sanitized.length > 0) {
+      const { error } = validarCampo(campo, sanitized);
+      setFieldErrors(prev => ({ ...prev, [campo]: error }));
+    }
+
+    // Si es campo de documento, verificar duplicado
+    if (esDocumento(campo)) {
+      verificarDuplicado(sanitized);
     }
   };
 
@@ -110,10 +130,40 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
     e.preventDefault();
     setErrorMessage('');
     setSaveSuccess(false);
+    setSubmittedOnce(true);
+
+    // ── Validar todos los campos configurados ──────────────────────────────
+    const newErrors: Record<string, string> = {};
+    let firstErrorField = '';
+
+    if (metadata?.configuraciones) {
+      for (const cfg of metadata.configuraciones) {
+        const valor = String(formData[cfg.campo] || '');
+        const { error } = validarCampo(cfg.campo, valor);
+
+        if (cfg.obligatorio && !valor.trim()) {
+          newErrors[cfg.campo] = 'Este campo es obligatorio.';
+          if (!firstErrorField) firstErrorField = cfg.campo;
+        } else if (error) {
+          newErrors[cfg.campo] = error;
+          if (!firstErrorField) firstErrorField = cfg.campo;
+        }
+      }
+    }
+
+    setFieldErrors(newErrors);
+
+    if (Object.values(newErrors).some(e => e !== '')) {
+      showErrorAlert('Formulario incompleto', 'Por favor corrige los campos marcados en rojo antes de guardar.');
+      if (firstErrorField) {
+        const el = document.querySelector(`[data-campo="${CSS.escape(firstErrorField)}"]`);
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
 
     if (cedulaDuplicada) {
       showErrorAlert('Documento existente', 'No es posible registrar una encuesta con un documento que ya existe en el sistema.');
-      setErrorMessage('No es posible registrar una encuesta con un documento que ya existe en el sistema.');
       return;
     }
 
@@ -128,11 +178,12 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
       await showSuccessAlert('¡Encuesta Registrada!', 'La encuesta ha sido guardada y sincronizada exitosamente.');
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
-      // Resetear datos
       setFormData({
         'Marca temporal': new Date().toLocaleDateString('es-CO'),
         '2. Tipo de documento': 'Cedula de Ciudadania'
       });
+      setFieldErrors({});
+      setSubmittedOnce(false);
       setCedulaDuplicada(null);
       setCedulaMensaje('');
     } catch (err: any) {
@@ -149,6 +200,8 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
     const isMulti = lower.includes('puede marcar') || lower.includes('varias opciones') || lower.includes('estrategias');
     const valor = formData[campo] || '';
     const opciones = cfg.opciones || [];
+    const fieldError = fieldErrors[campo] || '';
+    const hasError = !!fieldError;
 
     // Título con enumeración clara y llamativa
     const displayNumber = idx + 1;
@@ -168,12 +221,22 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
     if (isDate) Icon = Calendar;
     if (cfg.tipo === 'opcion') Icon = ListChecks;
 
+    // Clases del input según estado de error
+    const inputBaseClass = `w-full px-4 py-3 rounded-xl border text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2`;
+    const inputNormalClass = theme === 'light'
+      ? 'bg-slate-50 border-slate-300 text-slate-800 placeholder:text-slate-400 focus:ring-indigo-500'
+      : 'bg-slate-800 border-slate-700 text-slate-200 placeholder:text-slate-500 focus:ring-indigo-500';
+    const inputErrorClass = 'border-rose-500 bg-rose-500/5 focus:ring-rose-500/50';
+
     return (
-      <div 
-        key={campo} 
+      <div
+        key={campo}
+        data-campo={campo}
         className={`p-5 rounded-2xl border transition-all ${
-          theme === 'light' 
-            ? 'bg-white border-slate-200/90 hover:border-indigo-400 shadow-sm' 
+          hasError
+            ? 'border-rose-500/60 bg-rose-500/5'
+            : theme === 'light'
+            ? 'bg-white border-slate-200/90 hover:border-indigo-400 shadow-sm'
             : 'bg-slate-900/80 border-slate-700/60 hover:border-slate-600 shadow-sm'
         } ${isMulti ? 'md:col-span-2' : ''}`}
       >
@@ -241,10 +304,10 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
             value={valor}
             required={cfg.obligatorio}
             onChange={(e) => handleInputChange(campo, e.target.value)}
-            className={`w-full px-4 py-3 rounded-xl border text-xs sm:text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer ${
-              theme === 'light' 
-                ? 'bg-slate-50 border-slate-300 text-slate-800' 
-                : 'bg-slate-800 border-slate-700 text-slate-200'
+            className={`w-full px-4 py-3 rounded-xl border text-xs sm:text-sm font-semibold transition-all focus:outline-none focus:ring-2 cursor-pointer ${
+              hasError
+                ? inputErrorClass
+                : `focus:ring-indigo-500 ${theme === 'light' ? 'bg-slate-50 border-slate-300 text-slate-800' : 'bg-slate-800 border-slate-700 text-slate-200'}`
             }`}
           >
             <option value="">-- Seleccione una opción --</option>
@@ -255,40 +318,66 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
             ))}
           </select>
         ) : isDate ? (
-          /* 3. INPUT DE FECHA NATIVO (Calendario para escoger Año, Mes y Día) */
-          <div className="relative">
+          /* 3. INPUT DE FECHA NATIVO */
+          <div>
             <input
               type="date"
               value={valor}
               required={cfg.obligatorio}
               onChange={(e) => handleInputChange(campo, e.target.value)}
-              className={`w-full px-4 py-3 rounded-xl border text-xs sm:text-sm font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer ${
-                theme === 'light' 
-                  ? 'bg-slate-50 border-slate-300 text-slate-800' 
-                  : 'bg-slate-800 border-slate-700 text-slate-200'
+              className={`w-full px-4 py-3 rounded-xl border text-xs sm:text-sm font-semibold transition-all focus:outline-none focus:ring-2 cursor-pointer ${
+                hasError
+                  ? inputErrorClass
+                  : `focus:ring-indigo-500 ${theme === 'light' ? 'bg-slate-50 border-slate-300 text-slate-800' : 'bg-slate-800 border-slate-700 text-slate-200'}`
               }`}
             />
+            {hasError && (
+              <p className="mt-1.5 flex items-center gap-1.5 text-[11px] font-bold text-rose-500">
+                <AlertCircle size={12} /> {fieldError}
+              </p>
+            )}
           </div>
         ) : (
           /* 4. INPUT TEXTO / NÚMERO */
           <div>
-            <input
-              type={isNumber ? 'number' : 'text'}
-              value={valor}
-              required={cfg.obligatorio}
-              placeholder={`Ingrese ${cleanTitle.toLowerCase()}`}
-              onChange={(e) => handleInputChange(campo, e.target.value)}
-              className={`w-full px-4 py-3 rounded-xl border text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
-                theme === 'light' 
-                  ? 'bg-slate-50 border-slate-300 text-slate-800 placeholder:text-slate-400' 
-                  : 'bg-slate-800 border-slate-700 text-slate-200 placeholder:text-slate-500'
-              }`}
-            />
+            <div className="relative">
+              <input
+                type="text"
+                inputMode={esDocumento(campo) || esSoloNumeros(campo) ? 'numeric' : 'text'}
+                value={valor}
+                required={cfg.obligatorio}
+                placeholder={
+                  esDocumento(campo)
+                    ? 'Solo números (ej. 1234567890)'
+                    : esNombre(campo)
+                    ? 'Solo letras (ej. Juan Pérez)'
+                    : esCorreo(campo)
+                    ? 'correo@ejemplo.com'
+                    : `Ingrese ${cleanTitle.toLowerCase()}`
+                }
+                onChange={(e) => handleInputChange(campo, e.target.value)}
+                className={`${inputBaseClass} ${hasError ? inputErrorClass : inputNormalClass}`}
+              />
+              {/* Hint a la derecha para campos con restricción */}
+              {(esDocumento(campo) || esSoloNumeros(campo)) && !hasError && (
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-500 bg-slate-800/70 px-1.5 py-0.5 rounded-md pointer-events-none">
+                  #
+                </span>
+              )}
+            </div>
+
+            {/* Mensaje de error inline */}
+            {hasError && (
+              <p className="mt-1.5 flex items-center gap-1.5 text-[11px] font-bold text-rose-500">
+                <AlertCircle size={12} /> {fieldError}
+              </p>
+            )}
+
             {/* Aviso especial de verificación de documento */}
-            {(lower.includes('documento') || lower.includes('cédula')) && cedulaMensaje && (
+            {esDocumento(campo) && cedulaMensaje && !hasError && (
               <div className={`mt-2 p-2.5 rounded-xl text-xs font-bold flex items-center gap-2 border ${
-                cedulaDuplicada 
-                  ? 'bg-rose-500/10 border-rose-500/30 text-rose-500' 
+                cedulaDuplicada
+                  ? 'bg-rose-500/10 border-rose-500/30 text-rose-500'
                   : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500'
               }`}>
                 {verificandoCedula ? (
