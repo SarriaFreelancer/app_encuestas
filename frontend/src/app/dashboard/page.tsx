@@ -8,7 +8,7 @@ import { useSidebar } from '@/context/SidebarContext';
 import {
   Filter, RefreshCw, CheckCircle2, RotateCcw, Users, Heart, Home,
   AlertCircle, MapPin, Layers, GraduationCap, Briefcase, TrendingUp,
-  Activity, FileWarning, ShieldAlert, Star, PieChart as PieIcon, BarChart3,
+  Activity, FileWarning, ShieldAlert, ShieldCheck, ShieldX, Star, PieChart as PieIcon, BarChart3,
   Calculator, ChevronDown, Check, X
 } from 'lucide-react';
 
@@ -84,6 +84,7 @@ export default function DashboardPage() {
       necesTerc: find(['68.', 'necesidad terciaria']),
       menores: find(['22.', 'menores de 18']),
       edad: find(['4. Edad', 'edad']),
+      autorizaDatos: find(['autoriza el tratamiento', 'autoriza']),
     };
   }, [columnas]);
 
@@ -109,20 +110,24 @@ export default function DashboardPage() {
   // Cálculo de frecuencias
   const getFrecuencias = (colName: string, top = 8) => {
     if (!colName || rows.length === 0) return [];
-    const freqMap: Record<string, number> = {};
+    const freqMap: Record<string, { count: number; rawVal: string }> = {};
     rows.forEach(r => {
       const raw = s(r[colName]);
       const valStr = raw || 'Sin respuesta';
       const label = valStr.length > 26 ? valStr.slice(0, 23) + '…' : valStr;
-      freqMap[label] = (freqMap[label] || 0) + 1;
+      if (!freqMap[label]) {
+        freqMap[label] = { count: 0, rawVal: valStr };
+      }
+      freqMap[label].count += 1;
     });
 
     return Object.keys(freqMap).map(k => ({
       name: k,
-      opcion: k,
-      value: freqMap[k],
-      cantidad: freqMap[k],
-      porcentaje: Number(((freqMap[k] / rows.length) * 100).toFixed(1))
+      opcion: freqMap[k].rawVal,
+      label: k,
+      value: freqMap[k].count,
+      cantidad: freqMap[k].count,
+      porcentaje: Number(((freqMap[k].count / rows.length) * 100).toFixed(1))
     })).sort((a, b) => b.value - a.value).slice(0, top);
   };
 
@@ -447,6 +452,106 @@ export default function DashboardPage() {
     );
   };
 
+  // 4B. GRÁFICO DE BARRAS INCLINADAS 2D/3D (AUTORIZACIÓN DE TRATAMIENTO DE DATOS)
+  const SlantedBarChart2D = ({ onSelect, activeVal }: { onSelect?: (item: any) => void; activeVal?: string }) => {
+    // Para que este gráfico muestre siempre ambas opciones (Sí y No) manteniendo sus totales originales
+    // de la selección actual del resto de los filtros (zona, municipio, etc.) ignorando únicamente el filtro de autorizaDatos:
+    const rowsForHabeasData = useMemo(() => {
+      return respuestas.filter(row => {
+        return Object.entries(filters).every(([col, val]) => {
+          if (!val || col === C.autorizaDatos) return true;
+          return s(row[col]) === val;
+        });
+      });
+    }, [respuestas, filters, C.autorizaDatos]);
+
+    const totalHabeasSample = rowsForHabeasData.length || 1;
+
+    // Obtener valores reales de opciones
+    const allOptValues = useMemo(() => {
+      const set = new Set<string>();
+      respuestas.forEach(r => {
+        const val = s(r[C.autorizaDatos]);
+        if (val) set.add(val);
+      });
+      return Array.from(set);
+    }, [respuestas, C.autorizaDatos]);
+
+    const rawSiVal = allOptValues.find(v => v.toLowerCase().includes('sí') || v.toLowerCase().includes('si') || v.toLowerCase().includes('autorizo')) || 'Sí, autorizo el tratamiento de mis datos personales.';
+    const rawNoVal = allOptValues.find(v => v.toLowerCase().includes('no autorizo') || v.toLowerCase().startsWith('no')) || 'No autorizo el tratamiento de mis datos personales.';
+
+    const cantSi = rowsForHabeasData.filter(r => s(r[C.autorizaDatos]) === rawSiVal).length;
+    const cantNo = rowsForHabeasData.filter(r => s(r[C.autorizaDatos]) === rawNoVal).length;
+
+    const pctSi = totalHabeasSample > 0 ? Math.round((cantSi / totalHabeasSample) * 100) : 0;
+    const pctNo = totalHabeasSample > 0 ? Math.round((cantNo / totalHabeasSample) * 100) : 0;
+
+    const itemSi = { opcion: rawSiVal, cantidad: cantSi, porcentaje: pctSi };
+    const itemNo = { opcion: rawNoVal, cantidad: cantNo, porcentaje: pctNo };
+
+    const isSiActive = activeVal === itemSi.opcion;
+    const isNoActive = activeVal === itemNo.opcion;
+
+    return (
+      <div className="pt-2 pb-1 space-y-4">
+        {/* Contenedor de Barras Inclinadas en Ángulo */}
+        <div className="space-y-3">
+          {/* Barra Inclinada: SÍ AUTORIZAN */}
+          <div
+            onClick={() => itemSi && onSelect && onSelect(itemSi)}
+            className={`group cursor-pointer p-2 rounded-2xl border transition-all ${
+              isSiActive
+                ? 'bg-emerald-500/20 border-emerald-400 ring-2 ring-emerald-400/50 shadow-lg shadow-emerald-500/20'
+                : 'bg-slate-900/40 border-slate-800 hover:border-emerald-500/40 hover:bg-emerald-500/5'
+            }`}
+          >
+            <div className="flex justify-between items-center text-xs mb-1.5 px-1">
+              <span className="font-extrabold text-emerald-400 flex items-center gap-1.5 text-xs">
+                <ShieldCheck size={14} /> Autorizan Tratamiento
+              </span>
+              <span className="font-mono font-black text-white text-xs">
+                {cantSi} <span className="text-[10px] text-slate-400 font-semibold">({pctSi}%)</span>
+              </span>
+            </div>
+            {/* Barra con skew/inclinación */}
+            <div className="w-full bg-slate-950/80 rounded-xl h-4 p-0.5 overflow-hidden border border-slate-800">
+              <div
+                className="h-full bg-gradient-to-r from-emerald-600 to-teal-400 rounded-lg -skew-x-12 transform origin-left transition-all duration-500 shadow-md shadow-emerald-500/30 group-hover:brightness-125"
+                style={{ width: `${pctSi}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Barra Inclinada: NO AUTORIZAN */}
+          <div
+            onClick={() => itemNo && onSelect && onSelect(itemNo)}
+            className={`group cursor-pointer p-2 rounded-2xl border transition-all ${
+              isNoActive
+                ? 'bg-rose-500/20 border-rose-400 ring-2 ring-rose-400/50 shadow-lg shadow-rose-500/20'
+                : 'bg-slate-900/40 border-slate-800 hover:border-rose-500/40 hover:bg-rose-500/5'
+            }`}
+          >
+            <div className="flex justify-between items-center text-xs mb-1.5 px-1">
+              <span className="font-extrabold text-rose-400 flex items-center gap-1.5 text-xs">
+                <ShieldX size={14} /> No Autorizan
+              </span>
+              <span className="font-mono font-black text-white text-xs">
+                {cantNo} <span className="text-[10px] text-slate-400 font-semibold">({pctNo}%)</span>
+              </span>
+            </div>
+            {/* Barra con skew/inclinación */}
+            <div className="w-full bg-slate-950/80 rounded-xl h-4 p-0.5 overflow-hidden border border-slate-800">
+              <div
+                className="h-full bg-gradient-to-r from-rose-600 to-amber-500 rounded-lg -skew-x-12 transform origin-left transition-all duration-500 shadow-md shadow-rose-500/30 group-hover:brightness-125"
+                style={{ width: `${pctNo}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // 5. GRÁFICO DE LÍNEA DE TIEMPO ESTILIZADO (ECUALIZADOR CRONOLÓGICO CON FILTRADO CRUZADO)
   const LineChart2D = ({ data }: { data: any[] }) => {
     if (data.length === 0) return <div className="text-xs text-slate-500 py-6 text-center">Sin datos de timeline</div>;
@@ -585,6 +690,7 @@ export default function DashboardPage() {
     { label: 'Sexo', col: C.sexo },
     { label: 'Zona', col: C.zona },
     { label: 'Tipo de Hecho', col: C.tipoHecho },
+    { label: 'Tratamiento Datos', col: C.autorizaDatos },
     { label: 'Necesidad', col: C.necesPrinc },
     { label: 'Libreta Militar', col: C.libreta },
     { label: 'Principal Afectación', col: C.afectacion },
@@ -956,42 +1062,59 @@ export default function DashboardPage() {
         </div>
 
         {/* ========================================================= */}
-        {/* FILA 7: PRINCIPAL AFECTACIÓN (BARRAS HORIZONTALES) + DISTRIBUCIÓN POR BARRIO/VEREDA (BARRAS HORIZONTALES) */}
+        {/* FILA 7: AFECTACIÓN + BARRIO + AUTORIZACIÓN DE DATOS (HABEAS DATA) */}
         {/* ========================================================= */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {/* Principal Afectación (Barras Horizontales) */}
-          <div className={`border rounded-3xl p-5 shadow-xl ${
+          <div className={`border rounded-3xl p-5 shadow-xl flex flex-col justify-between ${
             theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
           }`}>
             <div className="flex items-center justify-between mb-1">
               <div>
-                <span className="text-[10px] font-extrabold text-purple-500 uppercase tracking-wider">Gráfico de Barras Horizontales</span>
+                <span className="text-[10px] font-extrabold text-purple-500 uppercase tracking-wider">Gráfico de Barras</span>
                 <h4 className="text-sm font-bold">Principal Afectación</h4>
               </div>
               <FileWarning size={16} className="text-purple-500" />
             </div>
             <HorizontalBarChart2D
-              data={getFrecuencias(C.afectacion, 7)}
+              data={getFrecuencias(C.afectacion, 5)}
               activeVal={filters[C.afectacion]}
               onSelect={(item) => setFilter(C.afectacion, item.opcion)}
             />
           </div>
 
           {/* Distribución por Barrio / Vereda (Barras Horizontales) */}
-          <div className={`border rounded-3xl p-5 shadow-xl ${
+          <div className={`border rounded-3xl p-5 shadow-xl flex flex-col justify-between ${
             theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
           }`}>
             <div className="flex items-center justify-between mb-1">
               <div>
-                <span className="text-[10px] font-extrabold text-cyan-500 uppercase tracking-wider">Gráfico de Barras Horizontales</span>
-                <h4 className="text-sm font-bold">Distribución por Barrio / Vereda</h4>
+                <span className="text-[10px] font-extrabold text-cyan-500 uppercase tracking-wider">Gráfico de Barras</span>
+                <h4 className="text-sm font-bold">Barrio / Vereda</h4>
               </div>
               <MapPin size={16} className="text-cyan-500" />
             </div>
             <HorizontalBarChart2D
-              data={getFrecuencias(C.barrio, 7)}
+              data={getFrecuencias(C.barrio, 5)}
               activeVal={filters[C.barrio]}
               onSelect={(item) => setFilter(C.barrio, item.opcion)}
+            />
+          </div>
+
+          {/* Autorización de Tratamiento de Datos (Tarjeta KPI Compacta 2D) */}
+          <div className={`border rounded-3xl p-5 shadow-xl flex flex-col justify-between ${
+            theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+          }`}>
+            <div className="flex items-center justify-between mb-1">
+              <div>
+                <span className="text-[10px] font-extrabold text-emerald-500 uppercase tracking-wider">Habeas Data</span>
+                <h4 className="text-sm font-bold">Tratamiento de Datos</h4>
+              </div>
+              <ShieldCheck size={18} className="text-emerald-500" />
+            </div>
+            <SlantedBarChart2D
+              activeVal={filters[C.autorizaDatos]}
+              onSelect={(item) => setFilter(C.autorizaDatos, item.opcion)}
             />
           </div>
         </div>
@@ -1018,6 +1141,7 @@ export default function DashboardPage() {
                 { label: 'Sexo', col: C.sexo },
                 { label: 'Zona (Urbana / Rural)', col: C.zona },
                 { label: 'Barrio / Vereda', col: C.barrio },
+                { label: 'Autorización de Datos', col: C.autorizaDatos },
                 { label: 'Discapacidad', col: C.discapacidad },
                 { label: 'Nivel Educativo', col: C.educacion },
                 { label: 'Situación Laboral', col: C.laboral },
