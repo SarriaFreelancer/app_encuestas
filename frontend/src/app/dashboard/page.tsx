@@ -79,12 +79,14 @@ export default function DashboardPage() {
       afectacion: find(['46.', 'principal afectacion']),
       etnia: find(['10.', 'grupo etnico', 'pertenece a algun']),
       libreta: find(['9.', 'libreta militar']),
+      libretaHogar: find(['32.', 'hombres mayores de edad']),
       necesPrinc: find(['66.', 'necesidad principal']),
       necesSecund: find(['67.', 'necesidad secundaria']),
       necesTerc: find(['68.', 'necesidad terciaria']),
       menores: find(['22.', 'menores de 18']),
       edad: find(['4. Edad', 'edad']),
       autorizaDatos: find(['autoriza el tratamiento', 'autoriza']),
+      hechosAdic: find(['47.', 'hechos victimizantes adicionales', 'otros hechos', 'adicionales']),
     };
   }, [columnas]);
 
@@ -108,7 +110,7 @@ export default function DashboardPage() {
   };
 
   // Cálculo de frecuencias
-  const getFrecuencias = (colName: string, top = 8) => {
+  const getFrecuencias = (colName: string, top = 20) => {
     if (!colName || rows.length === 0) return [];
     const freqMap: Record<string, { count: number; rawVal: string }> = {};
     rows.forEach(r => {
@@ -121,14 +123,52 @@ export default function DashboardPage() {
       freqMap[label].count += 1;
     });
 
-    return Object.keys(freqMap).map(k => ({
+    const items = Object.keys(freqMap).map(k => ({
       name: k,
       opcion: freqMap[k].rawVal,
       label: k,
       value: freqMap[k].count,
       cantidad: freqMap[k].count,
       porcentaje: Number(((freqMap[k].count / rows.length) * 100).toFixed(1))
-    })).sort((a, b) => b.value - a.value).slice(0, top);
+    })).sort((a, b) => b.value - a.value);
+
+    return items.slice(0, top);
+  };
+
+  // Cálculo de frecuencias filtrando únicamente a personas de sexo HOMBRE / Masculino
+  const getFrecuenciasHombresLibreta = (top = 10) => {
+    if (!C.libreta || rows.length === 0) return { items: [], totalHombres: 0 };
+    
+    // Filtrar únicamente los registros cuyo sexo sea Masculino/Hombre
+    const rowsHombres = rows.filter(r => {
+      const sx = s(r[C.sexo]).toLowerCase();
+      return sx.includes('masculino') || sx.includes('hombre');
+    });
+
+    const totalHombres = rowsHombres.length;
+    if (totalHombres === 0) return { items: [], totalHombres: 0 };
+
+    const freqMap: Record<string, { count: number; rawVal: string }> = {};
+    rowsHombres.forEach(r => {
+      const raw = s(r[C.libreta]);
+      const valStr = raw || 'Sin respuesta';
+      const label = valStr.length > 26 ? valStr.slice(0, 23) + '…' : valStr;
+      if (!freqMap[label]) {
+        freqMap[label] = { count: 0, rawVal: valStr };
+      }
+      freqMap[label].count += 1;
+    });
+
+    const items = Object.keys(freqMap).map(k => ({
+      name: k,
+      opcion: freqMap[k].rawVal,
+      label: k,
+      value: freqMap[k].count,
+      cantidad: freqMap[k].count,
+      porcentaje: Number(((freqMap[k].count / totalHombres) * 100).toFixed(1))
+    })).sort((a, b) => b.value - a.value);
+
+    return { items: items.slice(0, top), totalHombres };
   };
 
   const opts = (col: string) => {
@@ -189,6 +229,27 @@ export default function DashboardPage() {
     return Object.entries(m).map(([anio, total]) => ({ anio, total, cantidad: total }))
       .sort((a, b) => Number(a.anio) - Number(b.anio));
   }, [rows, C]);
+
+  // Análisis de Hechos Victimizantes Múltiples (Personas con > 1 Hecho)
+  const hechosMultiplesData = useMemo(() => {
+    let unSoloHecho = 0;
+    let masDeUnHecho = 0;
+
+    rows.forEach(r => {
+      const adic = s(r[C.hechosAdic]);
+      if (adic && adic !== 'Ninguno' && adic !== 'No' && adic !== 'Sin respuesta' && adic !== '0' && adic.length > 2) {
+        masDeUnHecho += 1;
+      } else {
+        unSoloHecho += 1;
+      }
+    });
+
+    const total = unSoloHecho + masDeUnHecho || 1;
+    return [
+      { name: '1 Solo Hecho Victimizante', opcion: 'Un Hecho', cantidad: unSoloHecho, porcentaje: Number(((unSoloHecho / total) * 100).toFixed(1)), color: '#10b981' },
+      { name: 'Múltiples Hechos (>1 Hecho)', opcion: 'Múltiples Hechos', cantidad: masDeUnHecho, porcentaje: Number(((masDeUnHecho / total) * 100).toFixed(1)), color: '#ef4444' }
+    ];
+  }, [rows, C.hechosAdic]);
 
   // ==========================================
   // COMPONENTES GRÁFICOS 2D VECTORIALES
@@ -343,65 +404,89 @@ export default function DashboardPage() {
 
     return (
       <div className="pt-3 pb-2 space-y-3">
-        {/* Leyenda */}
-        <div className="flex items-center justify-center gap-6 text-xs">
+        {/* Leyenda explicativa con colores */}
+        <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs bg-slate-900/30 p-2 rounded-2xl border border-slate-800/50">
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-rose-500" />
-            <span className={`font-bold ${theme === 'light' ? 'text-slate-700' : 'text-slate-300'}`}>1ª Prioritaria</span>
+            <span className="w-3 h-3 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50" />
+            <span className={`font-bold ${theme === 'light' ? 'text-slate-800' : 'text-slate-200'}`}>1ª Prioritaria</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-amber-500" />
-            <span className={`font-bold ${theme === 'light' ? 'text-slate-700' : 'text-slate-300'}`}>2ª Secundaria</span>
+            <span className="w-3 h-3 rounded-full bg-amber-500 shadow-sm shadow-amber-500/50" />
+            <span className={`font-bold ${theme === 'light' ? 'text-slate-800' : 'text-slate-200'}`}>2ª Secundaria</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm bg-indigo-500" />
-            <span className={`font-bold ${theme === 'light' ? 'text-slate-700' : 'text-slate-300'}`}>3ª Terciaria</span>
+            <span className="w-3 h-3 rounded-full bg-indigo-500 shadow-sm shadow-indigo-500/50" />
+            <span className={`font-bold ${theme === 'light' ? 'text-slate-800' : 'text-slate-200'}`}>3ª Terciaria</span>
           </div>
         </div>
 
-        {/* Columnas agrupadas */}
-        <div className={`h-48 flex items-end justify-between gap-3 border-b pb-2 px-2 ${
+        {/* ÁREA DEL GRÁFICO DE COLUMNAS AGRUPADAS */}
+        <div className={`h-48 flex items-end justify-between gap-2 border-b pb-2 px-1 ${
           theme === 'light' ? 'border-slate-200' : 'border-slate-800'
         }`}>
           {data.map((item, idx) => {
-            const hP = Math.max(4, Math.round((item.Prioritaria / maxVal) * 100));
-            const hS = Math.max(4, Math.round((item.Secundaria / maxVal) * 100));
-            const hT = Math.max(4, Math.round((item.Terciaria / maxVal) * 100));
+            const hP = Math.max(6, Math.round((item.Prioritaria / maxVal) * 100));
+            const hS = Math.max(6, Math.round((item.Secundaria / maxVal) * 100));
+            const hT = Math.max(6, Math.round((item.Terciaria / maxVal) * 100));
 
             return (
-              <div key={idx} className="flex-1 flex flex-col items-center justify-end h-full group">
-                <div className="flex items-end gap-1 w-full justify-center h-full">
-                  <div
-                    className="w-full max-w-[12px] bg-rose-500 rounded-t-sm transition-all group-hover:brightness-110"
-                    style={{ height: `${hP}%` }}
-                    title={`Prioritaria: ${item.Prioritaria}`}
-                  />
-                  <div
-                    className="w-full max-w-[12px] bg-amber-500 rounded-t-sm transition-all group-hover:brightness-110"
-                    style={{ height: `${hS}%` }}
-                    title={`Secundaria: ${item.Secundaria}`}
-                  />
-                  <div
-                    className="w-full max-w-[12px] bg-indigo-500 rounded-t-sm transition-all group-hover:brightness-110"
-                    style={{ height: `${hT}%` }}
-                    title={`Terciaria: ${item.Terciaria}`}
-                  />
+              <div key={idx} className="flex-1 flex flex-col items-center justify-end h-full group relative">
+                <div className="flex items-end gap-0.5 sm:gap-1 w-full justify-center h-full">
+                  {/* Columna Prioritaria (Roja) */}
+                  <div className="flex-1 max-w-[14px] flex flex-col items-center justify-end h-full group/bar">
+                    <span className="text-[9px] font-mono font-black text-rose-400 opacity-0 group-hover/bar:opacity-100 transition-opacity mb-0.5">
+                      {item.Prioritaria}
+                    </span>
+                    <div
+                      className="w-full bg-gradient-to-t from-rose-600 to-rose-400 rounded-t-md transition-all group-hover/bar:brightness-125 shadow-md shadow-rose-500/20"
+                      style={{ height: `${hP}%` }}
+                      title={`${item.name} - 1ª Prioritaria: ${item.Prioritaria} encuestados`}
+                    />
+                  </div>
+
+                  {/* Columna Secundaria (Naranja) */}
+                  <div className="flex-1 max-w-[14px] flex flex-col items-center justify-end h-full group/bar">
+                    <span className="text-[9px] font-mono font-black text-amber-400 opacity-0 group-hover/bar:opacity-100 transition-opacity mb-0.5">
+                      {item.Secundaria}
+                    </span>
+                    <div
+                      className="w-full bg-gradient-to-t from-amber-600 to-amber-400 rounded-t-md transition-all group-hover/bar:brightness-125 shadow-md shadow-amber-500/20"
+                      style={{ height: `${hS}%` }}
+                      title={`${item.name} - 2ª Secundaria: ${item.Secundaria} encuestados`}
+                    />
+                  </div>
+
+                  {/* Columna Terciaria (Morada) */}
+                  <div className="flex-1 max-w-[14px] flex flex-col items-center justify-end h-full group/bar">
+                    <span className="text-[9px] font-mono font-black text-indigo-400 opacity-0 group-hover/bar:opacity-100 transition-opacity mb-0.5">
+                      {item.Terciaria}
+                    </span>
+                    <div
+                      className="w-full bg-gradient-to-t from-indigo-600 to-indigo-400 rounded-t-md transition-all group-hover/bar:brightness-125 shadow-md shadow-indigo-500/20"
+                      style={{ height: `${hT}%` }}
+                      title={`${item.name} - 3ª Terciaria: ${item.Terciaria} encuestados`}
+                    />
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* Etiquetas X */}
-        <div className="flex justify-between gap-3 px-2">
+        {/* EJE X: Etiquetas y Cifras (Prioritaria / Secundaria / Terciaria) */}
+        <div className="flex justify-between gap-1 px-1">
           {data.map((item, idx) => (
-            <div key={idx} className="flex-1 text-center truncate">
-              <span className={`text-[10px] font-bold truncate block ${theme === 'light' ? 'text-slate-800' : 'text-slate-200'}`} title={item.name}>
+            <div key={idx} className="flex-1 text-center truncate px-0.5">
+              <span className={`text-[10px] font-extrabold truncate block ${theme === 'light' ? 'text-slate-800' : 'text-slate-200'}`} title={item.name}>
                 {item.name}
               </span>
-              <span className={`text-[9px] font-mono font-bold block ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>
-                {item.Prioritaria}/{item.Secundaria}/{item.Terciaria}
-              </span>
+              <div className="flex items-center justify-center gap-0.5 text-[9px] font-mono mt-0.5">
+                <span className="font-bold text-rose-500" title="Prioritaria">{item.Prioritaria}</span>
+                <span className="text-slate-600">/</span>
+                <span className="font-bold text-amber-500" title="Secundaria">{item.Secundaria}</span>
+                <span className="text-slate-600">/</span>
+                <span className="font-bold text-indigo-400" title="Terciaria">{item.Terciaria}</span>
+              </div>
             </div>
           ))}
         </div>
@@ -420,33 +505,49 @@ export default function DashboardPage() {
 
     return (
       <div className="pt-3 pb-2 space-y-4">
-        <div className="h-44 flex items-end justify-center gap-12 border-b border-slate-800 pb-2">
+        <div className={`h-44 flex items-end justify-center gap-12 border-b pb-2 ${
+          theme === 'light' ? 'border-slate-200' : 'border-slate-800'
+        }`}>
           {/* Menores de edad */}
           <div className="flex flex-col items-center justify-end h-full w-28 group">
-            <span className="text-sm font-black text-emerald-400 mb-1">{menores} ({pctMenores}%)</span>
+            <span className={`text-sm font-black mb-1 ${theme === 'light' ? 'text-emerald-600' : 'text-emerald-400'}`}>
+              {menores} ({pctMenores}%)
+            </span>
             <div
               className="w-full bg-gradient-to-t from-emerald-600 to-teal-400 rounded-t-xl transition-all group-hover:scale-105 shadow-lg shadow-emerald-600/20"
               style={{ height: `${hMenores}%` }}
             />
-            <span className="text-xs font-bold text-white mt-2">Menores de 18</span>
-            <span className="text-[10px] text-slate-400">Niños/Adolescentes</span>
+            <span className={`text-xs font-bold mt-2 ${theme === 'light' ? 'text-slate-800' : 'text-white'}`}>
+              Menores de 18
+            </span>
+            <span className={`text-[10px] ${theme === 'light' ? 'text-slate-500 font-medium' : 'text-slate-400'}`}>
+              Niños/Adolescentes
+            </span>
           </div>
 
           {/* Mayores de edad */}
           <div className="flex flex-col items-center justify-end h-full w-28 group">
-            <span className="text-sm font-black text-indigo-400 mb-1">{mayores} ({pctMayores}%)</span>
+            <span className={`text-sm font-black mb-1 ${theme === 'light' ? 'text-indigo-600' : 'text-indigo-400'}`}>
+              {mayores} ({pctMayores}%)
+            </span>
             <div
               className="w-full bg-gradient-to-t from-indigo-600 to-violet-400 rounded-t-xl transition-all group-hover:scale-105 shadow-lg shadow-indigo-600/20"
               style={{ height: `${hMayores}%` }}
             />
-            <span className="text-xs font-bold text-white mt-2">Mayores de 18</span>
-            <span className="text-[10px] text-slate-400">Adultos / Mayores</span>
+            <span className={`text-xs font-bold mt-2 ${theme === 'light' ? 'text-slate-800' : 'text-white'}`}>
+              Mayores de 18
+            </span>
+            <span className={`text-[10px] ${theme === 'light' ? 'text-slate-500 font-medium' : 'text-slate-400'}`}>
+              Adultos / Mayores
+            </span>
           </div>
         </div>
 
-        <div className="flex items-center justify-between bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80 text-xs">
-          <span className="text-slate-400">Total Personas en Hogares Censados:</span>
-          <span className="font-mono font-black text-white text-sm">{total} personas</span>
+        <div className={`flex items-center justify-between p-3 rounded-2xl border text-xs ${
+          theme === 'light' ? 'bg-slate-100/70 border-slate-200' : 'bg-slate-950/60 border-slate-800/80'
+        }`}>
+          <span className={theme === 'light' ? 'text-slate-600 font-medium' : 'text-slate-400'}>Total Personas en Hogares Censados:</span>
+          <span className={`font-mono font-black text-sm ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>{total} personas</span>
         </div>
       </div>
     );
@@ -499,22 +600,30 @@ export default function DashboardPage() {
           {/* Barra Inclinada: SÍ AUTORIZAN */}
           <div
             onClick={() => itemSi && onSelect && onSelect(itemSi)}
-            className={`group cursor-pointer p-2 rounded-2xl border transition-all ${
+            className={`group cursor-pointer p-2.5 rounded-2xl border transition-all ${
               isSiActive
-                ? 'bg-emerald-500/20 border-emerald-400 ring-2 ring-emerald-400/50 shadow-lg shadow-emerald-500/20'
+                ? 'bg-emerald-500/20 border-emerald-500 ring-2 ring-emerald-500/40 shadow-lg'
+                : theme === 'light'
+                ? 'bg-emerald-50/60 border-emerald-200 hover:border-emerald-400 hover:bg-emerald-100/50'
                 : 'bg-slate-900/40 border-slate-800 hover:border-emerald-500/40 hover:bg-emerald-500/5'
             }`}
           >
             <div className="flex justify-between items-center text-xs mb-1.5 px-1">
-              <span className="font-extrabold text-emerald-400 flex items-center gap-1.5 text-xs">
-                <ShieldCheck size={14} /> Autorizan Tratamiento
+              <span className={`font-extrabold flex items-center gap-1.5 text-xs ${
+                theme === 'light' ? 'text-emerald-700' : 'text-emerald-400'
+              }`}>
+                <ShieldCheck size={15} /> Autorizan Tratamiento
               </span>
-              <span className="font-mono font-black text-white text-xs">
-                {cantSi} <span className="text-[10px] text-slate-400 font-semibold">({pctSi}%)</span>
+              <span className={`font-mono font-black text-xs ${
+                theme === 'light' ? 'text-slate-900' : 'text-white'
+              }`}>
+                {cantSi} <span className={`text-[10px] font-semibold ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>({pctSi}%)</span>
               </span>
             </div>
             {/* Barra con skew/inclinación */}
-            <div className="w-full bg-slate-950/80 rounded-xl h-4 p-0.5 overflow-hidden border border-slate-800">
+            <div className={`w-full rounded-xl h-4 p-0.5 overflow-hidden border ${
+              theme === 'light' ? 'bg-slate-100 border-slate-300' : 'bg-slate-950/80 border-slate-800'
+            }`}>
               <div
                 className="h-full bg-gradient-to-r from-emerald-600 to-teal-400 rounded-lg -skew-x-12 transform origin-left transition-all duration-500 shadow-md shadow-emerald-500/30 group-hover:brightness-125"
                 style={{ width: `${pctSi}%` }}
@@ -525,22 +634,30 @@ export default function DashboardPage() {
           {/* Barra Inclinada: NO AUTORIZAN */}
           <div
             onClick={() => itemNo && onSelect && onSelect(itemNo)}
-            className={`group cursor-pointer p-2 rounded-2xl border transition-all ${
+            className={`group cursor-pointer p-2.5 rounded-2xl border transition-all ${
               isNoActive
-                ? 'bg-rose-500/20 border-rose-400 ring-2 ring-rose-400/50 shadow-lg shadow-rose-500/20'
+                ? 'bg-rose-500/20 border-rose-500 ring-2 ring-rose-500/40 shadow-lg'
+                : theme === 'light'
+                ? 'bg-rose-50/60 border-rose-200 hover:border-rose-400 hover:bg-rose-100/50'
                 : 'bg-slate-900/40 border-slate-800 hover:border-rose-500/40 hover:bg-rose-500/5'
             }`}
           >
             <div className="flex justify-between items-center text-xs mb-1.5 px-1">
-              <span className="font-extrabold text-rose-400 flex items-center gap-1.5 text-xs">
-                <ShieldX size={14} /> No Autorizan
+              <span className={`font-extrabold flex items-center gap-1.5 text-xs ${
+                theme === 'light' ? 'text-rose-700' : 'text-rose-400'
+              }`}>
+                <ShieldX size={15} /> No Autorizan
               </span>
-              <span className="font-mono font-black text-white text-xs">
-                {cantNo} <span className="text-[10px] text-slate-400 font-semibold">({pctNo}%)</span>
+              <span className={`font-mono font-black text-xs ${
+                theme === 'light' ? 'text-slate-900' : 'text-white'
+              }`}>
+                {cantNo} <span className={`text-[10px] font-semibold ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>({pctNo}%)</span>
               </span>
             </div>
             {/* Barra con skew/inclinación */}
-            <div className="w-full bg-slate-950/80 rounded-xl h-4 p-0.5 overflow-hidden border border-slate-800">
+            <div className={`w-full rounded-xl h-4 p-0.5 overflow-hidden border ${
+              theme === 'light' ? 'bg-slate-100 border-slate-300' : 'bg-slate-950/80 border-slate-800'
+            }`}>
               <div
                 className="h-full bg-gradient-to-r from-rose-600 to-amber-500 rounded-lg -skew-x-12 transform origin-left transition-all duration-500 shadow-md shadow-rose-500/30 group-hover:brightness-125"
                 style={{ width: `${pctNo}%` }}
@@ -629,7 +746,7 @@ export default function DashboardPage() {
     const maxVal = Math.max(...data.map(d => d.cantidad || d.value || 1));
 
     return (
-      <div className="space-y-2.5 pt-2">
+      <div className="space-y-2.5 pt-2 max-h-[380px] overflow-y-auto pr-1 scrollbar-thin">
         {data.map((item, idx) => {
           const val = item.cantidad || item.value || 0;
           const pct = Math.min(100, Math.round((val / maxVal) * 100));
@@ -921,7 +1038,7 @@ export default function DashboardPage() {
               <BarChart3 size={16} className="text-rose-500" />
             </div>
             <HorizontalBarChart2D
-              data={getFrecuencias(C.tipoHecho, 7)}
+              data={getFrecuencias(C.tipoHecho, 30)}
               activeVal={filters[C.tipoHecho]}
               onSelect={(item) => setFilter(C.tipoHecho, item.opcion)}
             />
@@ -939,7 +1056,7 @@ export default function DashboardPage() {
               <MapPin size={16} className="text-indigo-500" />
             </div>
             <HorizontalBarChart2D
-              data={getFrecuencias(C.municipioOc, 7)}
+              data={getFrecuencias(C.municipioOc, 30)}
               activeVal={filters[C.municipioOc]}
               onSelect={(item) => setFilter(C.municipioOc, item.opcion)}
             />
@@ -1035,11 +1152,17 @@ export default function DashboardPage() {
               </div>
               <PieIcon size={16} className="text-indigo-500" />
             </div>
-            <DonutPieChart2D
-              data={getFrecuencias(C.libreta, 6)}
-              activeVal={filters[C.libreta]}
-              onSelect={(item) => setFilter(C.libreta, item.opcion)}
-            />
+            {(() => {
+              const { items, totalHombres } = getFrecuenciasHombresLibreta(10);
+              return (
+                <DonutPieChart2D
+                  data={items}
+                  activeVal={filters[C.libreta]}
+                  totalOverride={totalHombres}
+                  onSelect={(item) => setFilter(C.libreta, item.opcion)}
+                />
+              );
+            })()}
           </div>
 
           {/* Condición de Discapacidad (Gráfico Circular 2D) */}
@@ -1077,7 +1200,7 @@ export default function DashboardPage() {
               <FileWarning size={16} className="text-purple-500" />
             </div>
             <HorizontalBarChart2D
-              data={getFrecuencias(C.afectacion, 5)}
+              data={getFrecuencias(C.afectacion, 30)}
               activeVal={filters[C.afectacion]}
               onSelect={(item) => setFilter(C.afectacion, item.opcion)}
             />
@@ -1095,7 +1218,7 @@ export default function DashboardPage() {
               <MapPin size={16} className="text-cyan-500" />
             </div>
             <HorizontalBarChart2D
-              data={getFrecuencias(C.barrio, 5)}
+              data={getFrecuencias(C.barrio, 30)}
               activeVal={filters[C.barrio]}
               onSelect={(item) => setFilter(C.barrio, item.opcion)}
             />
@@ -1112,9 +1235,71 @@ export default function DashboardPage() {
               </div>
               <ShieldCheck size={18} className="text-emerald-500" />
             </div>
-            <SlantedBarChart2D
+            <DonutPieChart2D
+              data={getFrecuencias(C.autorizaDatos, 5)}
               activeVal={filters[C.autorizaDatos]}
+              totalOverride={rows.length}
               onSelect={(item) => setFilter(C.autorizaDatos, item.opcion)}
+            />
+          </div>
+        </div>
+
+        {/* ========================================================= */}
+        {/* FILA 8: NUEVOS GRÁFICOS ANALÍTICOS (HECHOS MÚLTIPLES + PERTENENCIA ÉTNICA + LIBRETA MILITAR HOGAR) */}
+        {/* ========================================================= */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 pt-2">
+          {/* 1. Gráfico de Personas con >1 Hecho Victimizante */}
+          <div className={`border rounded-3xl p-5 shadow-xl flex flex-col justify-between ${
+            theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+          }`}>
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <span className="text-[10px] font-extrabold text-rose-500 uppercase tracking-wider">Análisis de Revictimización</span>
+                <h4 className="text-sm font-bold">Personas con Múltiples Hechos Victimizantes</h4>
+              </div>
+              <ShieldAlert size={18} className="text-rose-500" />
+            </div>
+            <DonutPieChart2D
+              data={hechosMultiplesData}
+              totalOverride={rows.length}
+            />
+          </div>
+
+          {/* 2. Gráfico Adicional: Pertenencia Étnica (Grupos Poblacionales / Enfoque Diferencial) */}
+          <div className={`border rounded-3xl p-5 shadow-xl flex flex-col justify-between ${
+            theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+          }`}>
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <span className="text-[10px] font-extrabold text-violet-500 uppercase tracking-wider">Enfoque Diferencial</span>
+                <h4 className="text-sm font-bold">Pertenencia Étnica / Grupo Poblacional</h4>
+              </div>
+              <Users size={18} className="text-violet-500" />
+            </div>
+            <DonutPieChart2D
+              data={getFrecuencias(C.etnia, 15)}
+              activeVal={filters[C.etnia]}
+              totalOverride={rows.length}
+              onSelect={(item) => setFilter(C.etnia, item.opcion)}
+            />
+          </div>
+
+          {/* 3. Gráfico Adicional: Libreta Militar en Hombres Adultos del Hogar (Pregunta 32) */}
+          <div className={`border rounded-3xl p-5 shadow-xl flex flex-col justify-between ${
+            theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+          }`}>
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <span className="text-[10px] font-extrabold text-blue-500 uppercase tracking-wider">Situación Militar del Hogar</span>
+                <h4 className="text-sm font-bold">Libreta Militar (Adultos en Hogar)</h4>
+              </div>
+              <PieIcon size={18} className="text-blue-500" />
+            </div>
+            <DonutPieChart2D
+              data={getFrecuencias(C.libretaHogar, 10)}
+              activeVal={filters[C.libretaHogar]}
+              totalOverride={rows.length}
+              onSelect={(item) => setFilter(C.libretaHogar, item.opcion)}
             />
           </div>
         </div>

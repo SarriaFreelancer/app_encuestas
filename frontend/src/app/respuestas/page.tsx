@@ -163,8 +163,14 @@ export default function RespuestasPage() {
             </div>
 
             {/* Selector de Tamaño de Página (25 o 50) */}
-            <div className="flex items-center gap-1.5 p-1 rounded-2xl border border-slate-700/60 bg-slate-800/40">
-              <span className="text-[11px] font-bold text-slate-400 pl-2 pr-1 flex items-center gap-1">
+            <div className={`flex items-center gap-1.5 p-1 rounded-2xl border transition-all ${
+              theme === 'light' 
+                ? 'border-slate-300 bg-slate-100/80 shadow-sm' 
+                : 'border-slate-700/60 bg-slate-800/40'
+            }`}>
+              <span className={`text-[11px] font-bold pl-2 pr-1 flex items-center gap-1 ${
+                theme === 'light' ? 'text-slate-600' : 'text-slate-400'
+              }`}>
                 <Rows size={13} /> Filas:
               </span>
               <button
@@ -172,7 +178,7 @@ export default function RespuestasPage() {
                 className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
                   pageSize === 25 
                     ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' 
-                    : 'text-slate-400 hover:text-white'
+                    : theme === 'light' ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60' : 'text-slate-400 hover:text-white'
                 }`}
               >
                 25
@@ -182,7 +188,7 @@ export default function RespuestasPage() {
                 className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
                   pageSize === 50 
                     ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' 
-                    : 'text-slate-400 hover:text-white'
+                    : theme === 'light' ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60' : 'text-slate-400 hover:text-white'
                 }`}
               >
                 50
@@ -191,8 +197,14 @@ export default function RespuestasPage() {
 
             {/* Filtro de Autorización (visible solo si existe la columna) */}
             {columnaAutorizacion && (
-              <div className="flex items-center gap-1.5 p-1 rounded-2xl border border-slate-700/60 bg-slate-800/40">
-                <span className="text-[11px] font-bold text-slate-400 pl-2 pr-1 flex items-center gap-1">
+              <div className={`flex items-center gap-1.5 p-1 rounded-2xl border transition-all ${
+                theme === 'light' 
+                  ? 'border-slate-300 bg-slate-100/80 shadow-sm' 
+                  : 'border-slate-700/60 bg-slate-800/40'
+              }`}>
+                <span className={`text-[11px] font-bold pl-2 pr-1 flex items-center gap-1 ${
+                  theme === 'light' ? 'text-slate-600' : 'text-slate-400'
+                }`}>
                   <Shield size={13} /> Autoriza:
                 </span>
                 <button
@@ -200,7 +212,7 @@ export default function RespuestasPage() {
                   className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
                     filtroAutorizacion === 'todos'
                       ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30'
-                      : 'text-slate-400 hover:text-white'
+                      : theme === 'light' ? 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60' : 'text-slate-400 hover:text-white'
                   }`}
                 >
                   Todos
@@ -210,7 +222,7 @@ export default function RespuestasPage() {
                   className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1 ${
                     filtroAutorizacion === 'si'
                       ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
-                      : 'text-slate-400 hover:text-emerald-400'
+                      : theme === 'light' ? 'text-slate-600 hover:text-emerald-700 hover:bg-emerald-100/50' : 'text-slate-400 hover:text-emerald-400'
                   }`}
                 >
                   <ShieldCheck size={13} /> Sí
@@ -220,7 +232,7 @@ export default function RespuestasPage() {
                   className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer flex items-center gap-1 ${
                     filtroAutorizacion === 'no'
                       ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30'
-                      : 'text-slate-400 hover:text-rose-400'
+                      : theme === 'light' ? 'text-slate-600 hover:text-rose-700 hover:bg-rose-100/50' : 'text-slate-400 hover:text-rose-400'
                   }`}
                 >
                   <ShieldX size={13} /> No
