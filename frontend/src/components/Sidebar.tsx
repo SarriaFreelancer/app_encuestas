@@ -72,7 +72,7 @@ export default function Sidebar() {
             </div>
             {(!isCollapsed || isOpenMobile) && (
               <div className="truncate">
-                <h1 className="font-extrabold text-base leading-tight">Encuestas AI</h1>
+                <h1 className="font-extrabold text-base leading-tight">VCA VILLA RICA</h1>
                 <span className={`text-[11px] font-medium ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Plataforma Analítica</span>
               </div>
             )}

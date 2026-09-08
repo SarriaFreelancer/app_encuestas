@@ -225,7 +225,9 @@ class PermissiveSheetsRepository(BaseRepository):
                         res = res.replace(k, v)
                     return res
 
-            clean_headers = [h.strip() for h in rows_list[0] if h.strip() != '']
+            # Mantener el índice original de las columnas para evitar desplazamientos por celdas vacías en la cabecera
+            raw_headers = rows_list[0]
+            clean_headers = [h.strip() if h.strip() != '' else f"COL_{idx}" for idx, h in enumerate(raw_headers)]
             clean_rows = []
 
             # 1. Cargar ediciones manuales locales guardadas para este documento
@@ -242,7 +244,7 @@ class PermissiveSheetsRepository(BaseRepository):
             for idx, r in enumerate(rows_list[1:], start=2):
                 has_survey_data = False
                 for i, h in enumerate(clean_headers):
-                    if h.lower() != 'visible':
+                    if not h.startswith("COL_") and h.lower() != 'visible':
                         val = r[i].strip() if i < len(r) else ''
                         if val != '' and val != '0':
                             has_survey_data = True
@@ -251,8 +253,9 @@ class PermissiveSheetsRepository(BaseRepository):
                 if has_survey_data:
                     row_dict = {'__row_index': idx}
                     for i, h in enumerate(clean_headers):
-                        val = r[i].strip() if i < len(r) else ''
-                        row_dict[h] = _fix_encoding(val)
+                        if not h.startswith("COL_"):
+                            val = r[i].strip() if i < len(r) else ''
+                            row_dict[h] = _fix_encoding(val)
 
                     # Buscar si este documento tiene ediciones manuales guardadas
                     doc_key = ""
@@ -266,7 +269,10 @@ class PermissiveSheetsRepository(BaseRepository):
                     if doc_key and doc_key in manual_edits:
                         for k, v in manual_edits[doc_key].items():
                             if k != '__row_index':
-                                row_dict[k] = str(v)
+                                # Solo sobreescribir si la edición manual trae un valor no vacío o intencional
+                                val_str = str(v).strip()
+                                if val_str != '':
+                                    row_dict[k] = val_str
 
                     clean_rows.append(row_dict)
 

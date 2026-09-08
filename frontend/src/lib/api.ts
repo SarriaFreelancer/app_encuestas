@@ -12,9 +12,9 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  // Controlador de Timeout a 12 segundos para evitar estados infinitos de carga
+  // Controlador de Timeout a 30 segundos para evitar cancelaciones prematuras en cargas de datos pesadas
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 12000);
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {

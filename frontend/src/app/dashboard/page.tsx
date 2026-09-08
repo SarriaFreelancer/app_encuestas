@@ -9,7 +9,7 @@ import {
   Filter, RefreshCw, CheckCircle2, RotateCcw, Users, Heart, Home,
   AlertCircle, MapPin, Layers, GraduationCap, Briefcase, TrendingUp,
   Activity, FileWarning, ShieldAlert, ShieldCheck, ShieldX, Star, PieChart as PieIcon, BarChart3,
-  Calculator, ChevronDown, Check, X
+  Calculator, ChevronDown, ChevronUp, Check, X, Database
 } from 'lucide-react';
 
 const COLORS = ['#6366f1', '#10b981', '#8b5cf6', '#ec4899', '#f59e0b', '#3b82f6', '#06b6d4', '#ef4444', '#84cc16', '#f97316'];
@@ -21,19 +21,23 @@ export default function DashboardPage() {
   const [columnas, setColumnas] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+  const [isQuickFilterExpanded, setIsQuickFilterExpanded] = useState(false);
 
   // Filtros globales interactivos
   const [filters, setFilters] = useState<Record<string, string>>({});
 
-  const loadData = async () => {
-    setLoading(true);
+  const loadData = async (isInitial = false) => {
+    if (isInitial || respuestas.length === 0) {
+      setLoading(true);
+    }
     try {
+      const ts = Date.now();
       const [meta, resp] = await Promise.all([
-        fetchApi('/encuestas/metadatos'),
-        fetchApi('/encuestas/respuestas')
+        fetchApi(`/encuestas/metadatos?_t=${ts}`),
+        fetchApi(`/encuestas/respuestas?_t=${ts}`)
       ]);
-      setColumnas(meta.columnas || []);
-      setRespuestas(resp || []);
+      if (meta?.columnas) setColumnas(meta.columnas);
+      if (resp) setRespuestas(resp);
     } catch (e) {
       console.error('Error cargando datos:', e);
     } finally {
@@ -42,11 +46,11 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    loadData();
-    // Re-sincronización periódica automática con Google Sheets cada 25 segundos
+    loadData(true);
+    // Re-sincronización periódica en segundo plano cada 60 segundos
     const interval = setInterval(() => {
-      loadData();
-    }, 25000);
+      loadData(false);
+    }, 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -78,15 +82,26 @@ export default function DashboardPage() {
       tipoHecho: find(['45.', 'tipo de hecho']),
       afectacion: find(['46.', 'principal afectacion']),
       etnia: find(['10.', 'grupo etnico', 'pertenece a algun']),
-      libreta: find(['9.', 'libreta militar']),
-      libretaHogar: find(['32.', 'hombres mayores de edad']),
+      libreta: find(['9. Libreta militar', '9. Libreta', 'libreta militar']), // Columna L (9. Libreta)
+      libretaHogar: find(['32. Libreta militar', '32. Libreta', 'hombres mayores de edad']), // Columna AI (32. Libreta Hogar)
       necesPrinc: find(['66.', 'necesidad principal']),
       necesSecund: find(['67.', 'necesidad secundaria']),
       necesTerc: find(['68.', 'necesidad terciaria']),
       menores: find(['22.', 'menores de 18']),
+      escolarizados: find(['26.', 'escolarizados', 'cuantos estan escolarizados']),
       edad: find(['4. Edad', 'edad']),
       autorizaDatos: find(['autoriza el tratamiento', 'autoriza']),
       hechosAdic: find(['47.', 'hechos victimizantes adicionales', 'otros hechos', 'adicionales']),
+      inscritoRuv: find(['40.', 'inscrito(a) en el registro', 'registro unico de victimas', 'ruv']),
+      jefeHogar: find(['38.', 'jefe(a) de hogar', 'jefe de hogar']),
+      orientacionEnc: find(['7. Orientacion Sexual', '7. Orientación Sexual', 'orientacion sexual']), // Columna J (7. Orientación Sexual)
+      identidadEnc: find(['8. Identidad de genero', '8. Identidad de género', 'identidad de genero']), // Columna K (8. Identidad de Género)
+      orientacionHogar: find(['30. Orientacion Sexual', '30. Orientación Sexual', '30.']), // Columna AG (30. Orientación Sexual Hogar)
+      identidadHogar: find(['31. Identidad de genero', '31. Identidad de género', '31.']), // Columna AH (31. Identidad de Género Hogar)
+      mayoresMasculino: find(['27. De los mayores de edad', '27. De los mayores', 'sexo masculino']), // Columna AD / Pregunta 27
+      tenenciaVivienda: find(['49.', 'tenencia de la vivienda']), // Columna AZ / Pregunta 49
+      rangoIngresos: find(['54.', 'rango se encuentran los ingresos']), // Columna BE / Pregunta 54
+      emprendimiento: find(['56.', 'cuenta actualmente con un emprendimiento']), // Columna BG / Pregunta 56
     };
   }, [columnas]);
 
@@ -115,7 +130,53 @@ export default function DashboardPage() {
     const freqMap: Record<string, { count: number; rawVal: string }> = {};
     rows.forEach(r => {
       const raw = s(r[colName]);
-      const valStr = raw || 'Sin respuesta';
+      let valStr = raw || 'Sin respuesta';
+      
+      // Normalización estandarizada para la pregunta 46 (Principal Afectación)
+      if (colName === C.afectacion && valStr !== 'Sin respuesta') {
+        const norm = valStr.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\./g, "").trim();
+        
+        if (norm.includes('todas')) {
+          valStr = 'Todas las anteriores';
+        } else if ((norm.includes('psicol') || norm.includes('psico') || norm.includes('emocional')) && norm.includes('econom') && !norm.includes('familiar') && !norm.includes('social') && !norm.includes('fisic')) {
+          // Unificar tanto "Económico y psicológico", "Psicológica y económica" y "Emocional y económica"
+          if (norm.includes('emocional')) {
+            valStr = 'Emocional y económica';
+          } else {
+            valStr = 'Económica y psicológica';
+          }
+        } else {
+          // Estandarizar tildes y ortografía sin colapsar opciones compuestas distintas
+          const replacements: [RegExp, string][] = [
+            [/emocional o psicol[oó]gica/gi, 'Emocional o psicológica'],
+            [/emocional, econ[oó]mica, familiar/gi, 'Emocional, económica y familiar'],
+            [/emocional, familiar/gi, 'Emocional y familiar'],
+            [/emocional, psicosocial, econom[ií]a/gi, 'Emocional, psicosocial y económica'],
+            [/psicolog[ií]a y social/gi, 'Psicológica y social'],
+            [/econ[oó]mica y familiar/gi, 'Económica y familiar'],
+            [/social y econ[oó]mica/gi, 'Social y económica'],
+            [/f[ií]sica y economica|f[ií]sica y econ[oó]mica/gi, 'Física y económica'],
+            [/f[ií]sica y emocional/gi, 'Física y emocional'],
+          ];
+
+          let matchFound = false;
+          for (const [pattern, rep] of replacements) {
+            if (pattern.test(norm)) {
+              valStr = rep;
+              matchFound = true;
+              break;
+            }
+          }
+
+          if (!matchFound) {
+            if (norm === 'familiar') valStr = 'Familiar';
+            else if (norm === 'fisica') valStr = 'Física';
+            else if (norm === 'economica') valStr = 'Económica';
+            else if (norm === 'social') valStr = 'Social';
+          }
+        }
+      }
+
       const label = valStr.length > 26 ? valStr.slice(0, 23) + '…' : valStr;
       if (!freqMap[label]) {
         freqMap[label] = { count: 0, rawVal: valStr };
@@ -169,6 +230,157 @@ export default function DashboardPage() {
     })).sort((a, b) => b.value - a.value);
 
     return { items: items.slice(0, top), totalHombres };
+  };
+
+  // Cálculo de situación militar consolidada de TODOS los hombres adultos (Encuestados + Integrantes del Hogar)
+  // Criterios:
+  // 1. Encuestados individuales (57 Hombres): Columna I (Sexo) + Columna L (Pregunta 9: Libreta Militar).
+  // 2. Integrantes del hogar (212 Hombres): Columna AD (Pregunta 27: Mayores masculino) + Columna AI (Pregunta 32: Libreta militar).
+  // Total Universo Consolidado: 269 Hombres Adultos.
+  const getFrecuenciasHombresLibretaHogar = (top = 10) => {
+    if (rows.length === 0) return { items: [], totalSubmuestra: 0 };
+
+    const freqMap: Record<string, number> = {};
+    let totalHombresMayoresSum = 0;
+
+    rows.forEach(r => {
+      // 1. Encuestados individuales (57 Hombres): Columna I y Columna L
+      const sexoEnc = s(r[C.sexo]).toLowerCase();
+      const esHombreEnc = sexoEnc.includes('masculino') || sexoEnc.includes('hombre');
+
+      if (esHombreEnc) {
+        totalHombresMayoresSum += 1;
+        const raw9 = s(r[C.libreta]);
+        let cat9 = raw9 || 'Sin respuesta';
+        const norm9 = cat9.toLowerCase();
+
+        if (norm9 === 'si' || norm9 === 'sí' || norm9.includes('cuenta con libreta')) {
+          cat9 = 'Sí';
+        } else if (norm9 === 'no') {
+          cat9 = 'No';
+        } else if (norm9.includes('en proceso')) {
+          cat9 = 'En proceso';
+        } else if (norm9.includes('no aplica') || norm9 === 'n/a' || norm9 === 'na') {
+          cat9 = 'No aplica';
+        } else if (norm9.includes('no sabe') || norm9.includes('no se')) {
+          cat9 = 'No sabe';
+        }
+
+        freqMap[cat9] = (freqMap[cat9] || 0) + 1;
+      }
+
+      // 2. Hombres adultos en el hogar (212 Hombres): Columna AD / 27 y Columna AI / 32
+      const nHombresHogar = parseFloat(s(r[C.mayoresMasculino])) || 0;
+
+      if (nHombresHogar > 0) {
+        totalHombresMayoresSum += nHombresHogar;
+        const raw32 = s(r[C.libretaHogar]);
+        let cat32 = raw32 || 'Sin respuesta';
+        const norm32 = cat32.toLowerCase();
+
+        if (norm32 === 'si' || norm32 === 'sí' || norm32.includes('cuenta con libreta') || norm32.includes('solo dos') || norm32 === 'uno') {
+          cat32 = 'Sí';
+        } else if (norm32 === 'no') {
+          cat32 = 'No';
+        } else if (norm32.includes('no sabe') || norm32.includes('no se')) {
+          cat32 = 'No sabe';
+        } else if (norm32.includes('en proceso')) {
+          cat32 = 'En proceso';
+        } else if (norm32.includes('no aplica')) {
+          cat32 = 'No aplica';
+        } else if (norm32.includes('solo uno')) {
+          cat32 = 'Sí (Parcial)';
+        }
+
+        freqMap[cat32] = (freqMap[cat32] || 0) + nHombresHogar;
+      }
+    });
+
+    const items = Object.keys(freqMap).map(k => ({
+      name: k,
+      opcion: k,
+      label: k,
+      value: freqMap[k],
+      cantidad: freqMap[k],
+      porcentaje: Number(((freqMap[k] / (totalHombresMayoresSum || 1)) * 100).toFixed(1))
+    })).sort((a, b) => b.value - a.value);
+
+    return { items: items.slice(0, top), totalSubmuestra: totalHombresMayoresSum };
+  };
+
+  // Cálculo de Escolarización de Menores de Edad (Columna 26 / AC respecto al total de menores en la Columna 22 / Y)
+  const getFrecuenciasEscolarizadosMenores = () => {
+    if (rows.length === 0) return { items: [], totalMenores: 0 };
+
+    let totalMenoresSum = 0;
+    let escolarizadosSum = 0;
+
+    rows.forEach(r => {
+      const m = parseFloat(s(r[C.menores])) || 0;
+      const e = parseFloat(s(r[C.escolarizados])) || 0;
+      totalMenoresSum += m;
+      escolarizadosSum += e;
+    });
+
+    const noEscolarizadosSum = Math.max(0, totalMenoresSum - escolarizadosSum);
+    const totalBase = totalMenoresSum || 1;
+
+    const items = [
+      {
+        name: 'Escolarizados',
+        opcion: 'Escolarizados',
+        label: 'Escolarizados',
+        value: escolarizadosSum,
+        cantidad: escolarizadosSum,
+        porcentaje: Number(((escolarizadosSum / totalBase) * 100).toFixed(1)),
+        color: '#10b981'
+      },
+      {
+        name: 'No escolarizados / Sin reporte',
+        opcion: 'No escolarizados',
+        label: 'No escolarizados',
+        value: noEscolarizadosSum,
+        cantidad: noEscolarizadosSum,
+        porcentaje: Number(((noEscolarizadosSum / totalBase) * 100).toFixed(1)),
+        color: '#ef4444'
+      }
+    ];
+
+    return { items, totalMenores: totalMenoresSum };
+  };
+
+  // Cálculo de frecuencias consolidando la población total del hogar (700+ integrantes)
+  const getFrecuenciasConsolidadoHogar = (colEnc: string, colHogar: string, top = 10) => {
+    if (rows.length === 0) return { items: [], totalConsolidado: 0 };
+    
+    // Sumar el total de integrantes de todos los hogares filtrados
+    const totalConsolidado = totalPersonasHogar || 1;
+    const freqMap: Record<string, { count: number; rawVal: string }> = {};
+
+    rows.forEach(r => {
+      // Integrantes en este hogar específico
+      const nHogar = Math.max(1, parseFloat(s(r[C.hogar])) || 1);
+      // Priorizar la respuesta del hogar (colHogar) o la persona encuestada (colEnc)
+      const valStr = s(r[colHogar]) || s(r[colEnc]) || 'Sin respuesta';
+      const label = valStr.length > 26 ? valStr.slice(0, 23) + '…' : valStr;
+
+      if (!freqMap[label]) {
+        freqMap[label] = { count: 0, rawVal: valStr };
+      }
+      // Ponderar por la cantidad de personas del hogar
+      freqMap[label].count += nHogar;
+    });
+
+    const items = Object.keys(freqMap).map(k => ({
+      name: k,
+      opcion: freqMap[k].rawVal,
+      label: k,
+      value: freqMap[k].count,
+      cantidad: freqMap[k].count,
+      porcentaje: Number(((freqMap[k].count / totalConsolidado) * 100).toFixed(1))
+    })).sort((a, b) => b.value - a.value);
+
+    return { items: items.slice(0, top), totalConsolidado };
   };
 
   const opts = (col: string) => {
@@ -230,26 +442,36 @@ export default function DashboardPage() {
       .sort((a, b) => Number(a.anio) - Number(b.anio));
   }, [rows, C]);
 
-  // Análisis de Hechos Victimizantes Múltiples (Personas con > 1 Hecho)
+  // Análisis de Revictimización: Personas con Múltiples Hechos Victimizantes
+  // Evalúa estrictamente la Columna AV (Pregunta 45. Tipo de Hecho) sobre los 233 encuestados:
+  // Se toma cada respuesta como 1 hecho, y se cuenta como Múltiples Hechos (>1) si contiene comas (,) o la palabra 'y' / 'Y'.
   const hechosMultiplesData = useMemo(() => {
     let unSoloHecho = 0;
     let masDeUnHecho = 0;
+    let totalVictimas = rows.length;
 
     rows.forEach(r => {
-      const adic = s(r[C.hechosAdic]);
-      if (adic && adic !== 'Ninguno' && adic !== 'No' && adic !== 'Sin respuesta' && adic !== '0' && adic.length > 2) {
+      const tipoHecho = s(r[C.tipoHecho]);
+      
+      // Evaluar delimitadores de múltiples hechos en la Columna AV (comas , o conjunción Y / y)
+      const tieneDelimitador = /[,]|(?:\s+[yY]\s+)/.test(tipoHecho);
+
+      if (tieneDelimitador) {
         masDeUnHecho += 1;
       } else {
         unSoloHecho += 1;
       }
     });
 
-    const total = unSoloHecho + masDeUnHecho || 1;
-    return [
-      { name: '1 Solo Hecho Victimizante', opcion: 'Un Hecho', cantidad: unSoloHecho, porcentaje: Number(((unSoloHecho / total) * 100).toFixed(1)), color: '#10b981' },
-      { name: 'Múltiples Hechos (>1 Hecho)', opcion: 'Múltiples Hechos', cantidad: masDeUnHecho, porcentaje: Number(((masDeUnHecho / total) * 100).toFixed(1)), color: '#ef4444' }
-    ];
-  }, [rows, C.hechosAdic]);
+    const totalBase = totalVictimas || 1;
+    return {
+      items: [
+        { name: '1 Solo Hecho Victimizante', opcion: 'Un Hecho', cantidad: unSoloHecho, porcentaje: Number(((unSoloHecho / totalBase) * 100).toFixed(1)), color: '#10b981' },
+        { name: 'Múltiples Hechos (>1 Hecho)', opcion: 'Múltiples Hechos', cantidad: masDeUnHecho, porcentaje: Number(((masDeUnHecho / totalBase) * 100).toFixed(1)), color: '#ef4444' }
+      ],
+      totalVictimas
+    };
+  }, [rows, C.tipoHecho]);
 
   // ==========================================
   // COMPONENTES GRÁFICOS 2D VECTORIALES
@@ -276,8 +498,8 @@ export default function DashboardPage() {
     });
 
     return (
-      <div className="flex flex-col xl:flex-row items-center gap-3 py-2 w-full min-w-0">
-        <div className="relative w-28 h-28 sm:w-32 sm:h-32 shrink-0 my-1">
+      <div className="flex flex-col xl:flex-row items-center gap-2 py-1 w-full min-w-0">
+        <div className="relative w-20 h-20 sm:w-22 sm:h-22 shrink-0 my-1">
           <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
             {slices.map((slice, i) => {
               const radius = 38;
@@ -305,7 +527,7 @@ export default function DashboardPage() {
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
             <span className={`text-xs sm:text-sm font-black ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>{total}</span>
-            <span className={`text-[8px] sm:text-[9px] font-bold uppercase ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Total</span>
+            <span className={`text-[7px] sm:text-[8px] font-bold uppercase ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Total</span>
           </div>
         </div>
 
@@ -317,15 +539,15 @@ export default function DashboardPage() {
               <div
                 key={i}
                 onClick={() => onSelect && onSelect(slice)}
-                className={`flex items-center justify-between gap-1 text-[10px] sm:text-[11px] p-1.5 rounded-xl cursor-pointer transition-colors ${
+                className={`flex items-start justify-between gap-1.5 text-[10px] sm:text-[11px] p-1.5 rounded-xl cursor-pointer transition-colors ${
                   isSelected 
                     ? 'bg-indigo-600/20 border border-indigo-500/40 font-bold' 
                     : ''
                 }`}
               >
                 <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: slice.color }} />
-                  <span className={`truncate ${
+                  <span className="w-2 h-2 rounded-full shrink-0 mt-0.5" style={{ backgroundColor: slice.color }} />
+                  <span className={`break-words leading-tight ${
                     isSelected 
                       ? 'font-black text-indigo-600 dark:text-indigo-400' 
                       : theme === 'light' ? 'font-bold text-slate-800 hover:text-indigo-600' : 'font-semibold text-slate-200 hover:text-white'
@@ -333,7 +555,7 @@ export default function DashboardPage() {
                     {slice.name}
                   </span>
                 </div>
-                <div className="flex items-center gap-1 font-mono text-[9px] sm:text-[10px] shrink-0">
+                <div className="flex items-center gap-1 font-mono text-[9px] sm:text-[10px] shrink-0 pt-0.5">
                   <span className={`font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>
                     {slice.value || slice.cantidad}
                   </span>
@@ -823,104 +1045,129 @@ export default function DashboardPage() {
         isCollapsed ? 'md:ml-20' : 'md:ml-64'
       }`}>
 
-        {/* HEADER STICKY */}
-        <div className={`border rounded-3xl px-4 sm:px-5 py-4 shadow-xl flex flex-wrap items-center justify-between gap-3 sticky top-4 z-30 backdrop-blur-md ${
-          theme === 'light' ? 'bg-white/95 border-slate-200' : 'bg-slate-900/95 border-slate-800'
-        }`}>
-          <div>
-            <div className="flex items-center gap-2 mb-0.5">
-              <CheckCircle2 size={14} className="text-emerald-500" />
-              <span className="text-xs text-emerald-500 font-bold">
-                Sincronizado con Google Sheets ({respuestas.length} registros válidos)
-              </span>
+        {/* CONTENEDOR STICKY: HEADER + BARRA DE FILTROS CÓMODAMENTE FIJOS AL HACER SCROLL */}
+        <div className="sticky top-2 sm:top-4 z-30 space-y-2">
+          {/* HEADER PRINCIPAL STICKY */}
+          <div className={`border rounded-3xl px-4 sm:px-5 py-3.5 shadow-xl flex flex-wrap items-center justify-between gap-3 backdrop-blur-md transition-all ${
+            theme === 'light' ? 'bg-white/95 border-slate-200' : 'bg-slate-900/95 border-slate-800'
+          }`}>
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <CheckCircle2 size={14} className="text-emerald-500" />
+                <span className="text-xs text-emerald-500 font-bold">
+                  Sincronizado con Google Sheets ({respuestas.length} registros válidos)
+                </span>
+              </div>
+              <h1 className="text-lg sm:text-xl font-extrabold">
+                Dashboard Analítico — Caracterización Víctimas del Conflicto Armado
+              </h1>
             </div>
-            <h1 className="text-lg sm:text-xl font-extrabold">
-              Dashboard Analítico — Caracterización Víctimas del Conflicto Armado
-            </h1>
+
+            <div className="flex items-center gap-2">
+              {/* Botón para Desplegar / Contraer la Barra de Filtros Rápidos */}
+              <button
+                onClick={() => setIsQuickFilterExpanded(!isQuickFilterExpanded)}
+                className={`px-3 py-2 rounded-2xl text-xs font-bold flex items-center gap-1.5 border transition-all cursor-pointer ${
+                  isQuickFilterExpanded
+                    ? 'bg-indigo-600 text-white border-indigo-500 shadow-md shadow-indigo-600/30'
+                    : theme === 'light'
+                    ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
+                    : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-300'
+                }`}
+                title={isQuickFilterExpanded ? "Ocultar Filtros Rápidos" : "Mostrar Filtros Rápidos"}
+              >
+                <Filter size={13} />
+                <span>{isQuickFilterExpanded ? "Ocultar Filtros" : "Mostrar Filtros"}</span>
+                {isQuickFilterExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                {activeFiltersCount > 0 && (
+                  <span className="ml-0.5 px-1.5 py-0.5 bg-amber-400 text-slate-950 rounded-full font-black text-[10px]">
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </button>
+
+              {activeFiltersCount > 0 && (
+                <button
+                  onClick={clearFilters}
+                  className="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/20 rounded-2xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+                >
+                  <RotateCcw size={13} /> Limpiar ({activeFiltersCount})
+                </button>
+              )}
+
+              <button
+                onClick={() => setIsFilterDrawerOpen(true)}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
+              >
+                <Filter size={14} /> Panel Filtros
+                {activeFiltersCount > 0 && (
+                  <span className="px-2 py-0.5 bg-white text-indigo-700 rounded-full font-black text-[10px]">
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => loadData(true)}
+                className={`p-2 rounded-xl border transition-all cursor-pointer ${
+                  theme === 'light' ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700' : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-300'
+                }`}
+                title="Recargar datos"
+              >
+                <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {activeFiltersCount > 0 && (
-              <button
-                onClick={clearFilters}
-                className="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/20 rounded-2xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
-              >
-                <RotateCcw size={13} /> Limpiar ({activeFiltersCount})
-              </button>
-            )}
-
-            <button
-              onClick={() => setIsFilterDrawerOpen(true)}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-xs font-bold flex items-center gap-2 shadow-lg shadow-indigo-600/30 transition-all cursor-pointer"
-            >
-              <Filter size={14} /> Panel Filtros
+          {/* BARRA SUPERIOR DE BOTONERA DE CONTROLES DE FILTRO (DESPLEGABLE / CONTRAÍBLE) */}
+          <div className={`border rounded-3xl p-3.5 shadow-xl backdrop-blur-md transition-all duration-300 ${
+            theme === 'light' ? 'bg-white/95 border-slate-200' : 'bg-slate-900/95 border-slate-800'
+          } ${isQuickFilterExpanded ? 'block animate-in fade-in zoom-in-95 duration-200' : 'hidden'}`}>
+            <div className="flex items-center justify-between mb-2 px-1">
+              <div className="flex items-center gap-2">
+                <Filter size={14} className="text-indigo-500" />
+                <span className="text-xs font-extrabold uppercase tracking-wider text-indigo-500">
+                  Controles de Filtro Rápido
+                </span>
+              </div>
               {activeFiltersCount > 0 && (
-                <span className="px-2 py-0.5 bg-white text-indigo-700 rounded-full font-black text-[10px]">
-                  {activeFiltersCount}
+                <span className="text-[11px] text-amber-500 font-bold">
+                  {activeFiltersCount} filtro(s) activo(s)
                 </span>
               )}
-            </button>
-
-            <button
-              onClick={loadData}
-              className={`p-2 rounded-xl border transition-all cursor-pointer ${
-                theme === 'light' ? 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700' : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-300'
-              }`}
-              title="Recargar datos"
-            >
-              <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
-            </button>
-          </div>
-        </div>
-
-        {/* BARRA SUPERIOR DE BOTONERA DE CONTROLES DE FILTRO (RESPONSIVA REORGANIZABLE) */}
-        <div className={`border rounded-3xl p-4 shadow-lg space-y-3 ${
-          theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/70 border-slate-800'
-        }`}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Filter size={15} className="text-indigo-500" />
-              <span className="text-xs font-bold uppercase tracking-wider">
-                Controles de Filtro Rápido
-              </span>
             </div>
-            {activeFiltersCount > 0 && (
-              <span className="text-[11px] text-amber-500 font-bold">
-                {activeFiltersCount} filtro(s) activo(s)
-              </span>
-            )}
-          </div>
 
-          {/* Grid responsivo: 2 col en móvil, 3 en tablet, 4 en laptop y hasta 8 en pantallas anchas */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-8 gap-2">
-            {filterControls.map(({ label, col }) => {
-              if (!col) return null;
-              const options = opts(col);
-              const currentVal = filters[col] || '';
+            {/* Grid responsivo: 2 col en móvil, 3 en tablet, 4 en laptop y hasta 8 en pantallas anchas */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-8 gap-2">
+              {filterControls.map(({ label, col }) => {
+                if (!col) return null;
+                const options = opts(col);
+                const currentVal = filters[col] || '';
 
-              return (
-                <div key={col} className="relative w-full">
-                  <select
-                    value={currentVal}
-                    onChange={(e) => setFilters(prev => ({ ...prev, [col]: e.target.value || '' }))}
-                    className={`w-full px-2.5 py-2 rounded-xl text-xs font-semibold focus:outline-none transition-all cursor-pointer truncate ${
-                      currentVal
-                        ? 'bg-indigo-600 text-white border border-indigo-400'
-                        : theme === 'light'
-                        ? 'bg-slate-100 text-slate-700 border border-slate-200 hover:border-slate-300'
-                        : 'bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-600'
-                    }`}
-                  >
-                    <option value="">{label} (Todos)</option>
-                    {options.map(o => (
-                      <option key={o} value={o}>
-                        {o.length > 25 ? o.slice(0, 22) + '…' : o}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              );
-            })}
+                return (
+                  <div key={col} className="relative w-full">
+                    <select
+                      value={currentVal}
+                      onChange={(e) => setFilters(prev => ({ ...prev, [col]: e.target.value || '' }))}
+                      className={`w-full px-2.5 py-1.5 rounded-xl text-xs font-semibold focus:outline-none transition-all cursor-pointer truncate ${
+                        currentVal
+                          ? 'bg-indigo-600 text-white border border-indigo-400'
+                          : theme === 'light'
+                          ? 'bg-slate-100 text-slate-700 border border-slate-200 hover:border-slate-300'
+                          : 'bg-slate-800 text-slate-300 border border-slate-700 hover:border-slate-600'
+                      }`}
+                    >
+                      <option value="">{label} (Todos)</option>
+                      {options.map(o => (
+                        <option key={o} value={o}>
+                          {o.length > 25 ? o.slice(0, 22) + '…' : o}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 
@@ -928,11 +1175,11 @@ export default function DashboardPage() {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {[
             { label: 'Total de Registros', value: rows.length, color: 'text-indigo-500', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20', icon: <Users size={18} /> },
-            { label: 'Total Personas', value: totalPersonasHogar || rows.length, color: 'text-pink-500', bg: 'bg-pink-500/10', border: 'border-pink-500/20', icon: <Users size={18} /> },
+            { label: 'Personas en Hogar', value: totalPersonasHogar || rows.length, color: 'text-pink-500', bg: 'bg-pink-500/10', border: 'border-pink-500/20', icon: <Home size={18} /> },
+            { label: 'Total Global Personas', value: (totalPersonasHogar + rows.length) || rows.length, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20', icon: <Users size={18} /> },
             { label: 'Promedio Integrantes', value: avgIntegrantes, color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', icon: <Calculator size={18} /> },
             { label: 'Menores de Edad', value: Math.round(totalMenores), color: 'text-teal-500', bg: 'bg-teal-500/10', border: 'border-teal-500/20', icon: <Star size={18} /> },
             { label: 'Mayores de Edad', value: Math.round(totalMayores), color: 'text-purple-500', bg: 'bg-purple-500/10', border: 'border-purple-500/20', icon: <Users size={18} /> },
-            { label: 'Preguntas / Variables', value: columnas.length, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20', icon: <Layers size={18} /> },
           ].map((kpi, i) => (
             <div key={i} className={`${kpi.bg} border ${kpi.border} rounded-3xl p-4 shadow-lg flex flex-col gap-1`}>
               <div className={`${kpi.bg} rounded-xl w-8 h-8 flex items-center justify-center ${kpi.color}`}>
@@ -1097,6 +1344,75 @@ export default function DashboardPage() {
         </div>
 
         {/* ========================================================= */}
+        {/* NUEVA FILA DE ESCOLARIZACIÓN DE MENORES DE EDAD (PASTEL) */}
+        {/* ========================================================= */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Escolarización de Menores de Edad (Gráfico Circular / Pastel 2D) */}
+          <div className={`border rounded-3xl p-5 shadow-xl flex flex-col justify-between ${
+            theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+          }`}>
+            <div className="flex items-center justify-between mb-1">
+              <div>
+                <span className="text-[10px] font-extrabold text-emerald-500 uppercase tracking-wider">Gráfico Circular 2D (Pastel)</span>
+                <h4 className="text-sm font-bold">Escolarización de Menores de Edad</h4>
+                <p className="text-[11px] text-slate-500">Pregunta 26 vs Total Menores de 18 años (Pregunta 22)</p>
+              </div>
+              <GraduationCap size={18} className="text-emerald-500" />
+            </div>
+            {(() => {
+              const { items, totalMenores: totM } = getFrecuenciasEscolarizadosMenores();
+              return (
+                <DonutPieChart2D
+                  data={items}
+                  totalOverride={totM}
+                />
+              );
+            })()}
+          </div>
+
+          {/* Tarjeta Informativa Resumen Escolaridad */}
+          <div className={`border rounded-3xl p-5 shadow-xl flex flex-col justify-center gap-4 ${
+            theme === 'light' ? 'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200' : 'bg-slate-900/80 border-slate-800'
+          }`}>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center font-black">
+                <GraduationCap size={24} />
+              </div>
+              <div>
+                <h4 className="text-base font-extrabold text-emerald-700 dark:text-emerald-400">
+                  Cobertura Escolar en Niños y Adolescentes
+                </h4>
+                <p className="text-xs text-slate-600 dark:text-slate-400">
+                  Análisis consolidado del nivel de escolarización registrado en los hogares
+                </p>
+              </div>
+            </div>
+
+            {(() => {
+              const { items, totalMenores: totM } = getFrecuenciasEscolarizadosMenores();
+              const esc = items.find(i => i.name === 'Escolarizados')?.cantidad || 0;
+              const pct = totM > 0 ? ((esc / totM) * 100).toFixed(1) : '0';
+
+              return (
+                <div className="grid grid-cols-2 gap-3 pt-2">
+                  <div className={`p-3.5 rounded-2xl border ${theme === 'light' ? 'bg-white border-emerald-100' : 'bg-slate-800/80 border-slate-700'}`}>
+                    <span className="text-[11px] font-bold text-slate-500 block uppercase">Total Menores</span>
+                    <span className="text-xl font-black text-slate-900 dark:text-white">{totM}</span>
+                    <span className="text-[10px] text-slate-400 block">Menores de 18 años</span>
+                  </div>
+
+                  <div className={`p-3.5 rounded-2xl border ${theme === 'light' ? 'bg-emerald-600 text-white border-emerald-500' : 'bg-emerald-600/30 border-emerald-500/40'}`}>
+                    <span className="text-[11px] font-bold opacity-90 block uppercase">Escolarizados</span>
+                    <span className="text-xl font-black">{esc} <span className="text-xs font-normal">({pct}%)</span></span>
+                    <span className="text-[10px] opacity-80 block">Asisten a la escuela</span>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+
+        {/* ========================================================= */}
         {/* FILA 5: NIVEL EDUCATIVO (COLUMNAS) + SITUACIÓN LABORAL (COLUMNAS) */}
         {/* ========================================================= */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -1141,25 +1457,26 @@ export default function DashboardPage() {
         {/* FILA 6: LIBRETA MILITAR (CIRCULAR) + DISCAPACIDAD (CIRCULAR) */}
         {/* ========================================================= */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Libreta Militar (Gráfico Circular 2D) */}
+          {/* Libreta Militar Consolidada (Gráfico Circular 2D - 269 Hombres Adultos) */}
           <div className={`border rounded-3xl p-5 shadow-xl flex flex-col justify-between ${
             theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
           }`}>
             <div className="flex items-center justify-between mb-1">
               <div>
-                <span className="text-[10px] font-extrabold text-indigo-500 uppercase tracking-wider">Gráfico Circular 2D</span>
-                <h4 className="text-sm font-bold">Libreta Militar (Hombres)</h4>
+                <span className="text-[10px] font-extrabold text-indigo-500 uppercase tracking-wider">Situación Militar Consolidada</span>
+                <h4 className="text-sm font-bold">Libreta Militar (Hombres Adultos Consolidado)</h4>
+                <p className="text-[10px] text-slate-500">Población total de 269 hombres (57 encuestados + 212 integrantes en hogar)</p>
               </div>
               <PieIcon size={16} className="text-indigo-500" />
             </div>
             {(() => {
-              const { items, totalHombres } = getFrecuenciasHombresLibreta(10);
+              const { items, totalSubmuestra } = getFrecuenciasHombresLibretaHogar(10);
               return (
                 <DonutPieChart2D
                   data={items}
-                  activeVal={filters[C.libreta]}
-                  totalOverride={totalHombres}
-                  onSelect={(item) => setFilter(C.libreta, item.opcion)}
+                  activeVal={filters[C.libretaHogar]}
+                  totalOverride={totalSubmuestra}
+                  onSelect={(item) => setFilter(C.libretaHogar, item.opcion)}
                 />
               );
             })()}
@@ -1245,23 +1562,25 @@ export default function DashboardPage() {
         </div>
 
         {/* ========================================================= */}
-        {/* FILA 8: NUEVOS GRÁFICOS ANALÍTICOS (HECHOS MÚLTIPLES + PERTENENCIA ÉTNICA + LIBRETA MILITAR HOGAR) */}
+        {/* FILA 8: NUEVOS GRÁFICOS ANALÍTICOS (HECHOS MÚLTIPLES + PERTENENCIA ÉTNICA) */}
         {/* ========================================================= */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 pt-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
           {/* 1. Gráfico de Personas con >1 Hecho Victimizante */}
           <div className={`border rounded-3xl p-5 shadow-xl flex flex-col justify-between ${
             theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
           }`}>
             <div className="flex items-center justify-between mb-2">
               <div>
-                <span className="text-[10px] font-extrabold text-rose-500 uppercase tracking-wider">Análisis de Revictimización</span>
+                <span className="text-[10px] font-extrabold text-rose-500 uppercase tracking-wider">
+                  Análisis de Revictimización
+                </span>
                 <h4 className="text-sm font-bold">Personas con Múltiples Hechos Victimizantes</h4>
               </div>
               <ShieldAlert size={18} className="text-rose-500" />
             </div>
             <DonutPieChart2D
-              data={hechosMultiplesData}
-              totalOverride={rows.length}
+              data={hechosMultiplesData.items}
+              totalOverride={hechosMultiplesData.totalVictimas}
             />
           </div>
 
@@ -1283,24 +1602,630 @@ export default function DashboardPage() {
               onSelect={(item) => setFilter(C.etnia, item.opcion)}
             />
           </div>
+        </div>
 
-          {/* 3. Gráfico Adicional: Libreta Militar en Hombres Adultos del Hogar (Pregunta 32) */}
+        {/* ========================================================= */}
+        {/* FILA 8.5: 3. CONDICIONES SOCIOECONÓMICAS (233 ENCUESTADOS) */}
+        {/* ========================================================= */}
+        <div className="pt-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <TrendingUp size={20} className="text-emerald-500" />
+            <div>
+              <h3 className="text-base font-extrabold">3. Condiciones Socioeconómicas</h3>
+              <p className="text-xs text-slate-400">Análisis sobre la población de 233 personas encuestadas</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {/* 1. Tenencia de la Vivienda (Columna AZ / 49) */}
+            <div className={`border rounded-3xl p-5 shadow-xl flex flex-col justify-between ${
+              theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+            }`}>
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <span className="text-[10px] font-extrabold text-cyan-500 uppercase tracking-wider">Vivienda</span>
+                  <h4 className="text-sm font-bold">Tenencia de Vivienda</h4>
+                </div>
+                <Home size={18} className="text-cyan-500" />
+              </div>
+              <DonutPieChart2D
+                data={getFrecuencias(C.tenenciaVivienda, 10)}
+                activeVal={filters[C.tenenciaVivienda]}
+                totalOverride={rows.length}
+                onSelect={(item) => setFilter(C.tenenciaVivienda, item.opcion)}
+              />
+            </div>
+
+            {/* 2. Rangos de Ingresos Mensuales (Columna BE / 54) */}
+            <div className={`border rounded-3xl p-5 shadow-xl flex flex-col justify-between ${
+              theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+            }`}>
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <span className="text-[10px] font-extrabold text-amber-500 uppercase tracking-wider">Ingresos</span>
+                  <h4 className="text-sm font-bold">Rangos de Ingresos Mensuales</h4>
+                </div>
+                <TrendingUp size={18} className="text-amber-500" />
+              </div>
+              <DonutPieChart2D
+                data={getFrecuencias(C.rangoIngresos, 10)}
+                activeVal={filters[C.rangoIngresos]}
+                totalOverride={rows.length}
+                onSelect={(item) => setFilter(C.rangoIngresos, item.opcion)}
+              />
+            </div>
+
+            {/* 3. Emprendimiento o Unidad Productiva (Columna BG / 56) */}
+            <div className={`border rounded-3xl p-5 shadow-xl flex flex-col justify-between ${
+              theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+            }`}>
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <span className="text-[10px] font-extrabold text-emerald-500 uppercase tracking-wider">Productividad</span>
+                  <h4 className="text-sm font-bold">Emprendimiento o Negocio Propio</h4>
+                </div>
+                <Briefcase size={18} className="text-emerald-500" />
+              </div>
+              <DonutPieChart2D
+                data={getFrecuencias(C.emprendimiento, 10)}
+                activeVal={filters[C.emprendimiento]}
+                totalOverride={rows.length}
+                onSelect={(item) => setFilter(C.emprendimiento, item.opcion)}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ========================================================= */}
+        {/* FILA 9: JEFE DE HOGAR + INTERPRETACIÓN ANALÍTICA COMPLETA */}
+        {/* ========================================================= */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 pt-2">
+          {/* Gráfico: Encuestados Jefes de Hogar */}
           <div className={`border rounded-3xl p-5 shadow-xl flex flex-col justify-between ${
             theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
           }`}>
             <div className="flex items-center justify-between mb-2">
               <div>
-                <span className="text-[10px] font-extrabold text-blue-500 uppercase tracking-wider">Situación Militar del Hogar</span>
-                <h4 className="text-sm font-bold">Libreta Militar (Adultos en Hogar)</h4>
+                <span className="text-[10px] font-extrabold text-emerald-500 uppercase tracking-wider">Liderazgo Familiar</span>
+                <h4 className="text-sm font-bold">Encuestados Jefes(as) de Hogar</h4>
               </div>
-              <PieIcon size={18} className="text-blue-500" />
+              <Home size={18} className="text-emerald-500" />
             </div>
             <DonutPieChart2D
-              data={getFrecuencias(C.libretaHogar, 10)}
-              activeVal={filters[C.libretaHogar]}
+              data={getFrecuencias(C.jefeHogar, 5)}
+              activeVal={filters[C.jefeHogar]}
               totalOverride={rows.length}
-              onSelect={(item) => setFilter(C.libretaHogar, item.opcion)}
+              onSelect={(item) => setFilter(C.jefeHogar, item.opcion)}
             />
+          </div>
+
+          {/* Tarjeta de Interpretación de Gráficos (Síntesis de hallazgos completa) */}
+          <div className={`xl:col-span-2 border rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col justify-between ${
+            theme === 'light' ? 'bg-gradient-to-br from-indigo-50/60 to-purple-50/40 border-slate-200' : 'bg-gradient-to-br from-slate-900/90 to-indigo-950/40 border-slate-800'
+          }`}>
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Activity size={18} className="text-indigo-500" />
+                <h4 className="text-sm font-black uppercase tracking-wider text-indigo-500">
+                  Interpretación Analítica y Hallazgos Clave Globales
+                </h4>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs mt-3">
+                {/* 1. Demografía y Género */}
+                <div className={`p-3 rounded-2xl border ${theme === 'light' ? 'bg-white/80 border-slate-200 text-slate-700' : 'bg-slate-900/60 border-slate-800 text-slate-300'}`}>
+                  <strong className="text-indigo-500 block mb-1">👩‍👩‍👧 Perfil Demográfico & Género:</strong>
+                  La población encuestada presenta un predominio femenino significativo, donde el <strong className="text-indigo-400">75.5% (176 personas)</strong> se identifican como mujeres y el <strong className="text-indigo-400">24.5% (57 personas)</strong> como hombres, marcando un liderazgo femenino clave en el censo.
+                </div>
+
+                {/* 2. Hecho Victimizante Principal */}
+                <div className={`p-3 rounded-2xl border ${theme === 'light' ? 'bg-white/80 border-slate-200 text-slate-700' : 'bg-slate-900/60 border-slate-800 text-slate-300'}`}>
+                  <strong className="text-rose-500 block mb-1">🚨 Mayor Impacto Victimizante:</strong>
+                  El <strong className="text-rose-400">Desplazamiento Forzado</strong> representa el hecho principal predominante con más del <strong className="text-rose-400">30.9%</strong> de los casos, seguido por atentados terroristas (26.2%) y amenazas (17.2%), concentrando el núcleo histórico del conflicto.
+                </div>
+
+                {/* 3. Focalización Territorial & Municipios */}
+                <div className={`p-3 rounded-2xl border ${theme === 'light' ? 'bg-white/80 border-slate-200 text-slate-700' : 'bg-slate-900/60 border-slate-800 text-slate-300'}`}>
+                  <strong className="text-cyan-500 block mb-1">📍 Concentración Territorial:</strong>
+                  El municipio de <strong className="text-cyan-400">Villa Rica (36.1%)</strong> concentra la mayor proporción de ocurrencia del hecho victimizante principal, convirtiéndose en el epicentro geográfico prioritized de atención en la región.
+                </div>
+
+                {/* 4. Situación Socioeconómica & Empleo */}
+                <div className={`p-3 rounded-2xl border ${theme === 'light' ? 'bg-white/80 border-slate-200 text-slate-700' : 'bg-slate-900/60 border-slate-800 text-slate-300'}`}>
+                  <strong className="text-amber-500 block mb-1">💼 Empleo & Estabilidad Laboral:</strong>
+                  Existe una importante barrera de inserción laboral formal: la gran mayoría se sustenta a través de <strong className="text-amber-400">empleo informal o independiente</strong> y emprendimientos de subsistencia, demandando apoyo en capacitación e impulso productivo.
+                </div>
+
+                {/* 5. Jefatura de Hogar */}
+                <div className={`p-3 rounded-2xl border ${theme === 'light' ? 'bg-white/80 border-slate-200 text-slate-700' : 'bg-slate-900/60 border-slate-800 text-slate-300'}`}>
+                  <strong className="text-emerald-500 block mb-1">🏠 Jefatura de Hogar & Responsabilidad:</strong>
+                  El <strong className="text-emerald-400">84.1%</strong> (196 encuestados) asume la jefatura directa de su núcleo familiar, confirmando que las respuestas provienen directamente de los tomadores de decisiones del hogar.
+                </div>
+
+                {/* 6. Revictimización */}
+                <div className={`p-3 rounded-2xl border ${theme === 'light' ? 'bg-white/80 border-slate-200 text-slate-700' : 'bg-slate-900/60 border-slate-800 text-slate-300'}`}>
+                  <strong className="text-rose-500 block mb-1">⚠️ Revictimización Múltiple:</strong>
+                  El <strong className="text-rose-400">91.4%</strong> (213 personas) registra múltiples hechos victimizantes en su trayectoria de vida, evidenciando un patrón de afectación continua y acumulativa.
+                </div>
+
+                {/* 7. Situación Militar */}
+                <div className={`p-3 rounded-2xl border ${theme === 'light' ? 'bg-white/80 border-slate-200 text-slate-700' : 'bg-slate-900/60 border-slate-800 text-slate-300'}`}>
+                  <strong className="text-indigo-500 block mb-1">🪖 Situación Militar (Submuestra 57 Hombres):</strong>
+                  Evaluada exactamente sobre la submuestra de 57 hombres encuestados: el <strong className="text-indigo-400">56.1% (32 hombres)</strong> tiene libreta personal, y al consultar por la situación de sus familiares masculinos en el hogar, en el <strong className="text-indigo-400">43.9% de los casos (25 hogares)</strong> también cuentan con miembros con situación militar definida.
+                </div>
+
+                {/* 8. Étnico y Tratamiento Datos */}
+                <div className={`p-3 rounded-2xl border ${theme === 'light' ? 'bg-white/80 border-slate-200 text-slate-700' : 'bg-slate-900/60 border-slate-800 text-slate-300'}`}>
+                  <strong className="text-purple-500 block mb-1">🧬 Enfoque Diferencial Étnico & Confianza:</strong>
+                  Destaca la alta representatividad de la comunidad <strong className="text-purple-400">Afrocolombiana (48.9%)</strong>, unida a una confianza del <strong className="text-emerald-400">99.5%</strong> para el tratamiento seguro de datos personales (Hábeas Data).
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ========================================================= */}
+        {/* FILA 10: CONSOLIDADO DEL CENSO (COBERURA & CALIDAD DE INFORMACIÓN) */}
+        {/* ========================================================= */}
+        <div className="pt-2 pb-4">
+          <div className={`border rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col justify-between ${
+            theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+          }`}>
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <div>
+                <span className="text-[10px] font-extrabold text-blue-500 uppercase tracking-wider">Control de Calidad & Cobertura</span>
+                <h4 className="text-base font-extrabold mt-0.5">Consolidado del Censo y Cobertura de Núcleos Familiares</h4>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 bg-indigo-600/10 text-indigo-500 rounded-full text-xs font-extrabold border border-indigo-500/20">
+                  255 Personas Encuestadas Totales
+                </span>
+                <span className="px-3 py-1 bg-emerald-600/10 text-emerald-500 rounded-full text-xs font-extrabold border border-emerald-500/20">
+                  233 Núcleos Registrados en Base de Datos
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+              {/* Tarjeta 1: Total Encuestados */}
+              <div className={`p-4 rounded-2xl border flex flex-col justify-between ${
+                theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/60 border-slate-800'
+              }`}>
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-xs font-bold text-slate-400">Población Censada</span>
+                  <Users size={16} className="text-blue-500" />
+                </div>
+                <div>
+                  <span className={`text-2xl font-black font-mono block ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>
+                    255
+                  </span>
+                  <span className="text-[11px] text-slate-500 font-semibold">Personas Encuestadas en Campo</span>
+                </div>
+                <div className="w-full bg-blue-500/20 h-1.5 rounded-full mt-3 overflow-hidden">
+                  <div className="bg-blue-500 h-full w-full" />
+                </div>
+              </div>
+
+              {/* Tarjeta 2: Núcleos en Base de Datos */}
+              <div className={`p-4 rounded-2xl border flex flex-col justify-between ${
+                theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/60 border-slate-800'
+              }`}>
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-xs font-bold text-slate-400">Núcleos en Base de Datos</span>
+                  <Database size={16} className="text-indigo-500" />
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className={`text-2xl font-black font-mono ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>
+                      233
+                    </span>
+                    <span className="text-xs text-indigo-400 font-bold">(91.4%)</span>
+                  </div>
+                  <span className="text-[11px] text-slate-500 font-semibold">Hogares Validados en Sistema</span>
+                </div>
+                <div className="w-full bg-indigo-500/20 h-1.5 rounded-full mt-3 overflow-hidden">
+                  <div className="bg-indigo-500 h-full w-[91.4%]" />
+                </div>
+              </div>
+
+              {/* Tarjeta 3: Información Completa */}
+              <div className={`p-4 rounded-2xl border flex flex-col justify-between ${
+                theme === 'light' ? 'bg-emerald-50/60 border-emerald-200' : 'bg-emerald-950/20 border-emerald-800/60'
+              }`}>
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-xs font-bold text-emerald-500">Información Completa</span>
+                  <CheckCircle2 size={16} className="text-emerald-500" />
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className={`text-2xl font-black font-mono ${theme === 'light' ? 'text-emerald-900' : 'text-emerald-400'}`}>
+                      221
+                    </span>
+                    <span className="text-xs text-emerald-500 font-bold">(94.8%)</span>
+                  </div>
+                  <span className="text-[11px] text-emerald-600 dark:text-emerald-400/80 font-semibold">Núcleos con Datos 100% Completos</span>
+                </div>
+                <div className="w-full bg-emerald-500/20 h-1.5 rounded-full mt-3 overflow-hidden">
+                  <div className="bg-emerald-500 h-full w-[94.8%]" />
+                </div>
+              </div>
+
+              {/* Tarjeta 4: Información Incompleta */}
+              <div className={`p-4 rounded-2xl border flex flex-col justify-between ${
+                theme === 'light' ? 'bg-amber-50/60 border-amber-200' : 'bg-amber-950/20 border-amber-800/60'
+              }`}>
+                <div className="flex justify-between items-start mb-2">
+                  <span className="text-xs font-bold text-amber-500">Información Incompleta</span>
+                  <AlertCircle size={16} className="text-amber-500" />
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-1.5">
+                    <span className={`text-2xl font-black font-mono ${theme === 'light' ? 'text-amber-900' : 'text-amber-400'}`}>
+                      12
+                    </span>
+                    <span className="text-xs text-amber-500 font-bold">(5.2%)</span>
+                  </div>
+                  <span className="text-[11px] text-amber-600 dark:text-amber-400/80 font-semibold">Núcleos Pendientes por Completar</span>
+                </div>
+                <div className="w-full bg-amber-500/20 h-1.5 rounded-full mt-3 overflow-hidden">
+                  <div className="bg-amber-500 h-full w-[5.2%]" />
+                </div>
+              </div>
+            </div>
+
+            {/* Visualización Gráfica en Donut Pie Charts de Cobertura e Calidad */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Gráfico 1: Cobertura del Censo (Registrados vs No Ingresados) */}
+              <div className={`border rounded-2xl p-4 shadow-sm ${
+                theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/40 border-slate-800'
+              }`}>
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <span className="text-[10px] font-extrabold text-indigo-500 uppercase tracking-wider">Análisis de Cobertura</span>
+                    <h4 className="text-xs sm:text-sm font-bold">Núcleos Censados vs. Registrados</h4>
+                  </div>
+                  <PieIcon size={16} className="text-indigo-500" />
+                </div>
+                <DonutPieChart2D
+                  data={[
+                    { name: 'Núcleos en Base de Datos', opcion: 'Registrado', cantidad: 233, porcentaje: 91.4, color: '#6366f1' },
+                    { name: 'Encuestados Pendientes Sistema', opcion: 'Pendiente', cantidad: 22, porcentaje: 8.6, color: '#94a3b8' }
+                  ]}
+                  totalOverride={255}
+                />
+              </div>
+
+              {/* Gráfico 2: Calidad de la Información (Completos vs Incompletos) */}
+              <div className={`border rounded-2xl p-4 shadow-sm ${
+                theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/40 border-slate-800'
+              }`}>
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <span className="text-[10px] font-extrabold text-emerald-500 uppercase tracking-wider">Calidad de Datos</span>
+                    <h4 className="text-xs sm:text-sm font-bold">Completitud de Información (233 Núcleos)</h4>
+                  </div>
+                  <BarChart3 size={16} className="text-emerald-500" />
+                </div>
+                <DonutPieChart2D
+                  data={[
+                    { name: 'Información Completa', opcion: 'Completa', cantidad: 221, porcentaje: 94.8, color: '#10b981' },
+                    { name: 'Información Incompleta', opcion: 'Incompleta', cantidad: 12, porcentaje: 5.2, color: '#f59e0b' }
+                  ]}
+                  totalOverride={233}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ========================================================= */}
+        {/* FILA 11: DIVERSIDAD, ORIENTACIÓN SEXUAL E IDENTIDAD DE GÉNERO (ENCUESTADO VS HOGAR) */}
+        {/* ========================================================= */}
+        <div className="pt-2 pb-6 space-y-5">
+          <div className="flex items-center gap-2">
+            <Heart size={20} className="text-pink-500" />
+            <div>
+              <h3 className="text-base font-extrabold">Diversidad, Orientación Sexual e Identidad de Género</h3>
+              <p className="text-xs text-slate-400">Comparativa analítica entre la persona encuestada y la composición del grupo familiar</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {/* 1. Orientación Sexual Consolidada Total Hogar */}
+            <div className={`border rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col justify-between ${
+              theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+            }`}>
+              <div className="flex items-center justify-between mb-3 border-b border-slate-700/40 pb-2">
+                <div>
+                  <span className="text-[10px] font-extrabold text-pink-500 uppercase tracking-wider">Población Total del Hogar ({totalPersonasHogar} personas)</span>
+                  <h4 className="text-sm font-bold">Orientación Sexual (Consolidado Total Integrantes)</h4>
+                </div>
+                <Heart size={18} className="text-pink-500" />
+              </div>
+              {(() => {
+                const { items, totalConsolidado } = getFrecuenciasConsolidadoHogar(C.orientacionEnc, C.orientacionHogar, 8);
+                return (
+                  <DonutPieChart2D
+                    data={items}
+                    activeVal={filters[C.orientacionHogar] || filters[C.orientacionEnc]}
+                    totalOverride={totalConsolidado}
+                    onSelect={(item) => setFilter(C.orientacionHogar, item.opcion)}
+                  />
+                );
+              })()}
+            </div>
+
+            {/* 2. Identidad de Género Consolidada Total Hogar */}
+            <div className={`border rounded-3xl p-5 sm:p-6 shadow-xl flex flex-col justify-between ${
+              theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/80 border-slate-800'
+            }`}>
+              <div className="flex items-center justify-between mb-3 border-b border-slate-700/40 pb-2">
+                <div>
+                  <span className="text-[10px] font-extrabold text-violet-500 uppercase tracking-wider">Población Total del Hogar ({totalPersonasHogar} personas)</span>
+                  <h4 className="text-sm font-bold">Identidad de Género (Consolidado Total Integrantes)</h4>
+                </div>
+                <Users size={18} className="text-violet-500" />
+              </div>
+              {(() => {
+                const { items, totalConsolidado } = getFrecuenciasConsolidadoHogar(C.identidadEnc, C.identidadHogar, 8);
+                return (
+                  <DonutPieChart2D
+                    data={items}
+                    activeVal={filters[C.identidadHogar] || filters[C.identidadEnc]}
+                    totalOverride={totalConsolidado}
+                    onSelect={(item) => setFilter(C.identidadHogar, item.opcion)}
+                  />
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+
+        {/* FILA 12: MAPA GEOGRÁFICO DE VILLA RICA - CAUCA (ZONA URBANA Y RURAL CON FILTROS) */}
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-700/50 pb-2">
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-500">
+                <MapPin size={20} />
+              </div>
+              <div>
+                <h3 className="text-lg font-black tracking-tight">Mapa de Distribución Territorial - Villa Rica, Cauca</h3>
+                <p className="text-xs text-slate-400">Distribución geográfica por Zona Urbana (Barrios) y Zona Rural (Veredas/Sectores)</p>
+              </div>
+            </div>
+            {filters[C.zona] && (
+              <button
+                onClick={() => setFilter(C.zona, filters[C.zona])}
+                className="flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 font-bold bg-indigo-500/10 px-3 py-1.5 rounded-xl border border-indigo-500/30 cursor-pointer self-start sm:self-auto"
+              >
+                <RotateCcw size={13} /> Limpiar filtro zona: {filters[C.zona]}
+              </button>
+            )}
+          </div>
+
+          <div className={`border rounded-3xl p-6 shadow-xl ${
+            theme === 'light' ? 'bg-white border-slate-200 text-slate-800' : 'bg-slate-900/90 border-slate-800 text-white'
+          }`}>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+              
+              {/* SVG Mapa Interactivo Limpio y Elegante */}
+              <div className={`lg:col-span-7 flex flex-col justify-between p-5 rounded-2xl border relative overflow-hidden min-h-[380px] ${
+                theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/80 border-slate-800'
+              }`}>
+                {/* Cabecera del Mapa */}
+                <div className="flex items-center justify-between z-10 mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 animate-pulse" />
+                    <span className="text-xs font-bold uppercase tracking-wider opacity-80">Municipio de Villa Rica (Cauca)</span>
+                  </div>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-500">
+                    Interactivo
+                  </span>
+                </div>
+                
+                {/* Google Maps 2D Interactivo de Villa Rica, Cauca */}
+                <div className="relative flex-1 flex flex-col items-center justify-center py-2 min-h-[360px]">
+                  <iframe
+                    title="Mapa Google Maps 2D Villa Rica Cauca"
+                    width="100%"
+                    height="100%"
+                    className="absolute inset-0 w-full h-full rounded-2xl border-0 shadow-inner"
+                    loading="lazy"
+                    allowFullScreen
+                    src={`https://maps.google.com/maps?q=3.1819,-76.4719+(Villa+Rica,+Cauca+-+${encodeURIComponent(filters[C.barrio] || filters[C.zona] || '746+Integrantes+Caracterizados')})&z=14&ie=UTF8&iwloc=B&output=embed`}
+                  />
+                  {/* InfoWindow / Tarjeta flotante interactiva sobre el mapa 2D */}
+                  <div className="absolute top-4 left-4 right-4 sm:right-auto z-10 bg-slate-900/90 backdrop-blur-md text-white p-3 rounded-2xl border border-indigo-500/30 shadow-2xl flex items-center gap-3">
+                    <div className="p-2 bg-indigo-600 rounded-xl shrink-0">
+                      <MapPin size={18} className="text-white animate-bounce" />
+                    </div>
+                    <div>
+                      <h5 className="text-xs font-black uppercase text-indigo-400">Villa Rica, Cauca</h5>
+                      <p className="text-[11px] font-bold text-slate-200">
+                        {filters[C.barrio] || filters[C.zona] ? `Filtro Activo: ${filters[C.barrio] || filters[C.zona]}` : `${totalPersonasHogar} Integrantes en ${rows.length} Hogares`}
+                      </p>
+                      <span className="text-[10px] text-slate-400">Coordenadas: 3.1819° N, 76.4719° W (Zoom 14)</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Leyenda y Guía Oficial de Veredas al pie del mapa */}
+                <div className={`p-3 rounded-xl border text-xs z-10 mt-1 space-y-2 ${
+                  theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="font-extrabold text-[11px] uppercase tracking-wider opacity-80">Leyenda Oficial de Veredas & Corregimiento</span>
+                      <span className="text-[10px] bg-indigo-500/10 text-indigo-500 font-bold px-2 py-0.5 rounded-full border border-indigo-500/20">
+                        {totalPersonasHogar} integrantes (746 pob. total)
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-indigo-500 font-bold hidden sm:inline">Haz clic en una vereda para filtrar</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
+                    <button 
+                      onClick={() => setFilter(C.barrio, 'Vereda Agua Azul')}
+                      className={`flex items-center gap-1.5 p-1.5 rounded-lg font-bold border transition-all cursor-pointer ${
+                        filters[C.barrio] === 'Vereda Agua Azul' ? 'bg-sky-500/20 border-sky-500 text-sky-600' : 'border-transparent opacity-80 hover:opacity-100'
+                      }`}
+                    >
+                      <span className="w-3 h-3 rounded-md bg-[#38bdf8] border border-sky-600 shrink-0" />
+                      <span className="truncate">Vereda Agua Azul</span>
+                    </button>
+
+                    <button 
+                      onClick={() => setFilter(C.barrio, 'Vereda Cantarito')}
+                      className={`flex items-center gap-1.5 p-1.5 rounded-lg font-bold border transition-all cursor-pointer ${
+                        filters[C.barrio] === 'Vereda Cantarito' ? 'bg-cyan-500/20 border-cyan-500 text-cyan-600' : 'border-transparent opacity-80 hover:opacity-100'
+                      }`}
+                    >
+                      <span className="w-3 h-3 rounded-md bg-[#06b6d4] border border-cyan-600 shrink-0" />
+                      <span className="truncate">Vereda Cantarito</span>
+                    </button>
+
+                    <button 
+                      onClick={() => setFilter(C.barrio, 'Vereda Chalo')}
+                      className={`flex items-center gap-1.5 p-1.5 rounded-lg font-bold border transition-all cursor-pointer ${
+                        filters[C.barrio] === 'Vereda Chalo' ? 'bg-pink-500/20 border-pink-500 text-pink-600' : 'border-transparent opacity-80 hover:opacity-100'
+                      }`}
+                    >
+                      <span className="w-3 h-3 rounded-md bg-[#ec4899] border border-pink-600 shrink-0" />
+                      <span className="truncate">Vereda Chalo</span>
+                    </button>
+
+                    <button 
+                      onClick={() => setFilter(C.barrio, 'Vereda La Primavera')}
+                      className={`flex items-center gap-1.5 p-1.5 rounded-lg font-bold border transition-all cursor-pointer ${
+                        filters[C.barrio] === 'Vereda La Primavera' ? 'bg-lime-500/20 border-lime-500 text-lime-600' : 'border-transparent opacity-80 hover:opacity-100'
+                      }`}
+                    >
+                      <span className="w-3 h-3 rounded-md bg-[#84cc16] border border-lime-600 shrink-0" />
+                      <span className="truncate">V. La Primavera</span>
+                    </button>
+
+                    <button 
+                      onClick={() => setFilter(C.barrio, 'Corregimiento Juan Ignacio')}
+                      className={`flex items-center gap-1.5 p-1.5 rounded-lg font-bold border transition-all cursor-pointer ${
+                        filters[C.barrio] === 'Corregimiento Juan Ignacio' ? 'bg-amber-500/20 border-amber-500 text-amber-600' : 'border-transparent opacity-80 hover:opacity-100'
+                      }`}
+                    >
+                      <span className="w-3 h-3 rounded-md bg-[#f59e0b] border border-amber-600 shrink-0" />
+                      <span className="truncate">C. Juan Ignacio</span>
+                    </button>
+
+                    <button 
+                      onClick={() => setFilter(C.zona, 'Cabecera municipal')}
+                      className={`flex items-center gap-1.5 p-1.5 rounded-lg font-bold border transition-all cursor-pointer ${
+                        filters[C.zona] === 'Cabecera municipal' ? 'bg-indigo-500/20 border-indigo-500 text-indigo-600' : 'border-transparent opacity-80 hover:opacity-100'
+                      }`}
+                    >
+                      <span className="w-3 h-3 rounded-md bg-[#6366f1] border border-indigo-600 shrink-0" />
+                      <span className="truncate">Área Urbanizada</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Estadísticas de Distribución Territorial y Filtros de Barrios */}
+              <div className="lg:col-span-5 flex flex-col justify-between space-y-4">
+                {/* Tarjetas resumen Urbana / Rural */}
+                <div className="grid grid-cols-2 gap-3">
+                  {(() => {
+                    const freqsZona = getFrecuencias(C.zona, 10);
+                    const urbanaItem = freqsZona.find(f => {
+                      const n = f.name.toLowerCase();
+                      return n.includes('urbana') || n.includes('cabecera') || n.includes('barrio');
+                    }) || { cantidad: 0, porcentaje: 0, opcion: 'Urbana' };
+
+                    const ruralItem = freqsZona.find(f => {
+                      const n = f.name.toLowerCase();
+                      return n.includes('rural') || n.includes('vereda') || n.includes('campo');
+                    }) || { cantidad: 0, porcentaje: 0, opcion: 'Rural' };
+
+                    return (
+                      <>
+                        <div 
+                          onClick={() => setFilter(C.zona, urbanaItem.opcion || 'Urbana')}
+                          className={`p-4 rounded-2xl border cursor-pointer transition-all ${
+                            filters[C.zona] === (urbanaItem.opcion || 'Urbana')
+                              ? 'bg-indigo-600/20 border-indigo-500 ring-2 ring-indigo-500/30' 
+                              : theme === 'light' ? 'bg-slate-50 border-slate-200 hover:border-indigo-400' : 'bg-slate-800/60 border-slate-700 hover:border-indigo-500/50'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[10px] font-black uppercase text-indigo-500">Cabecera Municipal</span>
+                            <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
+                          </div>
+                          <h5 className="text-sm font-bold">Zona Urbana</h5>
+                          <div className="mt-2 flex items-baseline gap-2">
+                            <span className="text-2xl font-black">{urbanaItem.cantidad}</span>
+                            <span className="text-xs text-indigo-500 font-bold">({urbanaItem.porcentaje}%)</span>
+                          </div>
+                          <p className="text-[10px] opacity-70 mt-1">Encuestados en barrios de la cabecera</p>
+                        </div>
+
+                        <div 
+                          onClick={() => setFilter(C.zona, ruralItem.opcion || 'Rural')}
+                          className={`p-4 rounded-2xl border cursor-pointer transition-all ${
+                            filters[C.zona] === (ruralItem.opcion || 'Rural')
+                              ? 'bg-emerald-600/20 border-emerald-500 ring-2 ring-emerald-500/30' 
+                              : theme === 'light' ? 'bg-slate-50 border-slate-200 hover:border-emerald-400' : 'bg-slate-800/60 border-slate-700 hover:border-emerald-500/50'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-[10px] font-black uppercase text-emerald-500">Veredas y Campos</span>
+                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                          </div>
+                          <h5 className="text-sm font-bold">Zona Rural</h5>
+                          <div className="mt-2 flex items-baseline gap-2">
+                            <span className="text-2xl font-black">{ruralItem.cantidad}</span>
+                            <span className="text-xs text-emerald-500 font-bold">({ruralItem.porcentaje}%)</span>
+                          </div>
+                          <p className="text-[10px] opacity-70 mt-1">Encuestados en veredas y sectores rural</p>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+
+                {/* Lista interactiva de Barrios / Veredas destacados */}
+                <div className={`p-4 rounded-2xl border flex-1 flex flex-col justify-between ${
+                  theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-slate-800/40 border-slate-800'
+                }`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <h5 className="text-xs font-bold uppercase tracking-wider opacity-70">Distribución por Barrio / Vereda</h5>
+                    <span className="text-[10px] text-indigo-500 font-bold">Top 6 Sectores</span>
+                  </div>
+                  <div className="space-y-2">
+                    {getFrecuencias(C.barrio, 6).map((b, idx) => {
+                      const isSelected = filters[C.barrio] === b.opcion;
+                      return (
+                        <div
+                          key={idx}
+                          onClick={() => setFilter(C.barrio, b.opcion)}
+                          className={`flex items-center justify-between p-2.5 rounded-xl text-xs cursor-pointer transition-all ${
+                            isSelected
+                              ? 'bg-indigo-600 text-white font-bold shadow-md'
+                              : theme === 'light' ? 'bg-white hover:bg-slate-200/80 text-slate-800 border border-slate-200/60' : 'bg-slate-900/60 hover:bg-slate-700/60 text-slate-200 border border-slate-800'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <MapPin size={13} className={isSelected ? 'text-white' : 'text-indigo-500'} />
+                            <span className="truncate font-medium" title={b.name}>{b.name}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 font-mono text-[11px] shrink-0 ml-2">
+                            <span className="font-bold">{b.cantidad}</span>
+                            <span className={isSelected ? 'text-indigo-100 text-[10px]' : 'opacity-70 text-[10px]'}>({b.porcentaje}%)</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
           </div>
         </div>
 

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
@@ -11,10 +11,17 @@ export function SessionGuard() {
   const { user, logout } = useAuth();
   const [showWarning, setShowWarning] = useState(false);
   const [countdown, setCountdown] = useState(COUNTDOWN_SECONDS);
+  const showWarningRef = useRef(false);
 
   const warningTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const logoutTimerRef  = useRef<ReturnType<typeof setTimeout> | null>(null);
   const countdownRef    = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Mantener showWarningRef sincronizado con showWarning
+  const updateWarningState = (val: boolean) => {
+    showWarningRef.current = val;
+    setShowWarning(val);
+  };
 
   /** Limpia todos los timers activos */
   const clearAllTimers = useCallback(() => {
@@ -27,12 +34,12 @@ export function SessionGuard() {
   const resetTimer = useCallback(() => {
     if (!user) return;
     clearAllTimers();
-    setShowWarning(false);
+    updateWarningState(false);
     setCountdown(COUNTDOWN_SECONDS);
 
     // Timer de advertencia (13 min)
     warningTimerRef.current = setTimeout(() => {
-      setShowWarning(true);
+      updateWarningState(true);
       setCountdown(COUNTDOWN_SECONDS);
 
       // Contador regresivo visual
@@ -58,15 +65,15 @@ export function SessionGuard() {
   useEffect(() => {
     if (!user) {
       clearAllTimers();
-      setShowWarning(false);
+      updateWarningState(false);
       return;
     }
 
     resetTimer();
 
     const handleActivity = () => {
-      // Solo reinicia si el modal NO está visible
-      if (!showWarning) {
+      // Solo reinicia si el modal NO está visible actualmente
+      if (!showWarningRef.current) {
         resetTimer();
       }
     };
