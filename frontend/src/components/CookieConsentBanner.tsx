@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -26,7 +26,7 @@ export function CookieConsentBanner() {
     localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
     Cookies.set(COOKIE_CONSENT_COOKIE, 'accepted', {
       expires: 365,
-      sameSite: 'Strict',
+      sameSite: 'Lax',
     });
     setVisible(false);
   };

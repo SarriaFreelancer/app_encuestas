@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import Sidebar from '@/components/Sidebar';
+import Footer from '@/components/Footer';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import { fetchApi } from '@/lib/api';
 import { useTheme } from '@/context/ThemeContext';
 import { useSidebar } from '@/context/SidebarContext';
@@ -27,6 +29,9 @@ export default function DashboardPage() {
   const [filters, setFilters] = useState<Record<string, string>>({});
 
   const loadData = async (isInitial = false) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) return;
+
     if (isInitial || respuestas.length === 0) {
       setLoading(true);
     }
@@ -39,7 +44,9 @@ export default function DashboardPage() {
       if (meta?.columnas) setColumnas(meta.columnas);
       if (resp) setRespuestas(resp);
     } catch (e) {
-      console.error('Error cargando datos:', e);
+      if (isInitial) {
+        console.error('Error cargando datos iniciales:', e);
+      }
     } finally {
       setLoading(false);
     }
@@ -498,8 +505,8 @@ export default function DashboardPage() {
     });
 
     return (
-      <div className="flex flex-col xl:flex-row items-center gap-2 py-1 w-full min-w-0">
-        <div className="relative w-20 h-20 sm:w-22 sm:h-22 shrink-0 my-1">
+      <div className="flex flex-col xl:flex-row items-center justify-center gap-2 py-1 w-full min-w-0 my-auto flex-1">
+        <div className="relative w-20 h-20 sm:w-22 sm:h-22 shrink-0 my-auto">
           <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
             {slices.map((slice, i) => {
               const radius = 38;
@@ -532,7 +539,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Leyenda 100% autocontenida y fluida */}
-        <div className="flex-1 space-y-1 w-full min-w-0">
+        <div className="flex-1 space-y-1 w-full min-w-0 my-auto">
           {slices.map((slice, i) => {
             const isSelected = activeVal === slice.opcion;
             return (
@@ -1038,15 +1045,16 @@ export default function DashboardPage() {
   ];
 
   return (
+    <ProtectedRoute>
     <div className={`min-h-screen flex ${theme === 'light' ? 'bg-slate-50 text-slate-900' : 'bg-slate-950 text-slate-100'}`}>
       <Sidebar />
 
-      <main className={`flex-1 p-3 sm:p-5 md:p-6 space-y-6 w-full max-w-full overflow-x-hidden transition-all duration-300 ${
+      <main className={`flex-1 p-3 sm:p-5 md:p-6 space-y-6 w-full transition-all duration-300 ${
         isCollapsed ? 'md:ml-20' : 'md:ml-64'
       }`}>
 
-        {/* CONTENEDOR STICKY: HEADER + BARRA DE FILTROS CÓMODAMENTE FIJOS AL HACER SCROLL */}
-        <div className="sticky top-2 sm:top-4 z-30 space-y-2">
+        {/* CONTENEDOR STICKY: HEADER + BARRA DE FILTROS FIJOS AL HACER SCROLL */}
+        <div className="sticky top-0 z-40 space-y-2 pt-1 pb-1">
           {/* HEADER PRINCIPAL STICKY */}
           <div className={`border rounded-3xl px-4 sm:px-5 py-3.5 shadow-xl flex flex-wrap items-center justify-between gap-3 backdrop-blur-md transition-all ${
             theme === 'light' ? 'bg-white/95 border-slate-200' : 'bg-slate-900/95 border-slate-800'
@@ -1176,7 +1184,7 @@ export default function DashboardPage() {
           {[
             { label: 'Total de Registros', value: rows.length, color: 'text-indigo-500', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20', icon: <Users size={18} /> },
             { label: 'Personas en Hogar', value: totalPersonasHogar || rows.length, color: 'text-pink-500', bg: 'bg-pink-500/10', border: 'border-pink-500/20', icon: <Home size={18} /> },
-            { label: 'Total Global Personas', value: (totalPersonasHogar + rows.length) || rows.length, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20', icon: <Users size={18} /> },
+            { label: 'Total Preguntas', value: columnas.length, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20', icon: <Layers size={18} /> },
             { label: 'Promedio Integrantes', value: avgIntegrantes, color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', icon: <Calculator size={18} /> },
             { label: 'Menores de Edad', value: Math.round(totalMenores), color: 'text-teal-500', bg: 'bg-teal-500/10', border: 'border-teal-500/20', icon: <Star size={18} /> },
             { label: 'Mayores de Edad', value: Math.round(totalMayores), color: 'text-purple-500', bg: 'bg-purple-500/10', border: 'border-purple-500/20', icon: <Users size={18} /> },
@@ -2007,8 +2015,8 @@ export default function DashboardPage() {
           }`}>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
               
-              {/* SVG Mapa Interactivo Limpio y Elegante */}
-              <div className={`lg:col-span-7 flex flex-col justify-between p-5 rounded-2xl border relative overflow-hidden min-h-[380px] ${
+              {/* SVG / Google Maps 2D Interactivo de Villa Rica, Cauca con Selección de Lugar Exclusivo */}
+              <div className={`lg:col-span-7 flex flex-col justify-between p-4 rounded-2xl border relative overflow-hidden min-h-[380px] ${
                 theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-slate-950/80 border-slate-800'
               }`}>
                 {/* Cabecera del Mapa */}
@@ -2018,110 +2026,117 @@ export default function DashboardPage() {
                     <span className="text-xs font-bold uppercase tracking-wider opacity-80">Municipio de Villa Rica (Cauca)</span>
                   </div>
                   <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-500">
-                    Interactivo
+                    Interactivo 2D
                   </span>
                 </div>
                 
                 {/* Google Maps 2D Interactivo de Villa Rica, Cauca */}
-                <div className="relative flex-1 flex flex-col items-center justify-center py-2 min-h-[360px]">
-                  <iframe
-                    title="Mapa Google Maps 2D Villa Rica Cauca"
-                    width="100%"
-                    height="100%"
-                    className="absolute inset-0 w-full h-full rounded-2xl border-0 shadow-inner"
-                    loading="lazy"
-                    allowFullScreen
-                    src={`https://maps.google.com/maps?q=3.1819,-76.4719+(Villa+Rica,+Cauca+-+${encodeURIComponent(filters[C.barrio] || filters[C.zona] || '746+Integrantes+Caracterizados')})&z=14&ie=UTF8&iwloc=B&output=embed`}
-                  />
-                  {/* InfoWindow / Tarjeta flotante interactiva sobre el mapa 2D */}
-                  <div className="absolute top-4 left-4 right-4 sm:right-auto z-10 bg-slate-900/90 backdrop-blur-md text-white p-3 rounded-2xl border border-indigo-500/30 shadow-2xl flex items-center gap-3">
-                    <div className="p-2 bg-indigo-600 rounded-xl shrink-0">
-                      <MapPin size={18} className="text-white animate-bounce" />
-                    </div>
-                    <div>
-                      <h5 className="text-xs font-black uppercase text-indigo-400">Villa Rica, Cauca</h5>
-                      <p className="text-[11px] font-bold text-slate-200">
-                        {filters[C.barrio] || filters[C.zona] ? `Filtro Activo: ${filters[C.barrio] || filters[C.zona]}` : `${totalPersonasHogar} Integrantes en ${rows.length} Hogares`}
-                      </p>
-                      <span className="text-[10px] text-slate-400">Coordenadas: 3.1819° N, 76.4719° W (Zoom 14)</span>
-                    </div>
-                  </div>
+                <div className="relative flex-1 flex flex-col items-center justify-center py-1 min-h-[350px]">
+                  {(() => {
+                    // Mapa de coordenadas dinámicas por leyenda/sector
+                    const coords: Record<string, { lat: number; lng: number; zoom: number }> = {
+                      'Vereda Agua Azul': { lat: 3.1650, lng: -76.4580, zoom: 15 },
+                      'Vereda Cantarito': { lat: 3.2050, lng: -76.4750, zoom: 15 },
+                      'Vereda Chalo': { lat: 3.1950, lng: -76.4650, zoom: 15 },
+                      'Vereda La Primavera': { lat: 3.2000, lng: -76.4520, zoom: 15 },
+                      'Corregimiento Juan Ignacio': { lat: 3.2120, lng: -76.4820, zoom: 15 },
+                      'Cabecera municipal': { lat: 3.1819, lng: -76.4719, zoom: 15 },
+                      'Área Urbanizada': { lat: 3.1819, lng: -76.4719, zoom: 15 }
+                    };
+
+                    const activeKey = filters[C.barrio] || filters[C.zona] || '';
+                    const currentTarget = coords[activeKey] || { lat: 3.1819, lng: -76.4719, zoom: 14 };
+
+                    return (
+                      <>
+                        <iframe
+                          key={`${currentTarget.lat}-${currentTarget.lng}-${activeKey}`}
+                          title="Mapa Google Maps 2D Villa Rica Cauca"
+                          width="100%"
+                          height="100%"
+                          className="absolute inset-0 w-full h-full rounded-2xl border-0 shadow-inner"
+                          loading="lazy"
+                          allowFullScreen
+                          src={`https://maps.google.com/maps?q=${currentTarget.lat},${currentTarget.lng}+(${encodeURIComponent(activeKey || 'Villa+Rica+Cauca')})&z=${currentTarget.zoom}&ie=UTF8&iwloc=B&output=embed`}
+                        />
+                        {/* InfoWindow / Tarjeta flotante interactiva reducida y compacta */}
+                        <div className="absolute top-2 left-2 z-10 bg-slate-950/90 backdrop-blur-md text-white px-2.5 py-1.5 rounded-xl border border-indigo-500/40 shadow-xl flex items-center gap-2 max-w-[260px]">
+                          <div className="p-1 bg-indigo-600 rounded-lg shrink-0">
+                            <MapPin size={13} className="text-white animate-bounce" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h5 className="text-[10px] font-black uppercase text-indigo-400 truncate">VILLA RICA, CAUCA</h5>
+                            <p className="text-[10px] font-bold text-slate-100 truncate">
+                              {activeKey ? `Filtro Activo: ${activeKey}` : `${totalPersonasHogar} Integrantes (${rows.length} Encuestados)`}
+                            </p>
+                            <span className="text-[8px] text-slate-400 block font-mono leading-none">
+                              {currentTarget.lat}° N, {currentTarget.lng}° W (z{currentTarget.zoom})
+                            </span>
+                          </div>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
 
                 {/* Leyenda y Guía Oficial de Veredas al pie del mapa */}
-                <div className={`p-3 rounded-xl border text-xs z-10 mt-1 space-y-2 ${
+                <div className={`p-2.5 rounded-xl border text-xs z-10 mt-1 space-y-1.5 ${
                   theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
                 }`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="font-extrabold text-[11px] uppercase tracking-wider opacity-80">Leyenda Oficial de Veredas & Corregimiento</span>
-                      <span className="text-[10px] bg-indigo-500/10 text-indigo-500 font-bold px-2 py-0.5 rounded-full border border-indigo-500/20">
-                        {totalPersonasHogar} integrantes (746 pob. total)
+                      <span className="font-extrabold text-[10px] uppercase tracking-wider opacity-80">Leyenda Oficial de Veredas & Corregimiento</span>
+                      <span className="text-[9px] bg-indigo-500/10 text-indigo-500 font-bold px-2 py-0.5 rounded-full border border-indigo-500/20">
+                        {totalPersonasHogar > 0 ? `${totalPersonasHogar} personas (${rows.length} encuestados)` : '746 personas (746 pob. total)'}
                       </span>
                     </div>
-                    <span className="text-[10px] text-indigo-500 font-bold hidden sm:inline">Haz clic en una vereda para filtrar</span>
+                    <span className="text-[9px] text-indigo-500 font-bold hidden sm:inline">Toca una leyenda para ubicar</span>
                   </div>
                   
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
-                    <button 
-                      onClick={() => setFilter(C.barrio, 'Vereda Agua Azul')}
-                      className={`flex items-center gap-1.5 p-1.5 rounded-lg font-bold border transition-all cursor-pointer ${
-                        filters[C.barrio] === 'Vereda Agua Azul' ? 'bg-sky-500/20 border-sky-500 text-sky-600' : 'border-transparent opacity-80 hover:opacity-100'
-                      }`}
-                    >
-                      <span className="w-3 h-3 rounded-md bg-[#38bdf8] border border-sky-600 shrink-0" />
-                      <span className="truncate">Vereda Agua Azul</span>
-                    </button>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-[11px]">
+                    {[
+                      { name: 'Vereda Agua Azul', col: C.barrio, val: 'Agua Azul', color: '#38bdf8' },
+                      { name: 'Vereda Cantarito', col: C.barrio, val: 'Cantarito', color: '#06b6d4' },
+                      { name: 'Vereda Chalo', col: C.barrio, val: 'Chalo', color: '#ec4899' },
+                      { name: 'V. La Primavera', col: C.barrio, val: 'La Primavera', color: '#84cc16' },
+                      { name: 'C. Juan Ignacio', col: C.barrio, val: 'Juan Ignacio', color: '#f59e0b' },
+                      { name: 'Área Urbanizada', col: C.zona, val: 'Cabecera municipal', color: '#6366f1' },
+                    ].map((item, idx) => {
+                      // Buscar coincidencia flexible en las respuestas reales del dataset
+                      const matchingOpt = item.col ? opts(item.col).find(o => o.toLowerCase().includes(item.val.toLowerCase())) || item.val : item.val;
+                      const isSelected = filters[item.col] === matchingOpt || (filters[item.col] && filters[item.col].toLowerCase().includes(item.val.toLowerCase()));
+                      
+                      // Alternar filtro territorial desmarcando automáticamente cualquier selección previa
+                      const handleToggleLegend = () => {
+                        setFilters(prev => {
+                          const next = { ...prev };
+                          if (isSelected) {
+                            delete next[C.zona];
+                            delete next[C.barrio];
+                          } else {
+                            delete next[C.zona];
+                            delete next[C.barrio];
+                            next[item.col] = matchingOpt;
+                          }
+                          return next;
+                        });
+                      };
 
-                    <button 
-                      onClick={() => setFilter(C.barrio, 'Vereda Cantarito')}
-                      className={`flex items-center gap-1.5 p-1.5 rounded-lg font-bold border transition-all cursor-pointer ${
-                        filters[C.barrio] === 'Vereda Cantarito' ? 'bg-cyan-500/20 border-cyan-500 text-cyan-600' : 'border-transparent opacity-80 hover:opacity-100'
-                      }`}
-                    >
-                      <span className="w-3 h-3 rounded-md bg-[#06b6d4] border border-cyan-600 shrink-0" />
-                      <span className="truncate">Vereda Cantarito</span>
-                    </button>
-
-                    <button 
-                      onClick={() => setFilter(C.barrio, 'Vereda Chalo')}
-                      className={`flex items-center gap-1.5 p-1.5 rounded-lg font-bold border transition-all cursor-pointer ${
-                        filters[C.barrio] === 'Vereda Chalo' ? 'bg-pink-500/20 border-pink-500 text-pink-600' : 'border-transparent opacity-80 hover:opacity-100'
-                      }`}
-                    >
-                      <span className="w-3 h-3 rounded-md bg-[#ec4899] border border-pink-600 shrink-0" />
-                      <span className="truncate">Vereda Chalo</span>
-                    </button>
-
-                    <button 
-                      onClick={() => setFilter(C.barrio, 'Vereda La Primavera')}
-                      className={`flex items-center gap-1.5 p-1.5 rounded-lg font-bold border transition-all cursor-pointer ${
-                        filters[C.barrio] === 'Vereda La Primavera' ? 'bg-lime-500/20 border-lime-500 text-lime-600' : 'border-transparent opacity-80 hover:opacity-100'
-                      }`}
-                    >
-                      <span className="w-3 h-3 rounded-md bg-[#84cc16] border border-lime-600 shrink-0" />
-                      <span className="truncate">V. La Primavera</span>
-                    </button>
-
-                    <button 
-                      onClick={() => setFilter(C.barrio, 'Corregimiento Juan Ignacio')}
-                      className={`flex items-center gap-1.5 p-1.5 rounded-lg font-bold border transition-all cursor-pointer ${
-                        filters[C.barrio] === 'Corregimiento Juan Ignacio' ? 'bg-amber-500/20 border-amber-500 text-amber-600' : 'border-transparent opacity-80 hover:opacity-100'
-                      }`}
-                    >
-                      <span className="w-3 h-3 rounded-md bg-[#f59e0b] border border-amber-600 shrink-0" />
-                      <span className="truncate">C. Juan Ignacio</span>
-                    </button>
-
-                    <button 
-                      onClick={() => setFilter(C.zona, 'Cabecera municipal')}
-                      className={`flex items-center gap-1.5 p-1.5 rounded-lg font-bold border transition-all cursor-pointer ${
-                        filters[C.zona] === 'Cabecera municipal' ? 'bg-indigo-500/20 border-indigo-500 text-indigo-600' : 'border-transparent opacity-80 hover:opacity-100'
-                      }`}
-                    >
-                      <span className="w-3 h-3 rounded-md bg-[#6366f1] border border-indigo-600 shrink-0" />
-                      <span className="truncate">Área Urbanizada</span>
-                    </button>
+                      return (
+                        <button 
+                          key={idx}
+                          onClick={handleToggleLegend}
+                          className={`flex items-center gap-1.5 p-1.5 rounded-lg font-bold border transition-all cursor-pointer text-left ${
+                            isSelected 
+                              ? 'bg-indigo-500/20 border-indigo-500 text-indigo-600 shadow-sm ring-1 ring-indigo-500/30' 
+                              : 'border-transparent opacity-85 hover:opacity-100'
+                          }`}
+                        >
+                          <span className="w-2.5 h-2.5 rounded-md shrink-0 border" style={{ backgroundColor: item.color, borderColor: item.color }} />
+                          <span className="truncate text-[11px]">{item.name}</span>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -2131,23 +2146,54 @@ export default function DashboardPage() {
                 {/* Tarjetas resumen Urbana / Rural */}
                 <div className="grid grid-cols-2 gap-3">
                   {(() => {
-                    const freqsZona = getFrecuencias(C.zona, 10);
-                    const urbanaItem = freqsZona.find(f => {
-                      const n = f.name.toLowerCase();
-                      return n.includes('urbana') || n.includes('cabecera') || n.includes('barrio');
-                    }) || { cantidad: 0, porcentaje: 0, opcion: 'Urbana' };
+                    // Contar encuestados e integrantes por Zona (Cabecera vs Rural)
+                    let cantUrbanaEnc = 0;
+                    let cantUrbanaHogar = 0;
+                    let cantRuralEnc = 0;
+                    let cantRuralHogar = 0;
 
-                    const ruralItem = freqsZona.find(f => {
-                      const n = f.name.toLowerCase();
-                      return n.includes('rural') || n.includes('vereda') || n.includes('campo');
-                    }) || { cantidad: 0, porcentaje: 0, opcion: 'Rural' };
+                    rows.forEach(r => {
+                      const zVal = s(r[C.zona]).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                      const nHogar = Math.max(1, parseFloat(s(r[C.hogar])) || 1);
+                      if (zVal.includes('cabecera') || zVal.includes('urbana') || zVal.includes('barrio')) {
+                        cantUrbanaEnc += 1;
+                        cantUrbanaHogar += nHogar;
+                      } else {
+                        cantRuralEnc += 1;
+                        cantRuralHogar += nHogar;
+                      }
+                    });
+
+                    const baseEnc = rows.length || 1;
+                    const porcUrbana = Number(((cantUrbanaEnc / baseEnc) * 100).toFixed(1));
+                    const porcRural = Number(((cantRuralEnc / baseEnc) * 100).toFixed(1));
+
+                    const isUrbanaActive = filters[C.zona] && (filters[C.zona].toLowerCase().includes('cabecera') || filters[C.zona].toLowerCase().includes('urbana'));
+                    const isRuralActive = filters[C.zona] && (filters[C.zona].toLowerCase().includes('rural') || filters[C.zona].toLowerCase().includes('vereda'));
+
+                    const toggleZona = (zonaVal: string) => {
+                      setFilters(prev => {
+                        const next = { ...prev };
+                        const currentZ = s(prev[C.zona]).toLowerCase();
+                        if (currentZ.includes(zonaVal.toLowerCase())) {
+                          delete next[C.zona];
+                          delete next[C.barrio];
+                        } else {
+                          const matchedOpt = opts(C.zona).find(o => o.toLowerCase().includes(zonaVal.toLowerCase())) || zonaVal;
+                          delete next[C.zona];
+                          delete next[C.barrio];
+                          next[C.zona] = matchedOpt;
+                        }
+                        return next;
+                      });
+                    };
 
                     return (
                       <>
                         <div 
-                          onClick={() => setFilter(C.zona, urbanaItem.opcion || 'Urbana')}
+                          onClick={() => toggleZona('cabecera')}
                           className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                            filters[C.zona] === (urbanaItem.opcion || 'Urbana')
+                            isUrbanaActive
                               ? 'bg-indigo-600/20 border-indigo-500 ring-2 ring-indigo-500/30' 
                               : theme === 'light' ? 'bg-slate-50 border-slate-200 hover:border-indigo-400' : 'bg-slate-800/60 border-slate-700 hover:border-indigo-500/50'
                           }`}
@@ -2158,16 +2204,16 @@ export default function DashboardPage() {
                           </div>
                           <h5 className="text-sm font-bold">Zona Urbana</h5>
                           <div className="mt-2 flex items-baseline gap-2">
-                            <span className="text-2xl font-black">{urbanaItem.cantidad}</span>
-                            <span className="text-xs text-indigo-500 font-bold">({urbanaItem.porcentaje}%)</span>
+                            <span className="text-2xl font-black">{cantUrbanaEnc}</span>
+                            <span className="text-xs text-indigo-500 font-bold">({porcUrbana}%)</span>
                           </div>
-                          <p className="text-[10px] opacity-70 mt-1">Encuestados en barrios de la cabecera</p>
+                          <p className="text-[10px] opacity-70 mt-1">{cantUrbanaHogar} pob. en barrios cabecera</p>
                         </div>
 
                         <div 
-                          onClick={() => setFilter(C.zona, ruralItem.opcion || 'Rural')}
+                          onClick={() => toggleZona('rural')}
                           className={`p-4 rounded-2xl border cursor-pointer transition-all ${
-                            filters[C.zona] === (ruralItem.opcion || 'Rural')
+                            isRuralActive
                               ? 'bg-emerald-600/20 border-emerald-500 ring-2 ring-emerald-500/30' 
                               : theme === 'light' ? 'bg-slate-50 border-slate-200 hover:border-emerald-400' : 'bg-slate-800/60 border-slate-700 hover:border-emerald-500/50'
                           }`}
@@ -2178,10 +2224,10 @@ export default function DashboardPage() {
                           </div>
                           <h5 className="text-sm font-bold">Zona Rural</h5>
                           <div className="mt-2 flex items-baseline gap-2">
-                            <span className="text-2xl font-black">{ruralItem.cantidad}</span>
-                            <span className="text-xs text-emerald-500 font-bold">({ruralItem.porcentaje}%)</span>
+                            <span className="text-2xl font-black">{cantRuralEnc}</span>
+                            <span className="text-xs text-emerald-500 font-bold">({porcRural}%)</span>
                           </div>
-                          <p className="text-[10px] opacity-70 mt-1">Encuestados en veredas y sectores rural</p>
+                          <p className="text-[10px] opacity-70 mt-1">{cantRuralHogar} pob. en veredas y campos</p>
                         </div>
                       </>
                     );
@@ -2194,15 +2240,29 @@ export default function DashboardPage() {
                 }`}>
                   <div className="flex items-center justify-between mb-3">
                     <h5 className="text-xs font-bold uppercase tracking-wider opacity-70">Distribución por Barrio / Vereda</h5>
-                    <span className="text-[10px] text-indigo-500 font-bold">Top 6 Sectores</span>
+                    <span className="text-[10px] text-indigo-500 font-bold">Submuestra ({rows.length} encuestados)</span>
                   </div>
                   <div className="space-y-2">
                     {getFrecuencias(C.barrio, 6).map((b, idx) => {
                       const isSelected = filters[C.barrio] === b.opcion;
+                      const toggleBarrio = () => {
+                        setFilters(prev => {
+                          const next = { ...prev };
+                          if (prev[C.barrio] === b.opcion) {
+                            delete next[C.barrio];
+                          } else {
+                            delete next[C.zona];
+                            delete next[C.barrio];
+                            next[C.barrio] = b.opcion;
+                          }
+                          return next;
+                        });
+                      };
+
                       return (
                         <div
                           key={idx}
-                          onClick={() => setFilter(C.barrio, b.opcion)}
+                          onClick={toggleBarrio}
                           className={`flex items-center justify-between p-2.5 rounded-xl text-xs cursor-pointer transition-all ${
                             isSelected
                               ? 'bg-indigo-600 text-white font-bold shadow-md'
@@ -2229,6 +2289,8 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Footer Copyright */}
+        <Footer className="mt-8 pt-6" />
       </main>
 
       {/* PANEL DE FILTROS LATERAL */}
@@ -2294,5 +2356,6 @@ export default function DashboardPage() {
         </div>
       )}
     </div>
+    </ProtectedRoute>
   );
 }

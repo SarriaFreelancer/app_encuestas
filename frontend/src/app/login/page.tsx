@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -100,6 +100,7 @@ export default function LoginPage() {
               <input
                 type="text"
                 required
+                autoComplete="username"
                 value={usuario}
                 onChange={(e) => setUsuario(e.target.value)}
                 placeholder="ej. admin o admin@encuestas.com"
@@ -117,6 +118,7 @@ export default function LoginPage() {
               <input
                 type="password"
                 required
+                autoComplete="current-password"
                 value={contrasena}
                 onChange={(e) => setContrasena(e.target.value)}
                 placeholder="••••••••"
@@ -147,10 +149,13 @@ export default function LoginPage() {
           </p>
           <Link
             href="/privacidad"
-            className="text-xs text-slate-600 hover:text-indigo-400 transition-colors underline underline-offset-2"
+            className="text-xs text-slate-600 hover:text-indigo-400 transition-colors underline underline-offset-2 block"
           >
             Política de privacidad y cookies
           </Link>
+          <p className="text-[11px] text-slate-400 font-medium pt-2 border-t border-slate-800/60 mt-2">
+            Desarrollado por <span className="font-bold text-indigo-400">SarriaTech Solutions S.A.S</span>
+          </p>
         </div>
       </div>
     </div>

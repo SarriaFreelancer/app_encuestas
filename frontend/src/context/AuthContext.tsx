@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -27,7 +27,7 @@ function setStoredToken(token: string) {
   localStorage.setItem('token', token);
   Cookies.set(SESSION_COOKIE_NAME, token, {
     expires: SESSION_COOKIE_DAYS,
-    sameSite: 'Strict',
+    sameSite: 'Lax',
     secure: window.location.protocol === 'https:',
   });
 }

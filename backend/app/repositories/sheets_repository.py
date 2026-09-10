@@ -185,18 +185,34 @@ class PermissiveSheetsRepository(BaseRepository):
         except Exception as e:
             print(f"[Google Apps Script Webhook Error]: {e}")
 
+    _is_syncing = False
+
     def _sync_with_google_sheets(self, force: bool = False):
         import time
-        import urllib.request
-        import csv
-        import io
+        import threading
 
         now = time.time()
         if not force and (now - PermissiveSheetsRepository._last_sync_time < PermissiveSheetsRepository._sync_interval):
             return
 
+        if PermissiveSheetsRepository._is_syncing:
+            return
+
         PermissiveSheetsRepository._last_sync_time = now
 
+        # Si el archivo local existe, ejecutar la sincronización en segundo plano sin bloquear la API
+        if os.path.exists(RESPONSES_FILE) and not force:
+            thread = threading.Thread(target=self._do_sync_google_sheets, daemon=True)
+            thread.start()
+        else:
+            self._do_sync_google_sheets()
+
+    def _do_sync_google_sheets(self):
+        import urllib.request
+        import csv
+        import io
+
+        PermissiveSheetsRepository._is_syncing = True
         try:
             req = urllib.request.Request(self.GOOGLE_SHEETS_CSV_URL, headers={'User-Agent': 'Mozilla/5.0'})
             with urllib.request.urlopen(req, timeout=8) as response:
@@ -283,6 +299,8 @@ class PermissiveSheetsRepository(BaseRepository):
         except Exception as e:
             # Si no hay internet o falla la petición temporalmente, continúa con la caché local
             pass
+        finally:
+            PermissiveSheetsRepository._is_syncing = False
 
     def get_headers(self, sheet_name: str = "RESPUESTAS") -> List[str]:
         self._sync_with_google_sheets()

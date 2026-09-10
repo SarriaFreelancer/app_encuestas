@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import React from 'react';
 import Link from 'next/link';
@@ -155,9 +155,12 @@ export default function PrivacidadPage() {
           </div>
         </div>
 
-        <p className="text-center text-xs text-slate-600 pb-4">
-          © {new Date().getFullYear()} {APP_NAME} — Uso interno exclusivo
-        </p>
+        <div className="text-center text-xs text-slate-500 pb-4 space-y-1">
+          <p>© {new Date().getFullYear()} {APP_NAME} — Uso interno exclusivo</p>
+          <p className="text-[11px] text-slate-400 font-medium">
+            Desarrollado por <span className="font-bold text-indigo-400">SarriaTech Solutions S.A.S</span>
+          </p>
+        </div>
       </div>
     </div>
   );

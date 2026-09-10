@@ -16,60 +16,75 @@ Sistema web full-stack moderno, interactivo y responsivo para el procesamiento, 
 
 | Rol | Usuario | Contraseña | Permisos |
 |---|---|---|---|
-| **Super Admin** | `superadmin` | `superadmin123` | Control total, crear/editar/eliminar admins y usuarios. |
+| **Super Admin** | `superadmin` | `superadmin123` | Control total, crear/editar/eliminar admins y usuarios, módulos avanzados. |
 | **Admin** | `admin` | `admin123` | Gestión de encuestas, crear/editar/eliminar operadores. |
 | **Operador** | `usuario1` | `admin123` | Visualización, toma de encuestas, consultas. |
 
 ---
 
-## 🚀 Guía Paso a Paso para Ejecución Local (Puerto 3007) y Exposición con Ngrok
+## 🚀 Guía de Inicio para Levantar los Servidores (Backend y Frontend)
 
-Sigue estos sencillos pasos desde la terminal de **Visual Studio Code** (`Ctrl + \``):
+El proyecto está estructurado en dos carpetas independientes:
+- `backend/`: API en Python con FastAPI (Puerto `8000`).
+- `frontend/`: Aplicación web en Next.js (Puerto `3007`).
 
-### 1️⃣ Paso 1: Iniciar el Servidor Backend (FastAPI - Puerto 8000)
+---
 
-Abre la primera pestaña de terminal en VS Code y ejecuta:
+### ⚡ Opción A: Levantar Todo Automáticamente (Recomendado)
+
+En la raíz del proyecto existe un script de PowerShell que monitorea y mantiene vivos ambos servicios de forma continua:
+
+Abre PowerShell en la raíz del proyecto (`app_encuentas`) y ejecuta:
 
 ```powershell
-# 1. Ir a la carpeta backend
+.\start_services.ps1
+```
+
+> 🟢 **Backend:** `http://127.0.0.1:8000`  
+> 🟢 **Frontend:** `http://localhost:3007`
+
+---
+
+### 💻 Opción B: Levantar Servidores Manualmente por Consola
+
+Abre dos pestañas de terminal en tu editor (ej. Visual Studio Code con `Ctrl + ~`):
+
+#### 1️⃣ Terminal 1: Iniciar Servidor Backend (FastAPI - Puerto 8000)
+
+```powershell
+# 1. Ingresar a la carpeta del backend
 cd backend
 
 # 2. Activar el entorno virtual de Python
 .\venv\Scripts\activate
 
-# 3. Iniciar el servidor FastAPI
-python -m uvicorn app.main:app --reload --port 8000
+# 3. Levantar el servidor Uvicorn (FastAPI)
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 ```
-> 🟢 **Backend activo en:** `http://127.0.0.1:8000` (Documentación Swagger en `http://127.0.0.1:8000/docs`)
+> 🟢 **Documentación interactiva de la API (Swagger):** `http://127.0.0.1:8000/docs`
 
 ---
 
-### 2️⃣ Paso 2: Iniciar el Servidor Frontend (Next.js - Puerto 3007)
-
-Abre una **segunda pestaña de terminal** (icono `+` en la esquina de la consola) y ejecuta:
+#### 2️⃣ Terminal 2: Iniciar Servidor Frontend (Next.js - Puerto 3007)
 
 ```powershell
-# 1. Ir a la carpeta frontend
+# 1. Ingresar a la carpeta del frontend
 cd frontend
 
-# 2. Iniciar el servidor Next.js en el puerto 3007
-npm run dev:3007
+# 2. Iniciar el servidor de desarrollo de Next.js en el puerto 3007
+npm run dev:3008
 ```
-> *(Alternativa: `npm run dev -- -p 3007`)*  
-> 🟢 **Frontend activo en:** `http://localhost:3007`
+> *(Alternativa de comando directo: `npm run dev -- -p 3008`)*  
+> 🟢 **Plataforma web activa en:** `http://localhost:3007`
 
 ---
 
-### 3️⃣ Paso 3: Exponer a Internet con Ngrok desde Visual Studio Code
+### 🌐 Opción C: Exponer a Internet con Ngrok
 
-Abre una **tercera pestaña de terminal** y ejecuta cualquiera de estas dos opciones:
+Para probar en dispositivos móviles o compartir con tu equipo a través de un enlace público:
 
-#### Opción A (Si ya tienes ngrok instalado):
-```powershell
-ngrok http 3007
-```
+Abre una **tercera pestaña de terminal** y ejecuta:
 
-#### Opción B (Usando npx sin instalar nada global):
 ```powershell
 npx ngrok http 3007
 ```
@@ -79,7 +94,26 @@ npx ngrok http 3007
 Forwarding: https://abc1-201-244-10-5.ngrok-free.app -> http://localhost:3007
 ```
 
-Copia ese enlace `https://...` y ábrelo desde cualquier dispositivo, celular o compártelo con tu equipo.
+---
+
+## ❓ Solución de Problemas Comunes
+
+### ❌ Error `npm error code ENOENT: Could not read package.json`
+- **Causa:** Intentaste ejecutar `npm run dev` en la raíz del proyecto (`app_encuentas`) donde no hay un `package.json`.
+- **Solución:** Debes ingresar a la carpeta `frontend` primero:
+  ```powershell
+  cd frontend
+  npm run dev:3007
+  ```
+  O usar desde la raíz: `npm run dev --prefix frontend -- -p 3007`
+
+### ❌ Error `[WinError 10013] Intento de acceso a un socket no permitido`
+- **Causa:** El puerto `8000` ya está en uso por un proceso previo o `0.0.0.0` requiere permisos elevados en Windows.
+- **Solución 1:** Ejecuta la aplicación usando `--host 127.0.0.1` en lugar de `0.0.0.0`.
+- **Solución 2:** Para cerrar cualquier proceso previo escuchando en el puerto `8000`, ejecuta en PowerShell:
+  ```powershell
+  Stop-Process -Id (Get-NetTCPConnection -LocalPort 8000).OwningProcess -Force
+  ```
 
 ---
 
@@ -96,10 +130,13 @@ Copia ese enlace `https://...` y ábrelo desde cualquier dispositivo, celular o 
 2. **Diseño Responsivo y Temas:**
    - **Modo Claro / Modo Oscuro** con guardado de preferencias en `localStorage`.
    - **Menú lateral minimizable (`<< Contraer menú` / `>>`)** para ganar espacio visual en monitores o modo drawer en móviles.
+   - Marca de agua y copyright **Desarrollado por SarriaTech Solutions S.A.S**.
 
 3. **Gestión de Usuarios (CRUD):**
    - Creación, edición de roles, cambio de contraseñas y desactivación/eliminación de usuarios.
-   - Protección con máscara para que los administradores no detecten la presencia de la cuenta Super Admin.
 
-4. **Depuración Automática de Datos:**
+4. **Centro de Reportes y Exportación:**
+   - Exportación directa de respuestas a formato CSV compatible con Excel y Power BI.
+
+5. **Depuración Automática de Datos:**
    - Omisión inteligente de filas 100% vacías, conservando campos vacíos en filas con datos válidos.

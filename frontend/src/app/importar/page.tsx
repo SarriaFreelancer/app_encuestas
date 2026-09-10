@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import Sidebar from '@/components/Sidebar';
+import Footer from '@/components/Footer';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import { fetchApi } from '@/lib/api';
 import { useTheme } from '@/context/ThemeContext';
 import { useSidebar } from '@/context/SidebarContext';
@@ -83,6 +85,7 @@ export default function ImportarEncuestaPage() {
   };
 
   return (
+    <ProtectedRoute>
     <div className={`min-h-screen transition-colors ${
       theme === 'light' ? 'bg-slate-50 text-slate-900' : 'bg-slate-950 text-slate-100'
     }`}>
@@ -297,7 +300,9 @@ export default function ImportarEncuestaPage() {
             </button>
           </div>
         )}
+        <Footer className="mt-8 pt-6" />
       </main>
     </div>
+    </ProtectedRoute>
   );
 }

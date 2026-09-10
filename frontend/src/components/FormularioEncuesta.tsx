@@ -500,10 +500,20 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
 
   if (isPublic) {
     return (
-      <main className={`min-h-screen p-4 sm:p-8 ${
+      <main className={`min-h-screen p-4 sm:p-8 flex flex-col justify-between ${
         theme === 'light' ? 'bg-slate-50 text-slate-900' : 'bg-slate-950 text-slate-100'
       }`}>
-        {formBody}
+        <div className="flex-1">{formBody}</div>
+        <footer className={`mt-8 py-4 text-center text-xs border-t ${
+          theme === 'light' ? 'text-slate-500 border-slate-200' : 'text-slate-400 border-slate-800'
+        }`}>
+          <p className="font-medium">
+            Desarrollado por{' '}
+            <span className={`font-bold ${theme === 'light' ? 'text-indigo-600' : 'text-indigo-400'}`}>
+              SarriaTech Solutions S.A.S
+            </span>
+          </p>
+        </footer>
       </main>
     );
   }

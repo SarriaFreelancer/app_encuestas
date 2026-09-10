@@ -188,6 +188,31 @@ export default function Sidebar() {
             <LogOut size={18} className="shrink-0" />
             {!isCollapsed && <span className="truncate">Cerrar sesión</span>}
           </button>
+
+          {/* Copyright */}
+          <div className={`pt-2 mt-1 border-t text-center ${
+            theme === 'light' ? 'border-slate-200/80' : 'border-slate-800/80'
+          }`}>
+            {isCollapsed && !isOpenMobile ? (
+              <span 
+                className={`text-[9px] font-extrabold tracking-wider block ${
+                  theme === 'light' ? 'text-slate-400' : 'text-slate-500'
+                }`}
+                title="Desarrollado por SarriaTech Solutions S.A.S"
+              >
+                STS
+              </span>
+            ) : (
+              <p className={`text-[10px] font-medium leading-tight ${
+                theme === 'light' ? 'text-slate-500' : 'text-slate-400'
+              }`}>
+                Desarrollado por{' '}
+                <span className={`font-bold ${theme === 'light' ? 'text-indigo-600' : 'text-indigo-400'}`}>
+                  SarriaTech Solutions S.A.S
+                </span>
+              </p>
+            )}
+          </div>
         </div>
       </aside>
     </>

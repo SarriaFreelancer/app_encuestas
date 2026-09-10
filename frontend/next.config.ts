@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
     '*.ngrok-free.app',
     '*.ngrok.app',
     'localhost:3007',
+    'localhost:3008',
   ],
   async rewrites() {
     return [
