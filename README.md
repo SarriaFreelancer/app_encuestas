@@ -47,11 +47,14 @@ Consiste en alojar el sistema en un **Hosting / Servidor Web en la nube**, permi
 
 ## 👥 Credenciales de Acceso por Defecto
 
+El sistema incluye únicamente 4 cuentas de acceso predeterminadas:
+
 | Rol | Usuario | Contraseña | Permisos |
 |---|---|---|---|
-| **Super Admin** | `superadmin` | `superadmin123` | Control total, crear/editar/eliminar admins y usuarios, módulos avanzados (Cruce, IA, Auditoría). |
-| **Admin** | `admin` | `admin123` | Gestión de encuestas, visualizar respuestas, crear/editar operadores. |
-| **Operador** | `usuario1` | `admin123` | Visualización, registro de encuestas y consultas. |
+| **Super Admin** | `superadmin` | `superadmin123` | Control total del sistema, incluyendo el módulo exclusivo de **Habilitar / Configurar Módulos**, además de administración completa de usuarios y base de datos. |
+| **Administrador** | `admin` | `admin123` | Acceso completo a eliminación de encuestas, gestión/creación/edición/eliminación de usuarios, Análisis cruzado, Consulta IA, Auditoría y Reportes (Todas las funciones excepto Habilitar/Configurar Módulos). |
+| **Operador 1** | `Usuario1` | `Usuario345*` | Registro de encuestas, búsqueda de personas y visualización general de respuestas. |
+| **Operador 2** | `Usuario2` | `Usuario789*` | Registro de encuestas, búsqueda de personas y visualización general de respuestas. |
 
 ---
 

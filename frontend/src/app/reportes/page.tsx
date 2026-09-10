@@ -38,7 +38,7 @@ export default function ReportesPage() {
         csvRows.push(values.join(','));
       }
 
-      const csvString = csvRows.join('\n');
+      const csvString = '\uFEFF' + csvRows.join('\n');
       const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');

@@ -9,7 +9,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { useSidebar } from '@/context/SidebarContext';
 import { showErrorAlert } from '@/lib/alerts';
 import { AIQueryResponse } from '@/types';
-import { Bot, Send, Sparkles, Loader2, Database } from 'lucide-react';
+import { Bot, Send, Loader2, Database } from 'lucide-react';
 
 export default function ConsultaIAPage() {
   const { theme } = useTheme();
@@ -45,7 +45,7 @@ export default function ConsultaIAPage() {
   };
 
   return (
-    <ProtectedRoute requireSuperAdmin>
+    <ProtectedRoute requireAdmin>
     <div className={`min-h-screen transition-colors ${
       theme === 'light' ? 'bg-slate-50 text-slate-900' : 'bg-slate-950 text-slate-100'
     }`}>
@@ -57,7 +57,7 @@ export default function ConsultaIAPage() {
         {/* Header */}
         <div className={`border-b pb-6 ${theme === 'light' ? 'border-slate-200' : 'border-slate-800'}`}>
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 rounded-full text-xs font-semibold mb-3">
-            <Sparkles size={14} /> Módulo Preparado para IA
+            <Bot size={14} /> Módulo Preparado para IA
           </div>
           <h1 className={`text-3xl font-extrabold tracking-tight ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>
             Consulta Inteligente

@@ -28,10 +28,10 @@ export default function Sidebar() {
     { label: 'Reportes', href: '/reportes', icon: FileText },
     { label: 'Nueva encuesta', href: '/encuesta/nueva', icon: FilePlus },
     { label: 'Usuarios', href: '/usuarios', icon: Users, adminOnly: true },
-    // Módulos exclusivos de SUPERADMIN (Ocultos para admin y operadores)
-    { label: 'Análisis cruzado', href: '/analisis-cruzado', icon: GitCompare, superAdminOnly: true },
-    { label: 'Consulta IA', href: '/consulta-ia', icon: Bot, superAdminOnly: true },
-    { label: 'Auditoría', href: '/auditoria', icon: History, superAdminOnly: true },
+    { label: 'Análisis cruzado', href: '/analisis-cruzado', icon: GitCompare, adminOnly: true },
+    { label: 'Consulta IA', href: '/consulta-ia', icon: Bot, adminOnly: true },
+    { label: 'Auditoría', href: '/auditoria', icon: History, adminOnly: true },
+    // Módulo exclusivo de SUPERADMIN (Habilitar / Configurar Módulos)
     { label: 'Configuración', href: '/configuracion', icon: Settings, superAdminOnly: true },
   ];
 

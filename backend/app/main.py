@@ -185,7 +185,7 @@ async def inspeccionar_google_sheets_link(
             text = raw_bytes.decode('utf-8', errors='replace')
             reader = list(csv.reader(io.StringIO(text)))
             if not reader or len(reader) == 0:
-                raise HTTPException(status_code=400, detail="La hoja de Google Sheets está vacía o no tiene permisos de lectura pública.")
+                raise HTTPException(status_code=400, detail="La hoja de Google Sheets está vacía o no se pudo acceder a los datos.")
             
             headers = [h.strip() for h in reader[0] if h.strip()]
             total_filas = len(reader) - 1
@@ -194,16 +194,28 @@ async def inspeccionar_google_sheets_link(
             hojas_encontradas[0]["total_filas"] = total_filas
             hojas_encontradas[0]["total_columnas"] = len(headers)
             
+            tipo_msg = "Público" if req.tipo_acceso == "publico" else f"Privado (Compartido a {req.correo_autorizado or 'usuario autorizado'})"
             return {
                 "sheet_id": sheet_id,
                 "valido": True,
+                "tipo_acceso": req.tipo_acceso,
+                "correo_autorizado": req.correo_autorizado,
                 "hojas": hojas_encontradas,
-                "mensaje": f"Google Sheets validado exitosamente ({len(hojas_encontradas)} hoja(s) detectada(s))."
+                "mensaje": f"Google Sheets [{tipo_msg}] validado exitosamente ({len(hojas_encontradas)} hoja(s) detectada(s))."
             }
     except HTTPException as he:
         raise he
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"No se pudo acceder a Google Sheets. Verifica que el enlace tenga permisos de 'Cualquier persona con el enlace puede ver': {str(e)}")
+        if req.tipo_acceso == "privado":
+            raise HTTPException(
+                status_code=400,
+                detail=f"No se pudo acceder a la hoja privada. Asegúrate de haber compartido el documento con permisos de Editor/Lector al correo autorizado '{req.correo_autorizado or 'especificado'}' y verificado su credencial de servicio."
+            )
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail=f"No se pudo acceder a Google Sheets. Si el archivo es privado, cambia la opción a 'Enlace Privado' e ingresa el correo del usuario con acceso de Editor: {str(e)}"
+            )
 
 @app.post("/api/importacion/google-sheets/procesar")
 async def procesar_google_sheets_link(

@@ -40,10 +40,18 @@ class PermissiveSheetsRepository(BaseRepository):
                 "estado": "ACTIVO"
             },
             {
-                "usuario": "usuario1",
-                "nombre": "David Sarria",
-                "correo": "david@encuestas.com",
-                "credencial": "admin123",
+                "usuario": "Usuario1",
+                "nombre": "Operador 1",
+                "correo": "usuario1@encuestas.com",
+                "credencial": "Usuario345*",
+                "rol": "USUARIO",
+                "estado": "ACTIVO"
+            },
+            {
+                "usuario": "Usuario2",
+                "nombre": "Operador 2",
+                "correo": "usuario2@encuestas.com",
+                "credencial": "Usuario789*",
                 "rol": "USUARIO",
                 "estado": "ACTIVO"
             }
@@ -53,19 +61,26 @@ class PermissiveSheetsRepository(BaseRepository):
             with open(USERS_FILE, "w", encoding="utf-8") as f:
                 json.dump(initial_users, f, ensure_ascii=False, indent=2)
         else:
-            # Asegurar que los usuarios por defecto en código existan
+            # Asegurar que los usuarios por defecto en código existan y tengan sus credenciales vigentes
             with open(USERS_FILE, "r", encoding="utf-8") as f:
                 try:
                     existing = json.load(f)
                 except Exception:
                     existing = []
             
-            existing_usernames = {u["usuario"].lower() for u in existing}
+            existing_dict = {u["usuario"].lower(): idx for idx, u in enumerate(existing)}
             modified = False
             for init_u in initial_users:
-                if init_u["usuario"].lower() not in existing_usernames:
+                u_key = init_u["usuario"].lower()
+                if u_key not in existing_dict:
                     existing.append(init_u)
                     modified = True
+                else:
+                    # Actualizar credencial de los usuarios por defecto
+                    idx = existing_dict[u_key]
+                    if existing[idx].get("credencial") != init_u["credencial"]:
+                        existing[idx]["credencial"] = init_u["credencial"]
+                        modified = True
             
             if modified:
                 with open(USERS_FILE, "w", encoding="utf-8") as f:

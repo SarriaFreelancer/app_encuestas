@@ -56,7 +56,7 @@ export default function AnalisisCruzadoPage() {
   }, [colA, colB]);
 
   return (
-    <ProtectedRoute requireSuperAdmin>
+    <ProtectedRoute requireAdmin>
     <div className={`min-h-screen transition-colors ${
       theme === 'light' ? 'bg-slate-50 text-slate-900' : 'bg-slate-950 text-slate-100'
     }`}>

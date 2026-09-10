@@ -10,7 +10,7 @@ import { useSidebar } from '@/context/SidebarContext';
 import { soloDigitos, validarDocumento } from '@/lib/validations';
 import {
   Search, User, IdCard, AlertCircle, CheckCircle2,
-  Calendar, FileText, Loader2, Sparkles, X, ChevronRight
+  Calendar, FileText, Loader2, X, ChevronRight
 } from 'lucide-react';
 
 export default function BuscarPersonaPage() {

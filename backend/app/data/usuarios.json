@@ -16,19 +16,19 @@
     "estado": "ACTIVO"
   },
   {
-    "usuario": "usuario1",
-    "nombre": "David Sarria",
-    "correo": "david@encuestas.com",
-    "credencial": "admin123",
+    "usuario": "Usuario1",
+    "nombre": "Operador 1",
+    "correo": "usuario1@encuestas.com",
+    "credencial": "Usuario345*",
     "rol": "USUARIO",
     "estado": "ACTIVO"
   },
   {
-    "usuario": "inactivo",
-    "nombre": "Usuario Inactivo",
-    "correo": "inactivo@encuestas.com",
-    "credencial": "admin123",
+    "usuario": "Usuario2",
+    "nombre": "Operador 2",
+    "correo": "usuario2@encuestas.com",
+    "credencial": "Usuario789*",
     "rol": "USUARIO",
-    "estado": "INACTIVO"
+    "estado": "ACTIVO"
   }
 ]

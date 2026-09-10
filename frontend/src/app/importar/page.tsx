@@ -22,6 +22,9 @@ export default function ImportarEncuestaPage() {
   
   // Estado para Google Sheets Link
   const [sheetsUrl, setSheetsUrl] = useState('');
+  const [tipoAcceso, setTipoAcceso] = useState<'publico' | 'privado'>('publico');
+  const [correoAutorizado, setCorreoAutorizado] = useState('');
+  const [claveAcceso, setClaveAcceso] = useState('');
   const [sheetsData, setSheetsData] = useState<any>(null);
   const [selectedSheets, setSelectedSheets] = useState<string[]>(['Hoja Principal (Default)']);
 
@@ -40,11 +43,20 @@ export default function ImportarEncuestaPage() {
       showErrorAlert('Enlace requerido', 'Por favor ingresa un enlace válido de Google Sheets.');
       return;
     }
+    if (tipoAcceso === 'privado' && !correoAutorizado.trim()) {
+      showErrorAlert('Correo requerido', 'Para enlaces privados con permisos asignados debes especificar el correo del usuario autorizado.');
+      return;
+    }
     setLoading(true);
     try {
       const data = await fetchApi('/importacion/google-sheets/inspeccionar', {
         method: 'POST',
-        body: JSON.stringify({ url: sheetsUrl })
+        body: JSON.stringify({
+          url: sheetsUrl,
+          tipo_acceso: tipoAcceso,
+          correo_autorizado: correoAutorizado.trim() || undefined,
+          clave_acceso: claveAcceso.trim() || undefined
+        })
       });
       setSheetsData(data);
       setStep(2);
@@ -61,7 +73,13 @@ export default function ImportarEncuestaPage() {
     try {
       const data = await fetchApi('/importacion/google-sheets/procesar', {
         method: 'POST',
-        body: JSON.stringify({ url: sheetsUrl, selected_sheets: selectedSheets })
+        body: JSON.stringify({
+          url: sheetsUrl,
+          selected_sheets: selectedSheets,
+          tipo_acceso: tipoAcceso,
+          correo_autorizado: correoAutorizado.trim() || undefined,
+          clave_acceso: claveAcceso.trim() || undefined
+        })
       });
       setResult(data);
       setStep(3);
@@ -141,50 +159,77 @@ export default function ImportarEncuestaPage() {
       <main className={`transition-all duration-300 p-4 sm:p-8 pt-16 md:pt-8 space-y-6 ${
         isCollapsed ? 'md:ml-20' : 'md:ml-64'
       }`}>
-        {/* Header */}
-        <div className={`p-6 sm:p-8 rounded-3xl border shadow-xl ${
-          theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+        {/* Header con Banner de Gradiente */}
+        <div className={`p-6 sm:p-8 rounded-3xl border shadow-2xl relative overflow-hidden transition-all ${
+          theme === 'light'
+            ? 'bg-gradient-to-r from-indigo-900 via-indigo-800 to-purple-900 text-white border-indigo-700/50'
+            : 'bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white border-slate-800'
         }`}>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-600 text-white">
-              Carga Masiva
-            </span>
+          <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative z-10 flex flex-wrap items-center justify-between gap-4">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-xs font-bold border border-white/20">
+                <Database size={14} className="text-amber-400" /> Carga Masiva e Inspección Automática
+              </div>
+              <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
+                Asistente de Importación de Encuestas
+              </h1>
+              <p className="text-xs sm:text-sm text-indigo-200/90 max-w-xl">
+                Conecta tu libro de **Google Sheets** o sube un archivo **Excel local (.xlsx / .xls)**. El sistema inspeccionará las hojas, profilará vacíos y actualizará los gráficos del tablero en tiempo real.
+              </p>
+            </div>
+            <div className="p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 flex items-center gap-3">
+              <div className="p-3 bg-emerald-500/20 text-emerald-300 rounded-xl border border-emerald-400/30">
+                <Database size={24} />
+              </div>
+              <div>
+                <p className="text-[10px] uppercase font-bold text-indigo-200">Sincronización BD</p>
+                <p className="text-xs font-extrabold text-white">Directa y Segura</p>
+              </div>
+            </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-            Asistente de Importación de Excel
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Carga de archivos .xlsx / .xls con inspección automática, profiling de vacíos y autodetección de tipos
-          </p>
         </div>
 
-        {/* Pasos */}
-        <div className={`p-4 rounded-2xl border shadow-md flex items-center gap-2 sm:gap-4 overflow-x-auto text-xs font-bold ${
-          theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+        {/* Stepper Progresivo Mejorado */}
+        <div className={`p-4 rounded-3xl border shadow-xl flex items-center justify-around gap-2 sm:gap-4 overflow-x-auto text-xs font-bold transition-all ${
+          theme === 'light' ? 'bg-white border-slate-200/90' : 'bg-slate-900 border-slate-800'
         }`}>
-          <span className={`px-4 py-2 rounded-xl shrink-0 transition-all ${
-            step === 1 
-              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' 
-              : theme === 'light' ? 'bg-slate-100 text-slate-600' : 'bg-slate-800 text-slate-400'
+          <div className={`flex items-center gap-3 px-5 py-3 rounded-2xl transition-all ${
+            step === 1
+              ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 scale-105'
+              : theme === 'light' ? 'bg-slate-100 text-slate-500' : 'bg-slate-800 text-slate-400'
           }`}>
-            1. Seleccionar Archivo
-          </span>
-          <ArrowRight size={14} className="text-slate-400 shrink-0" />
-          <span className={`px-4 py-2 rounded-xl shrink-0 transition-all ${
-            step === 2 
-              ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' 
-              : theme === 'light' ? 'bg-slate-100 text-slate-600' : 'bg-slate-800 text-slate-400'
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black ${
+              step === 1 ? 'bg-white text-indigo-600' : 'bg-slate-300 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+            }`}>1</span>
+            <span>Seleccionar Origen de Datos</span>
+          </div>
+
+          <ArrowRight size={16} className="text-slate-400 shrink-0" />
+
+          <div className={`flex items-center gap-3 px-5 py-3 rounded-2xl transition-all ${
+            step === 2
+              ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 scale-105'
+              : theme === 'light' ? 'bg-slate-100 text-slate-500' : 'bg-slate-800 text-slate-400'
           }`}>
-            2. Vista Previa y Profiling
-          </span>
-          <ArrowRight size={14} className="text-slate-400 shrink-0" />
-          <span className={`px-4 py-2 rounded-xl shrink-0 transition-all ${
-            step === 3 
-              ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30' 
-              : theme === 'light' ? 'bg-slate-100 text-slate-600' : 'bg-slate-800 text-slate-400'
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black ${
+              step === 2 ? 'bg-white text-indigo-600' : 'bg-slate-300 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+            }`}>2</span>
+            <span>Vista Previa y Profiling</span>
+          </div>
+
+          <ArrowRight size={16} className="text-slate-400 shrink-0" />
+
+          <div className={`flex items-center gap-3 px-5 py-3 rounded-2xl transition-all ${
+            step === 3
+              ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 scale-105'
+              : theme === 'light' ? 'bg-slate-100 text-slate-500' : 'bg-slate-800 text-slate-400'
           }`}>
-            3. Resultado
-          </span>
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-black ${
+              step === 3 ? 'bg-white text-emerald-600' : 'bg-slate-300 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+            }`}>3</span>
+            <span>Resultado de Carga</span>
+          </div>
         </div>
 
         {/* PASO 1 */}
@@ -225,24 +270,100 @@ export default function ImportarEncuestaPage() {
                   <LinkIcon size={40} />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-slate-900 dark:text-white">Ingresa el enlace público de tu Google Sheets</h2>
+                  <h2 className="text-xl font-black text-slate-900 dark:text-white">Importación desde Google Sheets</h2>
                   <p className="text-slate-500 dark:text-slate-400 text-xs mt-1 max-w-md mx-auto">
-                    El backend con Python validará automáticamente las hojas de cálculo disponibles para importar los nuevos datos y actualizar las gráficas del Dashboard.
+                    El backend validará automáticamente las pestañas disponibles para cargar los datos en la base de datos y activar los nuevos gráficos.
                   </p>
                 </div>
 
-                <div className="space-y-2 text-left max-w-xl mx-auto">
-                  <label className="block text-xs font-bold uppercase text-slate-400">URL del documento de Google Sheets *</label>
-                  <input
-                    type="url"
-                    value={sheetsUrl}
-                    onChange={(e) => setSheetsUrl(e.target.value)}
-                    placeholder="https://docs.google.com/spreadsheets/d/18hVTcC1_ylED47qIfeuHm1rP7cyNW-9wJykhQoNoIrY/edit..."
-                    className={`w-full px-4 py-3.5 rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 border ${
-                      theme === 'light' ? 'bg-slate-100 border-slate-300 text-slate-900' : 'bg-slate-800 border-slate-700 text-white'
-                    }`}
-                  />
-                  <p className="text-[11px] text-slate-400 font-medium">Asegúrate de que la hoja tenga permisos de lectura pública (Cualquier persona con el enlace).</p>
+                {/* Selector Tipo de Acceso: Público vs Privado */}
+                <div className="max-w-xl mx-auto space-y-4 text-left">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">Tipo de Acceso al Documento *</label>
+                  <div className={`p-1.5 rounded-2xl border flex gap-1.5 ${
+                    theme === 'light' ? 'bg-slate-100 border-slate-200' : 'bg-slate-800 border-slate-700'
+                  }`}>
+                    <button
+                      type="button"
+                      onClick={() => setTipoAcceso('publico')}
+                      className={`flex-1 py-2.5 px-3 rounded-xl font-extrabold text-xs transition-all cursor-pointer ${
+                        tipoAcceso === 'publico'
+                          ? 'bg-emerald-600 text-white shadow-md'
+                          : theme === 'light' ? 'text-slate-700 hover:bg-slate-200' : 'text-slate-300 hover:bg-slate-700'
+                      }`}
+                    >
+                      🌐 Enlace Público (Cualquier persona con el enlace)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTipoAcceso('privado')}
+                      className={`flex-1 py-2.5 px-3 rounded-xl font-extrabold text-xs transition-all cursor-pointer ${
+                        tipoAcceso === 'privado'
+                          ? 'bg-indigo-600 text-white shadow-md'
+                          : theme === 'light' ? 'text-slate-700 hover:bg-slate-200' : 'text-slate-300 hover:bg-slate-700'
+                      }`}
+                    >
+                      🔒 Enlace Privado (Compartido a Usuario Específico)
+                    </button>
+                  </div>
+
+                  {/* URL */}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold uppercase text-slate-400">URL del documento de Google Sheets *</label>
+                    <input
+                      type="url"
+                      value={sheetsUrl}
+                      onChange={(e) => setSheetsUrl(e.target.value)}
+                      placeholder="https://docs.google.com/spreadsheets/d/18hVTcC1_ylED47qIfeuHm1rP7cyNW-9wJykhQoNoIrY/edit..."
+                      className={`w-full px-4 py-3.5 rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 border ${
+                        theme === 'light' ? 'bg-slate-50 border-slate-300 text-slate-900' : 'bg-slate-800 border-slate-700 text-white'
+                      }`}
+                    />
+                  </div>
+
+                  {/* Campos adicionales si es Enlace Privado */}
+                  {tipoAcceso === 'privado' && (
+                    <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 space-y-3 animate-in fade-in zoom-in-95">
+                      <div className="flex items-center gap-2 text-indigo-400 text-xs font-bold">
+                        <Database size={16} /> Credenciales del Usuario Autorizado con Permisos de Editor/Lector
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block text-[11px] font-bold text-slate-400">Correo Electrónico Autorizado en Google Sheets *</label>
+                        <input
+                          type="email"
+                          value={correoAutorizado}
+                          onChange={(e) => setCorreoAutorizado(e.target.value)}
+                          placeholder="ej. editor-autorizado@empresa.com"
+                          className={`w-full px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 border ${
+                            theme === 'light' ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-800 border-slate-700 text-white'
+                          }`}
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block text-[11px] font-bold text-slate-400">Clave de Servicio o Credencial de Aplicación (Opcional)</label>
+                        <input
+                          type="password"
+                          value={claveAcceso}
+                          onChange={(e) => setClaveAcceso(e.target.value)}
+                          placeholder="Clave de token API o contraseña de aplicación"
+                          className={`w-full px-3.5 py-2.5 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 border ${
+                            theme === 'light' ? 'bg-white border-slate-300 text-slate-900' : 'bg-slate-800 border-slate-700 text-white'
+                          }`}
+                        />
+                      </div>
+
+                      <p className="text-[10px] text-indigo-400 font-medium leading-tight">
+                        Al usar el acceso privado, el backend validará los permisos asignados a esta cuenta para cargar los datos en la base de datos para todos los usuarios.
+                      </p>
+                    </div>
+                  )}
+
+                  <p className="text-[11px] text-slate-400 font-medium">
+                    {tipoAcceso === 'publico' 
+                      ? 'Requisito: La hoja debe tener el permiso "Cualquier persona con el enlace puede ver".' 
+                      : 'Requisito: El archivo fue compartido con permisos explícitos de Editor/Lector al correo especificado.'}
+                  </p>
                 </div>
 
                 <div className="pt-2 max-w-xl mx-auto">
@@ -260,15 +381,14 @@ export default function ImportarEncuestaPage() {
 
             {/* MODO EXCEL LOCAL */}
             {importMode === 'excel' && (
-              <div className={`border rounded-3xl p-8 space-y-6 text-center shadow-2xl ${
+              <div className={`border rounded-3xl p-8 md:p-10 space-y-6 text-center shadow-2xl transition-all ${
                 theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/90 border-slate-800'
               }`}>
-                <div className="w-20 h-20 bg-indigo-600/10 text-indigo-500 rounded-3xl border border-indigo-500/20 flex items-center justify-center mx-auto shadow-inner">
-                  <FileSpreadsheet size={40} />
-                </div>
                 <div>
-                  <h2 className="text-xl font-black text-slate-900 dark:text-white">Selecciona tu archivo de encuesta (.xlsx o .xls)</h2>
-                  <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">El sistema autodetectará las hojas y columnas del archivo automáticamente</p>
+                  <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Carga de Archivo Excel Local</h2>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs sm:text-sm mt-1 max-w-md mx-auto">
+                    Selecciona o arrastra tu archivo **.xlsx** o **.xls**. El motor inspeccionará automáticamente todas las columnas y hojas.
+                  </p>
                 </div>
 
                 <input
@@ -278,27 +398,59 @@ export default function ImportarEncuestaPage() {
                   className="hidden"
                   id="excel-file-input"
                 />
+
+                {/* Zona de Soltar / Dropzone Interactiva */}
                 <label
                   htmlFor="excel-file-input"
-                  className={`inline-flex items-center gap-2 px-6 py-4 font-bold rounded-2xl border cursor-pointer transition-all text-sm shadow-md ${
-                    theme === 'light'
-                      ? 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300'
-                      : 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700'
+                  className={`group relative max-w-xl mx-auto flex flex-col items-center justify-center p-10 rounded-3xl border-2 border-dashed transition-all cursor-pointer ${
+                    file
+                      ? 'border-indigo-500 bg-indigo-500/10'
+                      : theme === 'light'
+                      ? 'border-indigo-300 hover:border-indigo-500 bg-slate-50/80 hover:bg-indigo-50/50'
+                      : 'border-slate-700 hover:border-indigo-500 bg-slate-800/40 hover:bg-slate-800'
                   }`}
                 >
-                  <Upload size={18} />
-                  {file ? file.name : 'Buscar archivo Excel...'}
+                  <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 shadow-xl ${
+                    file
+                      ? 'bg-indigo-600 text-white shadow-indigo-600/30'
+                      : 'bg-indigo-600/10 text-indigo-500 border border-indigo-500/20 shadow-indigo-500/10'
+                  }`}>
+                    <FileSpreadsheet size={42} />
+                  </div>
+
+                  {file ? (
+                    <div className="space-y-1">
+                      <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 font-extrabold text-xs rounded-full inline-block mb-1 border border-emerald-500/30">
+                        ✓ Archivo Seleccionado
+                      </span>
+                      <p className="text-base font-black text-slate-900 dark:text-white truncate max-w-md">
+                        {file.name}
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        {(file.size / 1024).toFixed(1)} KB — Listo para inspeccionar
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-1">
+                      <p className="text-base font-extrabold text-slate-800 dark:text-slate-200">
+                        Haz clic aquí para seleccionar tu archivo Excel
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        Formatos soportados: **.xlsx**, **.xls** (Carga masiva directa)
+                      </p>
+                    </div>
+                  )}
                 </label>
 
                 {file && (
-                  <div className="pt-4 max-w-xl mx-auto">
+                  <div className="pt-2 max-w-xl mx-auto">
                     <button
                       onClick={handleInspect}
                       disabled={loading}
                       className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl shadow-xl shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50 cursor-pointer"
                     >
                       {loading ? <Loader2 className="animate-spin" size={18} /> : <RefreshCw size={18} />}
-                      VALIDAR HOJAS
+                      VALIDAR HOJAS Y COLUMNAS
                     </button>
                   </div>
                 )}

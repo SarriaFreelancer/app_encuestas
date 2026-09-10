@@ -92,8 +92,14 @@ class AIQueryResponse(BaseModel):
 
 class GoogleSheetsInspectRequest(BaseModel):
     url: str
+    tipo_acceso: Optional[str] = "publico" # "publico" | "privado"
+    correo_autorizado: Optional[str] = None
+    clave_acceso: Optional[str] = None
 
 class GoogleSheetsProcessRequest(BaseModel):
     url: str
     selected_sheets: List[str]
+    tipo_acceso: Optional[str] = "publico"
+    correo_autorizado: Optional[str] = None
+    clave_acceso: Optional[str] = None
 

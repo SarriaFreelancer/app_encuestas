@@ -10,7 +10,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { useSidebar } from '@/context/SidebarContext';
 import { 
   Columns, BarChart3, PieChart as PieIcon, ListFilter, Loader2, 
-  CheckCircle2, AlertCircle, Search, TrendingUp, Award, Layers, Hash
+  CheckCircle2, AlertCircle, Search, TrendingUp, Award, Layers, Hash, Database
 } from 'lucide-react';
 
 const COLORS = ['#6366f1', '#10b981', '#8b5cf6', '#ec4899', '#f59e0b', '#3b82f6', '#06b6d4', '#ef4444', '#84cc16', '#f97316'];
@@ -259,41 +259,64 @@ export default function AnalisisPreguntasPage() {
       <main className={`transition-all duration-300 p-4 sm:p-8 pt-16 md:pt-8 space-y-6 ${
         isCollapsed ? 'md:ml-20' : 'md:ml-64'
       }`}>
-        {/* Header */}
-        <div className={`p-6 sm:p-8 rounded-3xl border shadow-xl ${
-          theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+        {/* Header con Banner de Gradiente Estilizado */}
+        <div className={`p-6 sm:p-8 rounded-3xl border shadow-2xl relative overflow-hidden transition-all ${
+          theme === 'light'
+            ? 'bg-gradient-to-r from-indigo-900 via-indigo-800 to-purple-900 text-white border-indigo-700/50'
+            : 'bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white border-slate-800'
         }`}>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-600 text-white">
-              Analítica por Variable
-            </span>
+          <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="relative z-10 flex flex-wrap items-center justify-between gap-4">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 backdrop-blur-md rounded-full text-xs font-bold border border-white/20">
+                <BarChart3 size={14} className="text-amber-400" /> Analítica Descriptiva por Pregunta
+              </div>
+              <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
+                Análisis por Variable y Pregunta
+              </h1>
+              <p className="text-xs sm:text-sm text-indigo-200/90 max-w-xl">
+                Explore la distribución de frecuencias, porcentajes, modas y desglose estadístico detallado para cualquier campo del cuestionario.
+              </p>
+            </div>
+
+            <div className="p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 flex items-center gap-3">
+              <div className="p-3 bg-indigo-500/20 text-indigo-300 rounded-xl border border-indigo-400/30">
+                <Columns size={24} />
+              </div>
+              <div>
+                <p className="text-[10px] uppercase font-bold text-indigo-200">Total Preguntas</p>
+                <p className="text-xs font-extrabold text-white">
+                  {metadata?.columnas.length || 0} Variables Autodetectadas
+                </p>
+              </div>
+            </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
-            Análisis Descriptivo por Pregunta
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Explore la distribución, frecuencias, modas y porcentajes de cada pregunta del formulario
-          </p>
         </div>
 
-        {/* Selector de Pregunta / Columna */}
-        <div className={`p-6 rounded-3xl border shadow-xl space-y-3 ${
-          theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+        {/* Selector de Pregunta / Columna con Estilo Card Premium */}
+        <div className={`p-6 rounded-3xl border shadow-xl space-y-3 transition-all ${
+          theme === 'light' ? 'bg-white border-slate-200/90' : 'bg-slate-900 border-slate-800'
         }`}>
-          <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
-            <Columns size={16} className="text-indigo-500" />
-            Seleccione la Pregunta a Analizar:
-          </label>
+          <div className="flex items-center justify-between gap-2">
+            <label className="block text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
+              <Columns size={16} className="text-indigo-500" />
+              Seleccione la Pregunta o Variable a Analizar:
+            </label>
+            <span className="text-[11px] font-bold text-indigo-500 bg-indigo-500/10 px-2.5 py-0.5 rounded-full border border-indigo-500/20 hidden sm:inline">
+              Filtro Dinámico Reactivo
+            </span>
+          </div>
+
           <select
             value={columnaSeleccionada}
             onChange={(e) => {
               setColumnaSeleccionada(e.target.value);
               setFilterText('');
             }}
-            className={`w-full p-3.5 rounded-2xl border text-xs sm:text-sm font-bold transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer ${
+            className={`w-full p-4 rounded-2xl border text-xs sm:text-sm font-bold transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer shadow-sm ${
               theme === 'light'
-                ? 'bg-slate-50 border-slate-300 text-slate-800'
-                : 'bg-slate-800 border-slate-700 text-white'
+                ? 'bg-slate-50 border-slate-300 text-slate-900 hover:border-indigo-400'
+                : 'bg-slate-800 border-slate-700 text-white hover:border-slate-600'
             }`}
           >
             {metadata?.columnas.map((col, idx) => (
