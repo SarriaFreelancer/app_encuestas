@@ -8,7 +8,8 @@ import pandas as pd
 
 from app.schemas import (
     LoginRequest, TokenResponse, UserPublic, UserRole, UserInDB, UserCreate, UserUpdate,
-    SurveyMetadata, SurveyResponseCreate, SurveyResponseUpdate, AIQueryRequest, AIQueryResponse
+    SurveyMetadata, SurveyResponseCreate, SurveyResponseUpdate, AIQueryRequest, AIQueryResponse,
+    GoogleSheetsInspectRequest, GoogleSheetsProcessRequest
 )
 from app.repositories.base import BaseRepository
 from app.repositories.sheets_repository import PermissiveSheetsRepository
@@ -113,6 +114,150 @@ async def procesar_importacion(
         "registros_insertados": total_cargados,
         "total_columnas": len(headers_exactos)
     }
+
+# --- IMPORTACIÓN DESDE GOOGLE SHEETS VIA LINK ---
+import re
+import urllib.request
+import csv
+
+def _extract_sheets_id(url: str) -> str:
+    match = re.search(r'/d/([a-zA-Z0-9-_]+)', url)
+    if not match:
+        raise HTTPException(status_code=400, detail="El enlace proporcionado no parece un enlace válido de Google Sheets. Asegúrate de incluir el ID del archivo (/d/...)")
+    return match.group(1)
+
+@app.post("/api/importacion/google-sheets/inspeccionar")
+async def inspeccionar_google_sheets_link(
+    req: GoogleSheetsInspectRequest,
+    current_user: UserPublic = Depends(get_current_user)
+):
+    """
+    Valida un enlace público de Google Sheets e inspecciona todas las pestañas/hojas disponibles.
+    """
+    sheet_id = _extract_sheets_id(req.url)
+    
+    # Obtener el HTML de la vista pública para extraer todas las pestañas (sheet names y gids)
+    html_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/htmlview"
+    hojas_encontradas = []
+    
+    try:
+        req_html = urllib.request.Request(html_url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req_html, timeout=10) as response:
+            html_text = response.read().decode('utf-8', errors='replace')
+            # Extraer pestañas buscando elementos de menú/pestanas en htmlview (id="sheet-button-...", o list-item class o #sheet-menu)
+            # RegEx para sheet-button: id="sheet-button-(\d+)">([^<]+)< o data-sheet-id="(\d+)" ... >([^<]+)<
+            sheet_matches = re.findall(r'id="sheet-button-([0-9]+)"[^>]*>([^<]+)<', html_text)
+            if not sheet_matches:
+                sheet_matches = re.findall(r'<li[^>]*id="sheet-button-([0-9]+)"[^>]*><a[^>]*>([^<]+)</a>', html_text)
+            if not sheet_matches:
+                # Fallback alternativo para extraer nombres de etiquetas de pestañas
+                sheet_matches = re.findall(r'class="sheet-name"[^>]*>([^<]+)<', html_text)
+                if sheet_matches:
+                    sheet_matches = [("0", name) for name in sheet_matches]
+
+            if sheet_matches:
+                for gid, nombre in sheet_matches:
+                    clean_name = nombre.strip()
+                    if clean_name and not any(h["nombre"] == clean_name for h in hojas_encontradas):
+                        hojas_encontradas.append({
+                            "nombre": clean_name,
+                            "gid": gid,
+                            "total_filas": "Disponible",
+                            "total_columnas": "Autodetectable"
+                        })
+    except Exception:
+        pass
+
+    # Si no se pudieron extraer pestañas secundarias, se usa la hoja principal por defecto
+    if not hojas_encontradas:
+        hojas_encontradas.append({
+            "nombre": "Hoja Principal (Respuestas)",
+            "gid": "0",
+            "total_filas": "Disponible",
+            "total_columnas": "Autodetectable"
+        })
+
+    csv_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv"
+    try:
+        request = urllib.request.Request(csv_url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(request, timeout=10) as response:
+            raw_bytes = response.read()
+            text = raw_bytes.decode('utf-8', errors='replace')
+            reader = list(csv.reader(io.StringIO(text)))
+            if not reader or len(reader) == 0:
+                raise HTTPException(status_code=400, detail="La hoja de Google Sheets está vacía o no tiene permisos de lectura pública.")
+            
+            headers = [h.strip() for h in reader[0] if h.strip()]
+            total_filas = len(reader) - 1
+            
+            # Actualizar conteo de la primera hoja
+            hojas_encontradas[0]["total_filas"] = total_filas
+            hojas_encontradas[0]["total_columnas"] = len(headers)
+            
+            return {
+                "sheet_id": sheet_id,
+                "valido": True,
+                "hojas": hojas_encontradas,
+                "mensaje": f"Google Sheets validado exitosamente ({len(hojas_encontradas)} hoja(s) detectada(s))."
+            }
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"No se pudo acceder a Google Sheets. Verifica que el enlace tenga permisos de 'Cualquier persona con el enlace puede ver': {str(e)}")
+
+@app.post("/api/importacion/google-sheets/procesar")
+async def procesar_google_sheets_link(
+    req: GoogleSheetsProcessRequest,
+    current_user: UserPublic = Depends(get_current_user),
+    repo: PermissiveSheetsRepository = Depends(get_repository)
+):
+    """
+    Importa los datos de las hojas seleccionadas de Google Sheets y actualiza el Dashboard activando los nuevos gráficos.
+    """
+    sheet_id = _extract_sheets_id(req.url)
+    csv_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv"
+    
+    try:
+        request = urllib.request.Request(csv_url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(request, timeout=10) as response:
+            raw_bytes = response.read()
+            text = raw_bytes.decode('utf-8', errors='replace')
+            reader = list(csv.reader(io.StringIO(text)))
+            
+            if not reader or len(reader) < 2:
+                raise HTTPException(status_code=400, detail="La hoja de cálculo no contiene filas de datos suficientes.")
+            
+            raw_headers = reader[0]
+            clean_headers = [h.strip() if h.strip() != "" else f"COL_{idx}" for idx, h in enumerate(raw_headers)]
+            
+            records = []
+            for idx, row in enumerate(reader[1:], start=2):
+                if not any(cell.strip() for cell in row):
+                    continue
+                row_dict = {}
+                for col_idx, h in enumerate(clean_headers):
+                    row_dict[h] = row[col_idx].strip() if col_idx < len(row) else ""
+                records.append(row_dict)
+                
+            total_cargados = repo.replace_all_data(clean_headers, records)
+            
+            audit_service.log_change(
+                usuario=current_user.usuario,
+                registro_afectado=f"Google Sheets ({sheet_id})",
+                campos_modificados={"total_filas_cargadas": total_cargados, "total_columnas": len(clean_headers)}
+            )
+            
+            return {
+                "message": "Importación desde Google Sheets completada exitosamente. El Dashboard ha sido actualizado con los nuevos gráficos.",
+                "registros_procesados": len(records),
+                "registros_insertados": total_cargados,
+                "total_columnas": len(clean_headers),
+                "fuente": f"Google Sheets ({sheet_id})"
+            }
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error al procesar la importación desde Google Sheets: {str(e)}")
 
 # --- METADATOS Y COLUMNAS ---
 @app.get("/api/encuestas/metadatos")

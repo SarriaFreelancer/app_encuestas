@@ -4,25 +4,58 @@ Sistema web full-stack moderno, interactivo y responsivo para el procesamiento, 
 
 ---
 
-## 🛠️ Tecnologías Utilizadas
+## ⚙️ Instrucciones para que el Sistema Funcione Correctamente
 
-- **Frontend:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, Lucide React.
-- **Backend:** FastAPI, Python 3.12, Uvicorn, Pandas, OpenPyXL, JOSE (JWT).
-- **Almacenamiento:** Repositorio en memoria / JSON estructurado con compatibilidad 100% fiel a Google Sheets.
+Para desplegar y utilizar la plataforma de encuestas y caracterización, existen **dos maneras** de poner en funcionamiento el sistema:
 
 ---
 
-## 👥 Credenciales de Acceso
+### 1. 💻 Servidor Local (Entorno en tu propia Computadora)
+Esta modalidad permite ejecutar la plataforma localmente en tu equipo (computador personal o servidor de la oficina) para pruebas, desarrollo o administración directa en red local.
+
+#### 🛠️ Herramientas e Instalación Necesaria:
+1. **Python 3.12 (o superior)**:
+   - Requerido para ejecutar el backend (API en FastAPI).
+   - Descarga e instalador oficial: [https://www.python.org/downloads/](https://www.python.org/downloads/)
+   - *Importante durante la instalación:* Marcar la opción **"Add Python to PATH"**.
+
+2. **Node.js 18 (o superior) & npm**:
+   - Requerido para ejecutar el frontend (Next.js 16).
+   - Descarga e instalador LTS oficial: [https://nodejs.org/](https://nodejs.org/)
+
+3. **Git** (Opcional pero recomendado):
+   - Para clonar y actualizar el repositorio de código.
+   - Descarga: [https://git-scm.com/](https://git-scm.com/)
+
+---
+
+### 2. 🌐 Servidor Web (Hosting Cloud en Producción)
+Consiste en alojar el sistema en un **Hosting / Servidor Web en la nube**, permitiendo que funcione bajo un dominio propio (por ejemplo, [www.encuestavictimas.com](http://www.encuestavictimas.com)). 
+
+#### 🌟 Ventajas del Servidor Web:
+- **Acceso desde cualquier lugar**: Se puede ingresar desde cualquier computador, tablet o celular con conexión a Internet simplemente escribiendo la URL (ejemplo: `www.encuestavictimas.com`).
+- **Sin necesidad de instalar programas locales**: Los usuarios u operadores no tienen que instalar Python, Node.js ni configurar consolas; solo abren el navegador e ingresan con su **Usuario y Clave**.
+- **Disponibilidad 24/7**: El tablero y las encuestas permanecen activos las 24 horas del día.
+
+> [!IMPORTANT]
+> **Nota sobre el Hosting:**
+> Cabe destacar que el hosting en la nube es un **servicio de pago**, el cual se adquiere mediante suscripciones mensuales o pagos anuales (estos últimos son **altamente recomendados** por costo-beneficio y estabilidad).
+> 
+> Uno de los proveedores más recomendados y populares es **Hostinger** (o alternativas como VPS Hostinger, Vercel/Render, AWS, DigitalOcean), el cual ofrece planes optimizados para aplicaciones web con soporte para Next.js y Python.
+
+---
+
+## 👥 Credenciales de Acceso por Defecto
 
 | Rol | Usuario | Contraseña | Permisos |
 |---|---|---|---|
-| **Super Admin** | `superadmin` | `superadmin123` | Control total, crear/editar/eliminar admins y usuarios, módulos avanzados. |
-| **Admin** | `admin` | `admin123` | Gestión de encuestas, crear/editar/eliminar operadores. |
-| **Operador** | `usuario1` | `admin123` | Visualización, toma de encuestas, consultas. |
+| **Super Admin** | `superadmin` | `superadmin123` | Control total, crear/editar/eliminar admins y usuarios, módulos avanzados (Cruce, IA, Auditoría). |
+| **Admin** | `admin` | `admin123` | Gestión de encuestas, visualizar respuestas, crear/editar operadores. |
+| **Operador** | `usuario1` | `admin123` | Visualización, registro de encuestas y consultas. |
 
 ---
 
-## 🚀 Guía de Inicio para Levantar los Servidores (Backend y Frontend)
+## 🚀 Guía Paso a Paso para Iniciar en Servidor Local (Backend y Frontend)
 
 El proyecto está estructurado en dos carpetas independientes:
 - `backend/`: API en Python con FastAPI (Puerto `8000`).
@@ -30,9 +63,9 @@ El proyecto está estructurado en dos carpetas independientes:
 
 ---
 
-### ⚡ Opción A: Levantar Todo Automáticamente (Recomendado)
+### ⚡ Opción A: Levantar Todo Automáticamente (Recomendado en Windows)
 
-En la raíz del proyecto existe un script de PowerShell que monitorea y mantiene vivos ambos servicios de forma continua:
+En la raíz del proyecto existe un script de PowerShell que monitorea e inicia ambos servicios:
 
 Abre PowerShell en la raíz del proyecto (`app_encuentas`) y ejecuta:
 
@@ -40,12 +73,12 @@ Abre PowerShell en la raíz del proyecto (`app_encuentas`) y ejecuta:
 .\start_services.ps1
 ```
 
-> 🟢 **Backend:** `http://127.0.0.1:8000`  
-> 🟢 **Frontend:** `http://localhost:3007`
+> 🟢 **Backend activo en:** `http://localhost:8000`  
+> 🟢 **Frontend activo en:** `http://localhost:3007`
 
 ---
 
-### 💻 Opción B: Levantar Servidores Manualmente por Consola
+### 💻 Opción B: Iniciar Servidores Manualmente por Consola
 
 Abre dos pestañas de terminal en tu editor (ej. Visual Studio Code con `Ctrl + ~`):
 
@@ -58,10 +91,13 @@ cd backend
 # 2. Activar el entorno virtual de Python
 .\venv\Scripts\activate
 
-# 3. Levantar el servidor Uvicorn (FastAPI)
-python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+# 3. Instalar dependencias (Solo la primera vez)
+pip install -r requirements.txt
+
+# 4. Levantar el servidor Uvicorn (FastAPI)
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
-> 🟢 **Documentación interactiva de la API (Swagger):** `http://127.0.0.1:8000/docs`
+> 🟢 **Documentación interactiva Swagger de la API:** `http://localhost:8000/docs`
 
 ---
 
@@ -71,17 +107,19 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 # 1. Ingresar a la carpeta del frontend
 cd frontend
 
-# 2. Iniciar el servidor de desarrollo de Next.js en el puerto 3007
-npm run dev:3008
+# 2. Instalar dependencias (Solo la primera vez)
+npm install
+
+# 3. Iniciar el servidor de desarrollo en el puerto 3007
+npm run dev -- -p 3007
 ```
-> *(Alternativa de comando directo: `npm run dev -- -p 3008`)*  
 > 🟢 **Plataforma web activa en:** `http://localhost:3007`
 
 ---
 
-### 🌐 Opción C: Exponer a Internet con Ngrok
+### 🔗 Opción C: Exposición Temporal a Internet con Ngrok
 
-Para probar en dispositivos móviles o compartir con tu equipo a través de un enlace público:
+Para realizar pruebas remotas desde dispositivos móviles o compartir con tu equipo sin publicar en un servidor web definitivo:
 
 Abre una **tercera pestaña de terminal** y ejecuta:
 
@@ -89,54 +127,40 @@ Abre una **tercera pestaña de terminal** y ejecuta:
 npx ngrok http 3007
 ```
 
-**Ngrok generará una URL pública segura**, por ejemplo:
+**Ngrok generará un enlace público seguro**, por ejemplo:
 ```text
-Forwarding: https://abc1-201-244-10-5.ngrok-free.app -> http://localhost:3007
+Forwarding: https://abroad-glancing-specked.ngrok-free.dev -> http://localhost:3007
 ```
+
+---
+
+## 🛠️ Tecnologías del Proyecto
+
+- **Frontend:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, Lucide React.
+- **Backend:** FastAPI, Python 3.12, Uvicorn, Pandas, OpenPyXL, JOSE (JWT).
+- **Almacenamiento:** Base de datos estructurada en JSON con sincronización e importación directa desde Google Sheets y archivos Excel.
 
 ---
 
 ## ❓ Solución de Problemas Comunes
 
 ### ❌ Error `npm error code ENOENT: Could not read package.json`
-- **Causa:** Intentaste ejecutar `npm run dev` en la raíz del proyecto (`app_encuentas`) donde no hay un `package.json`.
+- **Causa:** Intentaste ejecutar `npm run dev` en la raíz del proyecto (`app_encuentas`) donde no se encuentra el `package.json`.
 - **Solución:** Debes ingresar a la carpeta `frontend` primero:
   ```powershell
   cd frontend
-  npm run dev:3007
+  npm run dev -- -p 3007
   ```
-  O usar desde la raíz: `npm run dev --prefix frontend -- -p 3007`
 
-### ❌ Error `[WinError 10013] Intento de acceso a un socket no permitido`
-- **Causa:** El puerto `8000` ya está en uso por un proceso previo o `0.0.0.0` requiere permisos elevados en Windows.
-- **Solución 1:** Ejecuta la aplicación usando `--host 127.0.0.1` en lugar de `0.0.0.0`.
-- **Solución 2:** Para cerrar cualquier proceso previo escuchando en el puerto `8000`, ejecuta en PowerShell:
+### ❌ Error `[WinError 10013] Intento de acceso a un socket no permitido` o Puerto ocupado
+- **Causa:** El puerto `8000` está ocupado por una instancia anterior de Python.
+- **Solución:** Para cerrar cualquier proceso previo escuchando en el puerto `8000`, ejecuta en PowerShell:
   ```powershell
   Stop-Process -Id (Get-NetTCPConnection -LocalPort 8000).OwningProcess -Force
   ```
 
 ---
 
-## ✨ Características y Módulos Principales
-
-1. **Dashboard Analítico Multi-Gráficos 2D:**
-   - Gráficos circulares / pastel (Sexo, Zona, Discapacidad, Libreta Militar, Fuente de Ingresos).
-   - Gráficos de barras horizontales (Tipo de Hecho Victimizante, Municipio, Principal Afectación, Barrio/Vereda).
-   - Gráficos de columnas verticales (Nivel Educativo, Situación Laboral, Menores vs Mayores).
-   - Gráfico de columnas agrupadas para Necesidades (Prioritaria, Secundaria y Terciaria).
-   - Línea de tiempo cronológica interactiva con **filtrado cruzado en tiempo real al hacer clic en cualquier año**.
-   - Botonera superior de controles de filtros rápidos reorganizables dinámicamente.
-
-2. **Diseño Responsivo y Temas:**
-   - **Modo Claro / Modo Oscuro** con guardado de preferencias en `localStorage`.
-   - **Menú lateral minimizable (`<< Contraer menú` / `>>`)** para ganar espacio visual en monitores o modo drawer en móviles.
-   - Marca de agua y copyright **Desarrollado por SarriaTech Solutions S.A.S**.
-
-3. **Gestión de Usuarios (CRUD):**
-   - Creación, edición de roles, cambio de contraseñas y desactivación/eliminación de usuarios.
-
-4. **Centro de Reportes y Exportación:**
-   - Exportación directa de respuestas a formato CSV compatible con Excel y Power BI.
-
-5. **Depuración Automática de Datos:**
-   - Omisión inteligente de filas 100% vacías, conservando campos vacíos en filas con datos válidos.
+## 👨‍💻 Créditos y Soporte
+**Desarrollado por SarriaTech Solutions S.A.S**  
+*Plataforma Analítica de Caracterización y Gestión de Encuestas.*

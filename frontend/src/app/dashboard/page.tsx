@@ -920,7 +920,7 @@ export default function DashboardPage() {
                   key={i}
                   onClick={() => setFilter(C.anio, d.anio)}
                   className={`flex-1 flex flex-col items-center justify-end h-full group cursor-pointer p-0.5 sm:p-1 rounded-xl transition-all ${
-                    isSelected ? 'bg-indigo-600/30 ring-2 ring-indigo-400' : 'hover:bg-slate-800/40'
+                    isSelected ? 'ring-2 ring-indigo-500 font-bold scale-105' : ''
                   }`}
                   title={`Filtrar por año ${d.anio}: ${d.total} víctimas`}
                 >
@@ -1049,7 +1049,7 @@ export default function DashboardPage() {
     <div className={`min-h-screen flex ${theme === 'light' ? 'bg-slate-50 text-slate-900' : 'bg-slate-950 text-slate-100'}`}>
       <Sidebar />
 
-      <main className={`flex-1 p-3 sm:p-5 md:p-6 space-y-6 w-full transition-all duration-300 ${
+      <main className={`flex-1 p-3 sm:p-5 md:p-6 space-y-6 w-full max-w-full min-w-0 transition-all duration-300 ${
         isCollapsed ? 'md:ml-20' : 'md:ml-64'
       }`}>
 
@@ -1180,7 +1180,7 @@ export default function DashboardPage() {
         </div>
 
         {/* TARJETAS DE RESUMEN (KPIS SOLICITADOS) */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 min-w-0">
           {[
             { label: 'Total de Registros', value: rows.length, color: 'text-indigo-500', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20', icon: <Users size={18} /> },
             { label: 'Personas en Hogar', value: totalPersonasHogar || rows.length, color: 'text-pink-500', bg: 'bg-pink-500/10', border: 'border-pink-500/20', icon: <Home size={18} /> },

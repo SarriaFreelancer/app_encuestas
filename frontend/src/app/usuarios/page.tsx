@@ -7,6 +7,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import { fetchApi } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useSidebar } from '@/context/SidebarContext';
 import { User } from '@/types';
 import { showSuccessAlert, showErrorAlert, showConfirmAlert } from '@/lib/alerts';
 import { 
@@ -17,6 +18,7 @@ import {
 export default function UsuariosPage() {
   const { user: currentUser } = useAuth();
   const { theme } = useTheme();
+  const { isCollapsed } = useSidebar();
   
   const [usuarios, setUsuarios] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -160,7 +162,9 @@ export default function UsuariosPage() {
     <div className={`min-h-screen flex ${theme === 'light' ? 'bg-slate-50 text-slate-900' : 'bg-slate-950 text-slate-100'}`}>
       <Sidebar />
 
-      <main className="flex-1 md:ml-20 lg:ml-64 p-4 md:p-8 space-y-6 max-w-7xl mx-auto w-full transition-all">
+      <main className={`flex-1 p-4 md:p-8 space-y-6 max-w-7xl mx-auto w-full max-w-full min-w-0 transition-all duration-300 ${
+        isCollapsed ? 'md:ml-20' : 'md:ml-64'
+      }`}>
         {/* Header */}
         <div className={`border-b pb-5 flex flex-wrap items-center justify-between gap-4 ${theme === 'light' ? 'border-slate-200' : 'border-slate-800'}`}>
           <div>

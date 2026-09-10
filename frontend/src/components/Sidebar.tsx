@@ -59,7 +59,7 @@ export default function Sidebar() {
 
       {/* Sidebar Principal Responsivo */}
       <aside className={`
-        fixed top-0 left-0 bottom-0 z-40 flex flex-col transition-all duration-300 ease-in-out border-r
+        fixed top-0 left-0 bottom-0 z-50 flex flex-col transition-all duration-300 ease-in-out border-r
         ${theme === 'light' ? 'bg-white border-slate-200 text-slate-800' : 'bg-slate-900 border-slate-800 text-white'}
         ${isCollapsed ? 'md:w-20' : 'md:w-64'}
         ${isOpenMobile ? 'w-64 translate-x-0' : '-translate-x-full md:translate-x-0'}

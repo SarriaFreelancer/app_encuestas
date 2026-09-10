@@ -43,7 +43,7 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
           window.location.href = '/login';
         }
       }
-      throw new Error(data?.detail || `Error del servidor (${response.status})`);
+      throw new Error(data?.detail || `Error del servidor (${response.status}): Ocurrió un inconveniente al procesar la solicitud.`);
     }
 
     return data;
@@ -51,6 +51,9 @@ export async function fetchApi(endpoint: string, options: RequestInit = {}) {
     clearTimeout(timeoutId);
     if (err.name === 'AbortError') {
       throw new Error('La solicitud tardó demasiado tiempo en responder (Timeout).');
+    }
+    if (err.message && err.message.includes('Failed to fetch')) {
+      throw new Error('No se pudo conectar con el servidor backend. Verifica que FastAPI esté iniciado en http://localhost:8000.');
     }
     throw err;
   }

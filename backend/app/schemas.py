@@ -89,3 +89,11 @@ class AIQueryResponse(BaseModel):
     respuesta: str
     datos_resultado: Optional[List[Dict[str, Any]]] = None
     resumen_estadistico: Optional[Dict[str, Any]] = None
+
+class GoogleSheetsInspectRequest(BaseModel):
+    url: str
+
+class GoogleSheetsProcessRequest(BaseModel):
+    url: str
+    selected_sheets: List[str]
+

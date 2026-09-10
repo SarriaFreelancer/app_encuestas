@@ -155,7 +155,7 @@ export default function AnalisisCruzadoPage() {
                 }`}>
                   <tr>
                     <th className="p-4 border-r border-b border-slate-200 dark:border-slate-800">{colA} \ {colB}</th>
-                    {crosstabData.columnas_b.map((cb: string) => (
+                    {(crosstabData.categorias_b || crosstabData.columnas_b || []).map((cb: string) => (
                       <th key={cb} className="p-4 border-r border-b border-slate-200 dark:border-slate-800 whitespace-nowrap text-center">
                         {cb}
                       </th>
@@ -164,38 +164,92 @@ export default function AnalisisCruzadoPage() {
                   </tr>
                 </thead>
                 <tbody className={`divide-y ${theme === 'light' ? 'divide-slate-200' : 'divide-slate-800'}`}>
-                  {crosstabData.filas_a.map((fa: string) => {
-                    let totalFila = 0;
-                    return (
-                      <tr key={fa} className={theme === 'light' ? 'hover:bg-slate-50' : 'hover:bg-slate-800/30'}>
-                        <td className={`p-4 font-bold border-r whitespace-nowrap ${
-                          theme === 'light' ? 'border-slate-200 text-slate-900 bg-slate-50/50' : 'border-slate-800 text-white bg-slate-950/40'
+                  {Array.isArray(crosstabData.matriz) ? (
+                    // Estructura array de objetos (backend oficial): [{ variable_a: '...', total: N, [cat_b]: { cantidad: N, porcentaje: P } }]
+                    crosstabData.matriz.map((rowObj: any, rIdx: number) => {
+                      const labelA = rowObj.variable_a || rowObj.fila || `Fila ${rIdx + 1}`;
+                      const catsB = crosstabData.categorias_b || crosstabData.columnas_b || [];
+                      const isTotalRow = labelA === 'Total';
+
+                      return (
+                        <tr key={rIdx} className={`${
+                          isTotalRow 
+                            ? theme === 'light' ? 'bg-indigo-50/70 font-black' : 'bg-indigo-950/40 font-black'
+                            : theme === 'light' ? 'hover:bg-slate-50' : 'hover:bg-slate-800/30'
                         }`}>
-                          {fa}
-                        </td>
-                        {crosstabData.columnas_b.map((cb: string) => {
-                          const val = crosstabData.matriz[fa]?.[cb] || 0;
-                          totalFila += val;
-                          return (
-                            <td key={cb} className={`p-4 border-r text-center font-mono ${
-                              theme === 'light' ? 'border-slate-200' : 'border-slate-800'
-                            }`}>
-                              {val > 0 ? (
-                                <span className={`font-bold ${theme === 'light' ? 'text-indigo-600' : 'text-indigo-400'}`}>
-                                  {val}
-                                </span>
-                              ) : (
-                                <span className="opacity-40">-</span>
-                              )}
-                            </td>
-                          );
-                        })}
-                        <td className="p-4 text-center font-black font-mono text-indigo-500">
-                          {totalFila}
-                        </td>
-                      </tr>
-                    );
-                  })}
+                          <td className={`p-4 font-bold border-r whitespace-nowrap ${
+                            theme === 'light' ? 'border-slate-200 text-slate-900' : 'border-slate-800 text-white'
+                          }`}>
+                            {labelA}
+                          </td>
+                          {catsB.map((cb: string) => {
+                            const cellData = rowObj[cb];
+                            const val = typeof cellData === 'object' && cellData !== null ? cellData.cantidad : (typeof cellData === 'number' ? cellData : 0);
+                            const pct = typeof cellData === 'object' && cellData !== null ? cellData.porcentaje : null;
+
+                            return (
+                              <td key={cb} className={`p-4 border-r text-center font-mono ${
+                                theme === 'light' ? 'border-slate-200' : 'border-slate-800'
+                              }`}>
+                                {val > 0 ? (
+                                  <div className="flex flex-col items-center">
+                                    <span className={`font-bold ${theme === 'light' ? 'text-indigo-600' : 'text-indigo-400'}`}>
+                                      {val}
+                                    </span>
+                                    {pct !== null && (
+                                      <span className="text-[10px] text-slate-400 font-semibold">
+                                        ({pct}%)
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="opacity-40">-</span>
+                                )}
+                              </td>
+                            );
+                          })}
+                          <td className="p-4 text-center font-black font-mono text-indigo-500">
+                            {rowObj.total ?? 0}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    // Fallback para matriz diccionario de objetos: { [fila_a]: { [col_b]: cantidad } }
+                    (crosstabData.filas_a || []).map((fa: string) => {
+                      let totalFila = 0;
+                      const catsB = crosstabData.columnas_b || [];
+                      return (
+                        <tr key={fa} className={theme === 'light' ? 'hover:bg-slate-50' : 'hover:bg-slate-800/30'}>
+                          <td className={`p-4 font-bold border-r whitespace-nowrap ${
+                            theme === 'light' ? 'border-slate-200 text-slate-900 bg-slate-50/50' : 'border-slate-800 text-white bg-slate-950/40'
+                          }`}>
+                            {fa}
+                          </td>
+                          {catsB.map((cb: string) => {
+                            const val = crosstabData.matriz[fa]?.[cb] || 0;
+                            totalFila += val;
+                            return (
+                              <td key={cb} className={`p-4 border-r text-center font-mono ${
+                                theme === 'light' ? 'border-slate-200' : 'border-slate-800'
+                              }`}>
+                                {val > 0 ? (
+                                  <span className={`font-bold ${theme === 'light' ? 'text-indigo-600' : 'text-indigo-400'}`}>
+                                    {val}
+                                  </span>
+                                ) : (
+                                  <span className="opacity-40">-</span>
+                                )}
+                              </td>
+                            );
+                          })}
+                          <td className="p-4 text-center font-black font-mono text-indigo-500">
+                            {totalFila}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
                 </tbody>
               </table>
             </div>

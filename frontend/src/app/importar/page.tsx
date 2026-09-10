@@ -8,14 +8,23 @@ import { fetchApi } from '@/lib/api';
 import { useTheme } from '@/context/ThemeContext';
 import { useSidebar } from '@/context/SidebarContext';
 import { showSuccessAlert, showErrorAlert } from '@/lib/alerts';
-import { FileSpreadsheet, Upload, CheckCircle2, AlertTriangle, ArrowRight, Loader2 } from 'lucide-react';
+import { FileSpreadsheet, Upload, CheckCircle2, AlertTriangle, ArrowRight, Loader2, Link as LinkIcon, Database, RefreshCw, Layers } from 'lucide-react';
 
 export default function ImportarEncuestaPage() {
   const { theme } = useTheme();
   const { isCollapsed } = useSidebar();
 
+  const [importMode, setImportMode] = useState<'excel' | 'sheets'>('sheets');
   const [step, setStep] = useState(1);
+  
+  // Estado para archivo Excel
   const [file, setFile] = useState<File | null>(null);
+  
+  // Estado para Google Sheets Link
+  const [sheetsUrl, setSheetsUrl] = useState('');
+  const [sheetsData, setSheetsData] = useState<any>(null);
+  const [selectedSheets, setSelectedSheets] = useState<string[]>(['Hoja Principal (Default)']);
+
   const [loading, setLoading] = useState(false);
   const [analysis, setAnalysis] = useState<any>(null);
   const [result, setResult] = useState<any>(null);
@@ -23,6 +32,44 @@ export default function ImportarEncuestaPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
+    }
+  };
+
+  const handleInspectSheetsUrl = async () => {
+    if (!sheetsUrl.trim()) {
+      showErrorAlert('Enlace requerido', 'Por favor ingresa un enlace válido de Google Sheets.');
+      return;
+    }
+    setLoading(true);
+    try {
+      const data = await fetchApi('/importacion/google-sheets/inspeccionar', {
+        method: 'POST',
+        body: JSON.stringify({ url: sheetsUrl })
+      });
+      setSheetsData(data);
+      setStep(2);
+    } catch (err: any) {
+      showErrorAlert('Error al validar enlace', err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConfirmSheetsImport = async () => {
+    if (!sheetsUrl.trim()) return;
+    setLoading(true);
+    try {
+      const data = await fetchApi('/importacion/google-sheets/procesar', {
+        method: 'POST',
+        body: JSON.stringify({ url: sheetsUrl, selected_sheets: selectedSheets })
+      });
+      setResult(data);
+      setStep(3);
+      showSuccessAlert('¡Dashboard Actualizado!', 'Los nuevos datos de Google Sheets han sido procesados y guardados en la Base de Datos.');
+    } catch (err: any) {
+      showErrorAlert('Error en la importación', err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -142,127 +189,331 @@ export default function ImportarEncuestaPage() {
 
         {/* PASO 1 */}
         {step === 1 && (
-          <div className={`border rounded-3xl p-8 max-w-2xl mx-auto space-y-6 text-center shadow-2xl ${
-            theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/90 border-slate-800'
-          }`}>
-            <div className="w-20 h-20 bg-indigo-600/10 text-indigo-500 rounded-3xl border border-indigo-500/20 flex items-center justify-center mx-auto shadow-inner">
-              <FileSpreadsheet size={40} />
-            </div>
-            <div>
-              <h2 className="text-xl font-black text-slate-900 dark:text-white">Selecciona tu archivo de encuesta (.xlsx o .xls)</h2>
-              <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">El sistema autodetectará las columnas y estructurará los datos automáticamente</p>
+          <div className="space-y-6 max-w-3xl mx-auto">
+            {/* Selector de Origen (Google Sheets vs Archivo Excel) */}
+            <div className={`p-2 rounded-2xl border flex gap-2 shadow-md ${
+              theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+            }`}>
+              <button
+                onClick={() => setImportMode('sheets')}
+                className={`flex-1 py-3 px-4 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  importMode === 'sheets'
+                    ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
+                    : theme === 'light' ? 'hover:bg-slate-100 text-slate-600' : 'hover:bg-slate-800 text-slate-400'
+                }`}
+              >
+                <LinkIcon size={16} /> Enlace de Google Sheets (Recomendado)
+              </button>
+              <button
+                onClick={() => setImportMode('excel')}
+                className={`flex-1 py-3 px-4 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  importMode === 'excel'
+                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30'
+                    : theme === 'light' ? 'hover:bg-slate-100 text-slate-600' : 'hover:bg-slate-800 text-slate-400'
+                }`}
+              >
+                <FileSpreadsheet size={16} /> Subir Archivo Excel Local (.xlsx / .xls)
+              </button>
             </div>
 
-            <input
-              type="file"
-              accept=".xlsx,.xls"
-              onChange={handleFileChange}
-              className="hidden"
-              id="excel-file-input"
-            />
-            <label
-              htmlFor="excel-file-input"
-              className={`inline-flex items-center gap-2 px-6 py-4 font-bold rounded-2xl border cursor-pointer transition-all text-sm shadow-md ${
-                theme === 'light'
-                  ? 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300'
-                  : 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700'
-              }`}
-            >
-              <Upload size={18} />
-              {file ? file.name : 'Buscar archivo Excel...'}
-            </label>
+            {/* MODO GOOGLE SHEETS LINK */}
+            {importMode === 'sheets' && (
+              <div className={`border rounded-3xl p-8 space-y-6 text-center shadow-2xl ${
+                theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/90 border-slate-800'
+              }`}>
+                <div className="w-20 h-20 bg-emerald-600/10 text-emerald-500 rounded-3xl border border-emerald-500/20 flex items-center justify-center mx-auto shadow-inner">
+                  <LinkIcon size={40} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black text-slate-900 dark:text-white">Ingresa el enlace público de tu Google Sheets</h2>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs mt-1 max-w-md mx-auto">
+                    El backend con Python validará automáticamente las hojas de cálculo disponibles para importar los nuevos datos y actualizar las gráficas del Dashboard.
+                  </p>
+                </div>
 
-            {file && (
-              <div className="pt-4">
-                <button
-                  onClick={handleInspect}
-                  disabled={loading}
-                  className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl shadow-xl shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50 cursor-pointer"
+                <div className="space-y-2 text-left max-w-xl mx-auto">
+                  <label className="block text-xs font-bold uppercase text-slate-400">URL del documento de Google Sheets *</label>
+                  <input
+                    type="url"
+                    value={sheetsUrl}
+                    onChange={(e) => setSheetsUrl(e.target.value)}
+                    placeholder="https://docs.google.com/spreadsheets/d/18hVTcC1_ylED47qIfeuHm1rP7cyNW-9wJykhQoNoIrY/edit..."
+                    className={`w-full px-4 py-3.5 rounded-2xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 border ${
+                      theme === 'light' ? 'bg-slate-100 border-slate-300 text-slate-900' : 'bg-slate-800 border-slate-700 text-white'
+                    }`}
+                  />
+                  <p className="text-[11px] text-slate-400 font-medium">Asegúrate de que la hoja tenga permisos de lectura pública (Cualquier persona con el enlace).</p>
+                </div>
+
+                <div className="pt-2 max-w-xl mx-auto">
+                  <button
+                    onClick={handleInspectSheetsUrl}
+                    disabled={loading || !sheetsUrl.trim()}
+                    className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl shadow-xl shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50 cursor-pointer"
+                  >
+                    {loading ? <Loader2 className="animate-spin" size={18} /> : <RefreshCw size={18} />}
+                    VALIDAR HOJAS
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* MODO EXCEL LOCAL */}
+            {importMode === 'excel' && (
+              <div className={`border rounded-3xl p-8 space-y-6 text-center shadow-2xl ${
+                theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/90 border-slate-800'
+              }`}>
+                <div className="w-20 h-20 bg-indigo-600/10 text-indigo-500 rounded-3xl border border-indigo-500/20 flex items-center justify-center mx-auto shadow-inner">
+                  <FileSpreadsheet size={40} />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black text-slate-900 dark:text-white">Selecciona tu archivo de encuesta (.xlsx o .xls)</h2>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs mt-1">El sistema autodetectará las hojas y columnas del archivo automáticamente</p>
+                </div>
+
+                <input
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  id="excel-file-input"
+                />
+                <label
+                  htmlFor="excel-file-input"
+                  className={`inline-flex items-center gap-2 px-6 py-4 font-bold rounded-2xl border cursor-pointer transition-all text-sm shadow-md ${
+                    theme === 'light'
+                      ? 'bg-slate-100 hover:bg-slate-200 text-slate-800 border-slate-300'
+                      : 'bg-slate-800 hover:bg-slate-700 text-white border-slate-700'
+                  }`}
                 >
-                  {loading ? <Loader2 className="animate-spin" size={18} /> : null}
-                  INSPECTAR ESTRUCTURA
-                </button>
+                  <Upload size={18} />
+                  {file ? file.name : 'Buscar archivo Excel...'}
+                </label>
+
+                {file && (
+                  <div className="pt-4 max-w-xl mx-auto">
+                    <button
+                      onClick={handleInspect}
+                      disabled={loading}
+                      className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl shadow-xl shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50 cursor-pointer"
+                    >
+                      {loading ? <Loader2 className="animate-spin" size={18} /> : <RefreshCw size={18} />}
+                      VALIDAR HOJAS
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
         )}
 
         {/* PASO 2 */}
-        {step === 2 && analysis && (
+        {step === 2 && (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className={`p-5 rounded-2xl border shadow-md ${
-                theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
-              }`}>
-                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Hoja Analizada</p>
-                <h3 className="text-xl font-black text-slate-900 dark:text-white mt-1">{analysis.hoja_analizada}</h3>
-              </div>
-              <div className={`p-5 rounded-2xl border shadow-md ${
-                theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
-              }`}>
-                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Total Registros</p>
-                <h3 className="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-1">{analysis.total_registros}</h3>
-              </div>
-              <div className={`p-5 rounded-2xl border shadow-md ${
-                theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
-              }`}>
-                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Total Columnas</p>
-                <h3 className="text-2xl font-black text-purple-600 dark:text-purple-400 mt-1">{analysis.total_columnas}</h3>
-              </div>
-            </div>
+            {/* Si es importación por Google Sheets Link */}
+            {sheetsData ? (
+              <div className="space-y-6">
+                <div className={`p-6 rounded-3xl border shadow-xl ${
+                  theme === 'light' ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+                }`}>
+                  <div className="flex items-start gap-4">
+                    <AlertTriangle size={24} className="text-amber-500 shrink-0 mt-1" />
+                    <div>
+                      <h4 className="font-extrabold text-sm uppercase tracking-wide">Aviso Importante sobre los Datos Actuales</h4>
+                      <p className="text-xs mt-1 leading-relaxed">
+                        Al confirmar esta importación, <strong>el Dashboard actual se respaldará en la Base de Datos</strong> y los nuevos datos de las hojas seleccionadas pasarán a ser la fuente activa para generar los gráficos analíticos actualizados.
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-            <div className={`border rounded-3xl p-6 shadow-xl ${
-              theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/90 border-slate-800'
-            }`}>
-              <h3 className="text-base font-black text-slate-900 dark:text-white mb-4">Profiling de Columnas y Tipos Detectados</h3>
-              <div className="overflow-x-auto max-h-96 rounded-2xl border border-slate-200 dark:border-slate-800">
-                <table className="w-full text-left text-xs">
-                  <thead className={`uppercase text-[11px] font-black tracking-wider sticky top-0 ${
-                    theme === 'light' ? 'bg-slate-100 text-slate-700' : 'bg-slate-800 text-slate-300'
-                  }`}>
-                    <tr>
-                      <th className="p-3">Columna</th>
-                      <th className="p-3">Tipo Detectado</th>
-                      <th className="p-3">Vacíos</th>
-                      <th className="p-3">Valores Únicos</th>
-                      <th className="p-3">Ejemplos</th>
-                    </tr>
-                  </thead>
-                  <tbody className={`divide-y ${theme === 'light' ? 'divide-slate-200' : 'divide-slate-800'}`}>
-                    {analysis.columnas.map((col: any, idx: number) => (
-                      <tr key={idx} className={theme === 'light' ? 'hover:bg-slate-50' : 'hover:bg-slate-800/40'}>
-                        <td className={`p-3 font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>{col.columna}</td>
-                        <td className="p-3 font-bold text-indigo-600 dark:text-indigo-300">{col.tipo_detectado}</td>
-                        <td className="p-3 font-bold text-rose-500">{col.vacios} ({col.porcentaje_vacios}%)</td>
-                        <td className="p-3 font-mono font-bold">{col.valores_unicos}</td>
-                        <td className="p-3 text-slate-500 dark:text-slate-400 truncate max-w-xs">{col.ejemplos.join(', ')}</td>
-                      </tr>
+                <div className={`border rounded-3xl p-6 shadow-xl space-y-4 ${
+                  theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/90 border-slate-800'
+                }`}>
+                  <div className="flex items-center gap-3">
+                    <Layers size={20} className="text-emerald-500" />
+                    <h3 className="text-base font-black text-slate-900 dark:text-white">Selección de Hojas a Tomar Datos</h3>
+                  </div>
+
+                  <div className="space-y-3 pt-2">
+                    {sheetsData.hojas.map((h: any, idx: number) => (
+                      <div key={idx} className={`p-4 rounded-2xl border flex items-center justify-between ${
+                        theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-slate-800/60 border-slate-700'
+                      }`}>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedSheets.includes(h.nombre)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedSheets([...selectedSheets, h.nombre]);
+                              } else {
+                                setSelectedSheets(selectedSheets.filter(s => s !== h.nombre));
+                              }
+                            }}
+                            className="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
+                          />
+                          <div>
+                            <span className="font-extrabold text-sm block">{h.nombre}</span>
+                            <span className="text-xs text-slate-400 font-mono">{h.total_filas} registros • {h.total_columnas} columnas autodetectadas</span>
+                          </div>
+                        </div>
+                        <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xs">Lista para importar</span>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
-              </div>
+                  </div>
 
-              <div className="pt-6 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
-                <button
-                  onClick={() => setStep(1)}
-                  className={`px-6 py-3 font-bold rounded-2xl text-xs transition-all ${
-                    theme === 'light' 
-                      ? 'bg-slate-200 hover:bg-slate-300 text-slate-700' 
-                      : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
-                  }`}
-                >
-                  Volver
-                </button>
-                <button
-                  onClick={handleConfirmImport}
-                  disabled={loading}
-                  className="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl shadow-lg shadow-emerald-600/30 transition-all flex items-center gap-2 text-xs disabled:opacity-50 cursor-pointer"
-                >
-                  {loading ? <Loader2 className="animate-spin" size={18} /> : null}
-                  CONFIRMAR E IMPORTAR
-                </button>
+                  <div className="pt-6 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
+                    <button
+                      onClick={() => setStep(1)}
+                      className={`px-6 py-3 font-bold rounded-2xl text-xs transition-all ${
+                        theme === 'light' 
+                          ? 'bg-slate-200 hover:bg-slate-300 text-slate-700' 
+                          : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                      }`}
+                    >
+                      Volver
+                    </button>
+                    <button
+                      onClick={handleConfirmSheetsImport}
+                      disabled={loading || selectedSheets.length === 0}
+                      className="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl shadow-lg shadow-emerald-600/30 transition-all flex items-center gap-2 text-xs disabled:opacity-50 cursor-pointer"
+                    >
+                      {loading ? <Loader2 className="animate-spin" size={18} /> : <Database size={18} />}
+                      GUARDAR EN BD Y ACTUALIZAR DASHBOARD
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : analysis ? (
+              /* Si es importación por Archivo Excel Local */
+              <div className="space-y-6">
+                <div className={`p-6 rounded-3xl border shadow-xl ${
+                  theme === 'light' ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-amber-500/10 border-amber-500/30 text-amber-300'
+                }`}>
+                  <div className="flex items-start gap-4">
+                    <AlertTriangle size={24} className="text-amber-500 shrink-0 mt-1" />
+                    <div>
+                      <h4 className="font-extrabold text-sm uppercase tracking-wide">Aviso Importante sobre los Datos Actuales</h4>
+                      <p className="text-xs mt-1 leading-relaxed">
+                        Al confirmar esta importación, <strong>el Dashboard actual se respaldará en la Base de Datos</strong> y los datos del archivo Excel pasarán a ser la fuente activa para generar los gráficos analíticos actualizados.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Hojas Disponibles en el Archivo Excel */}
+                {analysis.hojas_disponibles && (
+                  <div className={`border rounded-3xl p-6 shadow-xl space-y-4 ${
+                    theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/90 border-slate-800'
+                  }`}>
+                    <div className="flex items-center gap-3">
+                      <Layers size={20} className="text-indigo-500" />
+                      <h3 className="text-base font-black text-slate-900 dark:text-white">Selección de Hojas del Archivo Excel</h3>
+                    </div>
+
+                    <div className="space-y-3 pt-1">
+                      {analysis.hojas_disponibles.map((hName: string, idx: number) => (
+                        <div key={idx} className={`p-4 rounded-2xl border flex items-center justify-between ${
+                          theme === 'light' ? 'bg-slate-50 border-slate-200' : 'bg-slate-800/60 border-slate-700'
+                        }`}>
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="checkbox"
+                              defaultChecked={idx === 0}
+                              className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500 cursor-pointer"
+                            />
+                            <div>
+                              <span className="font-extrabold text-sm block">{hName}</span>
+                              <span className="text-xs text-slate-400 font-mono">
+                                {idx === 0 ? `${analysis.total_registros} registros • ${analysis.total_columnas} columnas` : 'Hoja Secundaria Detectada'}
+                              </span>
+                            </div>
+                          </div>
+                          <span className="px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-400 font-bold text-xs">
+                            {idx === 0 ? 'Hoja Principal' : 'Disponible'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className={`p-5 rounded-2xl border shadow-md ${
+                    theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+                  }`}>
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Hoja Analizada</p>
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white mt-1">{analysis.hoja_analizada}</h3>
+                  </div>
+                  <div className={`p-5 rounded-2xl border shadow-md ${
+                    theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+                  }`}>
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Total Registros</p>
+                    <h3 className="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-1">{analysis.total_registros}</h3>
+                  </div>
+                  <div className={`p-5 rounded-2xl border shadow-md ${
+                    theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
+                  }`}>
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Total Columnas</p>
+                    <h3 className="text-2xl font-black text-purple-600 dark:text-purple-400 mt-1">{analysis.total_columnas}</h3>
+                  </div>
+                </div>
+
+                <div className={`border rounded-3xl p-6 shadow-xl ${
+                  theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900/90 border-slate-800'
+                }`}>
+                  <h3 className="text-base font-black text-slate-900 dark:text-white mb-4">Profiling de Columnas y Tipos Detectados</h3>
+                  <div className="overflow-x-auto max-h-96 rounded-2xl border border-slate-200 dark:border-slate-800">
+                    <table className="w-full text-left text-xs">
+                      <thead className={`uppercase text-[11px] font-black tracking-wider sticky top-0 ${
+                        theme === 'light' ? 'bg-slate-100 text-slate-700' : 'bg-slate-800 text-slate-300'
+                      }`}>
+                        <tr>
+                          <th className="p-3">Columna</th>
+                          <th className="p-3">Tipo Detectado</th>
+                          <th className="p-3">Vacíos</th>
+                          <th className="p-3">Valores Únicos</th>
+                          <th className="p-3">Ejemplos</th>
+                        </tr>
+                      </thead>
+                      <tbody className={`divide-y ${theme === 'light' ? 'divide-slate-200' : 'divide-slate-800'}`}>
+                        {analysis.columnas.map((col: any, idx: number) => (
+                          <tr key={idx} className={theme === 'light' ? 'hover:bg-slate-50' : 'hover:bg-slate-800/40'}>
+                            <td className={`p-3 font-bold ${theme === 'light' ? 'text-slate-900' : 'text-white'}`}>{col.columna}</td>
+                            <td className="p-3 font-bold text-indigo-600 dark:text-indigo-300">{col.tipo_detectado}</td>
+                            <td className="p-3 font-bold text-rose-500">{col.vacios} ({col.porcentaje_vacios}%)</td>
+                            <td className="p-3 font-mono font-bold">{col.valores_unicos}</td>
+                            <td className="p-3 text-slate-500 dark:text-slate-400 truncate max-w-xs">{col.ejemplos.join(', ')}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="pt-6 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3">
+                    <button
+                      onClick={() => setStep(1)}
+                      className={`px-6 py-3 font-bold rounded-2xl text-xs transition-all ${
+                        theme === 'light' 
+                          ? 'bg-slate-200 hover:bg-slate-300 text-slate-700' 
+                          : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                      }`}
+                    >
+                      Volver
+                    </button>
+                    <button
+                      onClick={handleConfirmImport}
+                      disabled={loading}
+                      className="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-2xl shadow-lg shadow-emerald-600/30 transition-all flex items-center gap-2 text-xs disabled:opacity-50 cursor-pointer"
+                    >
+                      {loading ? <Loader2 className="animate-spin" size={18} /> : null}
+                      CONFIRMAR E IMPORTAR EXCEL
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : null}
           </div>
         )}
 
@@ -294,9 +545,9 @@ export default function ImportarEncuestaPage() {
 
             <button
               onClick={() => window.location.href = '/dashboard'}
-              className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl shadow-xl shadow-indigo-600/30 transition-all text-sm cursor-pointer"
+              className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl shadow-xl shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 text-sm cursor-pointer"
             >
-              IR AL DASHBOARD
+              <RefreshCw size={18} /> VER NUEVOS GRÁFICOS EN DASHBOARD
             </button>
           </div>
         )}
