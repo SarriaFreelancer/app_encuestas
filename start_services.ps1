@@ -51,7 +51,7 @@ while ($true) {
     if (-not $frontendConn) {
         Log-Message "El frontend (puerto 3007) no responde. Levantando proceso..."
         Write-Host " [!] Levantando Frontend (Next.js en puerto 3007)..." -ForegroundColor Yellow
-        Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"cd '$appDir\frontend'; npm run dev -- -p 3007`"" -WindowStyle Hidden
+        Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"cd '$appDir\frontend'; pnpm dev -p 3007`"" -WindowStyle Hidden
     }
 
     if ($firstRun) {

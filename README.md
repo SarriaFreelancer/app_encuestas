@@ -111,10 +111,10 @@ python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 cd frontend
 
 # 2. Instalar dependencias (Solo la primera vez)
-npm install
+pnpm install
 
 # 3. Iniciar el servidor de desarrollo en el puerto 3007
-npm run dev -- -p 3007
+pnpm dev -p 3007
 ```
 > 🟢 **Plataforma web activa en:** `http://localhost:3007`
 
@@ -127,7 +127,7 @@ Para realizar pruebas remotas desde dispositivos móviles o compartir con tu equ
 Abre una **tercera pestaña de terminal** y ejecuta:
 
 ```powershell
-npx ngrok http 3007
+pnpm dlx ngrok http 3007
 ```
 
 **Ngrok generará un enlace público seguro**, por ejemplo:
@@ -152,7 +152,7 @@ Forwarding: https://abroad-glancing-specked.ngrok-free.dev -> http://localhost:3
 - **Solución:** Debes ingresar a la carpeta `frontend` primero:
   ```powershell
   cd frontend
-  npm run dev -- -p 3007
+  pnpm dev -p 3007
   ```
 
 ### ❌ Error `[WinError 10013] Intento de acceso a un socket no permitido` o Puerto ocupado
