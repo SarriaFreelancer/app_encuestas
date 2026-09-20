@@ -7,7 +7,8 @@
     "dev:3007": "next dev -p 3007",
     "dev:3008": "next dev -p 3008",
     "build": "next build",
-    "start": "next start -p 3008",
+    "start": "next start",
+    "start:3008": "next start -p 3008",
     "lint": "eslint"
   },
   "dependencies": {

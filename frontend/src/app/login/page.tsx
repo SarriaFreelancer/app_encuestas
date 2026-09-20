@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import Link from 'next/link';
 import { Lock, User as UserIcon, AlertCircle, Loader2, Clock, Eye, EyeOff, Sun, Moon } from 'lucide-react';
 
-export default function LoginPage() {
+function LoginForm() {
   const { theme, toggleTheme } = useTheme();
   const [usuario, setUsuario] = useState('');
   const [contrasena, setContrasena] = useState('');
@@ -227,5 +227,17 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
+        <Loader2 className="animate-spin text-indigo-500" size={32} />
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
