@@ -21,16 +21,16 @@ export default function Sidebar() {
 
   const navItems = [
     { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { label: 'Importar encuesta', href: '/importar', icon: FileSpreadsheet },
-    { label: 'Análisis preguntas', href: '/preguntas', icon: Columns },
+    { label: 'Importar encuesta', href: '/importar', icon: FileSpreadsheet, superAdminOnly: true },
+    { label: 'Análisis preguntas', href: '/preguntas', icon: Columns, superAdminOnly: true },
     { label: 'Respuestas', href: '/respuestas', icon: ClipboardList },
     { label: 'Buscar persona', href: '/buscar', icon: Search },
-    { label: 'Reportes', href: '/reportes', icon: FileText },
+    { label: 'Reportes', href: '/reportes', icon: FileText, superAdminOnly: true },
     { label: 'Nueva encuesta', href: '/encuesta/nueva', icon: FilePlus },
     { label: 'Usuarios', href: '/usuarios', icon: Users, adminOnly: true },
-    { label: 'Análisis cruzado', href: '/analisis-cruzado', icon: GitCompare, adminOnly: true },
+    { label: 'Análisis cruzado', href: '/analisis-cruzado', icon: GitCompare, superAdminOnly: true },
     { label: 'Consulta IA', href: '/consulta-ia', icon: Bot, adminOnly: true },
-    { label: 'Auditoría', href: '/auditoria', icon: History, adminOnly: true },
+    { label: 'Auditoría', href: '/auditoria', icon: History, superAdminOnly: true },
     // Módulo exclusivo de SUPERADMIN (Habilitar / Configurar Módulos)
     { label: 'Configuración', href: '/configuracion', icon: Settings, superAdminOnly: true },
   ];

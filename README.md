@@ -66,26 +66,29 @@ El proyecto está estructurado en dos carpetas independientes:
 
 ---
 
-### ⚡ Opción A: Levantar Todo Automáticamente (Recomendado en Windows)
+### ⚡ Opción A: Levantar Todo Automáticamente (Recomendado)
 
-En la raíz del proyecto existe un script de PowerShell que monitorea e inicia ambos servicios:
-
-Abre PowerShell en la raíz del proyecto (`app_encuentas`) y ejecuta:
+En la raíz del proyecto existe un script de PowerShell que monitorea e inicia de forma automática y silenciosa ambos servicios (Backend en Python y Frontend con `pnpm`):
 
 ```powershell
 .\start_services.ps1
 ```
 
-> 🟢 **Backend activo en:** `http://localhost:8000`  
-> 🟢 **Frontend activo en:** `http://localhost:3007`
+> 🟢 **Frontend activo en:** `http://localhost:3007`  
+> 🟢 **Backend API Docs:** `http://localhost:8000/docs`
+
+#### 🛑 Para detener todos los servicios:
+```powershell
+.\stop_services.ps1
+```
 
 ---
 
-### 💻 Opción B: Iniciar Servidores Manualmente por Consola
+### 💻 Opción B: Iniciar Servidores Manualmente por Consola (Dos Terminales)
 
-Abre dos pestañas de terminal en tu editor (ej. Visual Studio Code con `Ctrl + ~`):
+Abre dos terminales en la raíz del proyecto (`app_encuentas`):
 
-#### 1️⃣ Terminal 1: Iniciar Servidor Backend (FastAPI - Puerto 8000)
+#### 1️⃣ Terminal 1: Iniciar Backend (FastAPI / Python)
 
 ```powershell
 # 1. Ingresar a la carpeta del backend
@@ -97,14 +100,14 @@ cd backend
 # 3. Instalar dependencias (Solo la primera vez)
 pip install -r requirements.txt
 
-# 4. Levantar el servidor Uvicorn (FastAPI)
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+# 4. Levantar el servidor Backend (FastAPI)
+python -m uvicorn app.main:app --port 8000 --reload
 ```
-> 🟢 **Documentación interactiva Swagger de la API:** `http://localhost:8000/docs`
+> 🟢 **API Documentación Swagger:** `http://localhost:8000/docs`
 
 ---
 
-#### 2️⃣ Terminal 2: Iniciar Servidor Frontend (Next.js - Puerto 3007)
+#### 2️⃣ Terminal 2: Iniciar Frontend (Next.js con `pnpm`)
 
 ```powershell
 # 1. Ingresar a la carpeta del frontend
@@ -118,6 +121,11 @@ pnpm dev -p 3007
 ```
 > 🟢 **Plataforma web activa en:** `http://localhost:3007`
 
+*Nota: Si estás en la raíz del proyecto y deseas levantar el frontend sin cambiar de carpeta:*
+```powershell
+pnpm --filter frontend dev -p 3007
+```
+
 ---
 
 ### 🔗 Opción C: Exposición Temporal a Internet con Ngrok
@@ -127,7 +135,7 @@ Para realizar pruebas remotas desde dispositivos móviles o compartir con tu equ
 Abre una **tercera pestaña de terminal** y ejecuta:
 
 ```powershell
-pnpm dlx ngrok http 3007
+pnpm dlx ngrok http --url=abroad-glancing-specked.ngrok-free.dev 3007
 ```
 
 **Ngrok generará un enlace público seguro**, por ejemplo:

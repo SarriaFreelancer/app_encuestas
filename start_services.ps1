@@ -43,7 +43,7 @@ while ($true) {
     if (-not $backendConn) {
         Log-Message "El backend (puerto 8000) no responde. Levantando proceso..."
         Write-Host " [!] Levantando Backend (FastAPI en puerto 8000)..." -ForegroundColor Yellow
-        Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"cd '$appDir\backend'; .\venv\Scripts\activate; python -m uvicorn app.main:app --host 0.0.0.0 --port 8000`"" -WindowStyle Hidden
+        Start-Process powershell -ArgumentList "-NoProfile -ExecutionPolicy Bypass -Command `"cd '$appDir\backend'; .\venv\Scripts\activate; python -m uvicorn app.main:app --port 8000`"" -WindowStyle Hidden
     }
 
     # 2. Monitoreo y arranque del Frontend (Next.js - Puerto 3007)

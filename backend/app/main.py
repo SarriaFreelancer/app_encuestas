@@ -66,6 +66,9 @@ async def inspeccionar_excel(
     """
     Inspecciona 100% de las filas y columnas del Excel sin omitir ningún dato.
     """
+    if current_user.rol != UserRole.SUPERADMIN:
+        raise HTTPException(status_code=403, detail="Acceso denegado. Solo SUPERADMIN puede importar encuestas.")
+
     if not (file.filename.endswith('.xlsx') or file.filename.endswith('.xls')):
         raise HTTPException(status_code=400, detail="Formato no soportado. Suba un archivo .xlsx o .xls")
 
@@ -92,6 +95,8 @@ async def procesar_importacion(
     """
     Carga Permisiva 100%: Lee todas las celdas como texto crudo, preservando vacíos y duplicados.
     """
+    if current_user.rol != UserRole.SUPERADMIN:
+        raise HTTPException(status_code=403, detail="Acceso denegado. Solo SUPERADMIN puede importar encuestas.")
     contents = await file.read()
     # Leer como cadena cruda para conservar todo
     df = pd.read_excel(io.BytesIO(contents), dtype=str)
@@ -134,6 +139,9 @@ async def inspeccionar_google_sheets_link(
     """
     Valida un enlace público de Google Sheets e inspecciona todas las pestañas/hojas disponibles.
     """
+    if current_user.rol != UserRole.SUPERADMIN:
+        raise HTTPException(status_code=403, detail="Acceso denegado. Solo SUPERADMIN puede importar encuestas.")
+
     sheet_id = _extract_sheets_id(req.url)
     
     # Obtener el HTML de la vista pública para extraer todas las pestañas (sheet names y gids)
@@ -226,6 +234,9 @@ async def procesar_google_sheets_link(
     """
     Importa los datos de las hojas seleccionadas de Google Sheets y actualiza el Dashboard activando los nuevos gráficos.
     """
+    if current_user.rol != UserRole.SUPERADMIN:
+        raise HTTPException(status_code=403, detail="Acceso denegado. Solo SUPERADMIN puede importar encuestas.")
+
     sheet_id = _extract_sheets_id(req.url)
     csv_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv"
     
@@ -296,6 +307,9 @@ def get_crosstab(
     current_user: UserPublic = Depends(get_current_user),
     repo: BaseRepository = Depends(get_repository)
 ):
+    if current_user.rol != UserRole.SUPERADMIN:
+        raise HTTPException(status_code=403, detail="Acceso denegado. Solo SUPERADMIN puede realizar análisis cruzado.")
+
     rows = repo.get_all_responses()
     if not rows:
         raise HTTPException(status_code=400, detail="No hay datos para realizar el cruce")
@@ -373,8 +387,9 @@ def ai_query(
 # --- AUDITORÍA & HISTORIAL ---
 @app.get("/api/auditoria")
 def get_audit_logs(current_user: UserPublic = Depends(get_current_user)):
-    if current_user.rol not in [UserRole.SUPERADMIN, UserRole.ADMIN]:
+    if current_user.rol != UserRole.SUPERADMIN:
         raise HTTPException(status_code=403, detail="Acceso no autorizado.")
+    return audit_service.get_logs()
     return audit_service.get_logs()
 
 # --- USUARIOS (CRUD COMPLETO Y MÁSCARA DE SUPERADMIN) ---

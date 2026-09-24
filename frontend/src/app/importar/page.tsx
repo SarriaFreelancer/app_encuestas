@@ -150,7 +150,7 @@ export default function ImportarEncuestaPage() {
   };
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute requireSuperAdmin>
     <div className={`min-h-screen transition-colors ${
       theme === 'light' ? 'bg-slate-50 text-slate-900' : 'bg-slate-950 text-slate-100'
     }`}>
