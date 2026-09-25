@@ -16,6 +16,11 @@ import {
   UserCheck, HelpCircle, CheckSquare, ListChecks, Calendar, Hash, Type
 } from 'lucide-react';
 
+const isAutorizaCampo = (campo: string): boolean => {
+  const lower = campo.toLowerCase();
+  return lower.includes('autoriza') && lower.includes('tratamiento');
+};
+
 export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?: boolean }) {
   const { theme } = useTheme();
   const { isCollapsed } = useSidebar();
@@ -34,6 +39,17 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
   const [submitting, setSubmitting] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  // Identificar campo de autorización y su estado actual
+  const autorizaField = useMemo(() => {
+    return metadata?.configuraciones.find(c => isAutorizaCampo(c.campo))?.campo || '¿Autoriza el tratamiento de sus datos personales?';
+  }, [metadata]);
+
+  const autorizaValue = formData[autorizaField] || '';
+  const noAutorizaTratamiento = useMemo(() => {
+    const l = String(autorizaValue).trim().toLowerCase();
+    return l.startsWith('no') || l.includes('no autoriz');
+  }, [autorizaValue]);
 
   // Cargar metadatos y opciones dinámicas
   const loadMetadata = async () => {
@@ -98,6 +114,22 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
       sanitized = soloLetras(sanitized);
     }
 
+    if (isAutorizaCampo(campo)) {
+      const l = sanitized.trim().toLowerCase();
+      const isNo = l.startsWith('no') || l.includes('no autoriz');
+      if (isNo) {
+        // Al seleccionar 'No autoriza', conservar solo la marca temporal y el campo de autorización
+        setFormData(prev => ({
+          'Marca temporal': prev['Marca temporal'] || new Date().toLocaleDateString('es-CO'),
+          [campo]: sanitized
+        }));
+        setFieldErrors({});
+        setCedulaDuplicada(null);
+        setCedulaMensaje('');
+        return;
+      }
+    }
+
     setFormData(prev => ({ ...prev, [campo]: sanitized }));
 
     // Validar y actualizar errores (solo si ya intentó enviar o el campo tiene valor)
@@ -106,8 +138,8 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
       setFieldErrors(prev => ({ ...prev, [campo]: error }));
     }
 
-    // Si es campo de documento, verificar duplicado
-    if (esDocumento(campo)) {
+    // Si es campo de documento, verificar duplicado (si aplica)
+    if (esDocumento(campo) && !noAutorizaTratamiento) {
       verificarDuplicado(sanitized);
     }
   };
@@ -126,8 +158,8 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
     setFormData(prev => ({ ...prev, [campo]: selected.join(', ') }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e && e.preventDefault) e.preventDefault();
     setErrorMessage('');
     setSaveSuccess(false);
     setSubmittedOnce(true);
@@ -138,15 +170,30 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
 
     if (metadata?.configuraciones) {
       for (const cfg of metadata.configuraciones) {
+        const isThisAutoriza = isAutorizaCampo(cfg.campo);
         const valor = String(formData[cfg.campo] || '');
         const { error } = validarCampo(cfg.campo, valor);
 
-        if (cfg.obligatorio && !valor.trim()) {
-          newErrors[cfg.campo] = 'Este campo es obligatorio.';
-          if (!firstErrorField) firstErrorField = cfg.campo;
-        } else if (error) {
-          newErrors[cfg.campo] = error;
-          if (!firstErrorField) firstErrorField = cfg.campo;
+        if (!noAutorizaTratamiento) {
+          // Flujo estándar: todos los campos obligatorios deben estar presentes
+          if (cfg.obligatorio && !valor.trim()) {
+            newErrors[cfg.campo] = 'Este campo es obligatorio.';
+            if (!firstErrorField) firstErrorField = cfg.campo;
+          } else if (error) {
+            newErrors[cfg.campo] = error;
+            if (!firstErrorField) firstErrorField = cfg.campo;
+          }
+        } else {
+          // Flujo cuando NO autoriza:
+          // Solo el campo de autorización es obligatorio, el resto es opcional
+          if (isThisAutoriza && !valor.trim()) {
+            newErrors[cfg.campo] = 'Debe seleccionar una opción de autorización.';
+            if (!firstErrorField) firstErrorField = cfg.campo;
+          } else if (valor.trim() && error) {
+            // Si el usuario llenó algo voluntariamente en otro campo, validamos su formato
+            newErrors[cfg.campo] = error;
+            if (!firstErrorField) firstErrorField = cfg.campo;
+          }
         }
       }
     }
@@ -162,7 +209,7 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
       return;
     }
 
-    if (cedulaDuplicada) {
+    if (!noAutorizaTratamiento && cedulaDuplicada) {
       showErrorAlert('Documento existente', 'No es posible registrar una encuesta con un documento que ya existe en el sistema.');
       return;
     }
@@ -175,7 +222,12 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
       });
 
       setSaveSuccess(true);
-      await showSuccessAlert('¡Encuesta Registrada!', 'La encuesta ha sido guardada y sincronizada exitosamente.');
+      await showSuccessAlert(
+        '¡Encuesta Registrada!', 
+        noAutorizaTratamiento 
+          ? 'La respuesta ha sido guardada como "No autoriza tratamiento de datos" y sincronizada exitosamente con la base de datos y Google Sheets.'
+          : 'La encuesta ha sido guardada y sincronizada exitosamente.'
+      );
       window.scrollTo({ top: 0, behavior: 'smooth' });
 
       setFormData({
@@ -196,12 +248,23 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
 
   const renderFieldInput = (cfg: ColumnConfig, idx: number) => {
     const campo = cfg.campo;
+    const isThisAutoriza = isAutorizaCampo(campo);
     const lower = campo.toLowerCase();
     const isMulti = lower.includes('puede marcar') || lower.includes('varias opciones') || lower.includes('estrategias');
     const valor = formData[campo] || '';
-    const opciones = cfg.opciones || [];
+    let opciones = cfg.opciones || [];
+
+    // Garantizar opciones estándar para el campo de autorización
+    if (isThisAutoriza && (!opciones || opciones.length === 0)) {
+      opciones = [
+        'Sí, autorizo el tratamiento de mis datos personales.',
+        'No autorizo el tratamiento de mis datos personales.'
+      ];
+    }
+
     const fieldError = fieldErrors[campo] || '';
     const hasError = !!fieldError;
+    const isFieldRequired = isThisAutoriza ? cfg.obligatorio : (!noAutorizaTratamiento && cfg.obligatorio);
 
     // Título con enumeración clara y llamativa
     const displayNumber = idx + 1;
@@ -235,30 +298,44 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
         className={`p-5 rounded-2xl border transition-all ${
           hasError
             ? 'border-rose-500/60 bg-rose-500/5'
+            : isThisAutoriza && noAutorizaTratamiento
+            ? theme === 'light'
+              ? 'border-amber-400 bg-amber-50/70 shadow-sm'
+              : 'border-amber-500/60 bg-amber-950/30 shadow-sm'
             : theme === 'light'
-            ? 'bg-white border-slate-200/90 hover:border-indigo-400 shadow-sm'
-            : 'bg-slate-900/80 border-slate-700/60 hover:border-slate-600 shadow-sm'
+            ? 'bg-white border-slate-200 hover:border-indigo-400 shadow-sm'
+            : 'bg-slate-900 border-slate-800 hover:border-slate-700 shadow-sm'
         } ${isMulti ? 'md:col-span-2' : ''}`}
       >
         {/* Título de la pregunta con número colorido */}
         <label className="block mb-3">
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-start gap-2.5">
-              <span className="shrink-0 px-2.5 py-1 rounded-lg font-black text-xs bg-indigo-600 text-white shadow-md shadow-indigo-600/30">
+              <span className={`shrink-0 px-2.5 py-1 rounded-lg font-black text-xs text-white shadow-md ${
+                isThisAutoriza && noAutorizaTratamiento 
+                  ? 'bg-amber-600 shadow-amber-600/30' 
+                  : 'bg-indigo-600 shadow-indigo-600/30'
+              }`}>
                 {displayNumber}
               </span>
               <span className={`font-black text-xs sm:text-sm leading-snug ${
-                theme === 'light' ? 'text-slate-900' : 'text-slate-100'
+                theme === 'light' ? 'text-slate-900' : 'text-white'
               }`}>
                 {cleanTitle}
-                {cfg.obligatorio && <span className="text-rose-500 font-black ml-1">*</span>}
+                {isFieldRequired && <span className="text-rose-500 font-black ml-1">*</span>}
               </span>
             </div>
-            {cfg.obligatorio && (
+            {isFieldRequired ? (
               <span className="shrink-0 text-[10px] px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-600 font-black border border-rose-500/30">
                 Requerido
               </span>
-            )}
+            ) : noAutorizaTratamiento && !isThisAutoriza ? (
+              <span className={`shrink-0 text-[10px] px-2 py-0.5 rounded-md font-bold border ${
+                theme === 'light' ? 'bg-slate-100 text-slate-600 border-slate-300' : 'bg-slate-800 text-slate-300 border-slate-700'
+              }`}>
+                Opcional
+              </span>
+            ) : null}
           </div>
         </label>
 
@@ -300,30 +377,92 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
           </div>
         ) : opciones.length > 0 ? (
           /* 2. SELECTOR SIMPLE (Dropdown con opciones únicas) */
-          <select
-            value={valor}
-            required={cfg.obligatorio}
-            onChange={(e) => handleInputChange(campo, e.target.value)}
-            className={`w-full px-4 py-3 rounded-xl border text-xs sm:text-sm font-semibold transition-all focus:outline-none focus:ring-2 cursor-pointer ${
-              hasError
-                ? inputErrorClass
-                : `focus:ring-indigo-500 ${theme === 'light' ? 'bg-slate-50 border-slate-300 text-slate-800' : 'bg-slate-800 border-slate-700 text-slate-200'}`
-            }`}
-          >
-            <option value="">-- Seleccione una opción --</option>
-            {opciones.map((opc, oIdx) => (
-              <option key={oIdx} value={opc}>
-                {opc}
+          <div>
+            <select
+              value={
+                opciones.includes(valor)
+                  ? valor
+                  : (valor.toLowerCase().startsWith('otro') || (valor && !opciones.includes(valor)))
+                  ? (opciones.find(o => o.toLowerCase().startsWith('otro')) || 'Otros:')
+                  : valor
+              }
+              required={isFieldRequired}
+              onChange={(e) => handleInputChange(campo, e.target.value)}
+              className={`w-full px-4 py-3 rounded-xl border text-xs sm:text-sm font-semibold transition-all focus:outline-none focus:ring-2 cursor-pointer ${
+                hasError
+                  ? inputErrorClass
+                  : isThisAutoriza && noAutorizaTratamiento
+                  ? theme === 'light'
+                    ? 'bg-white border-amber-500 text-slate-900 focus:ring-amber-500 shadow-sm'
+                    : 'bg-slate-800 border-amber-500 text-white focus:ring-amber-500 shadow-sm'
+                  : theme === 'light'
+                  ? 'bg-slate-50 border-slate-300 text-slate-900 focus:ring-indigo-500'
+                  : 'bg-slate-800 border-slate-700 text-slate-100 focus:ring-indigo-500'
+              }`}
+            >
+              <option value="" className={theme === 'light' ? 'bg-white text-slate-900' : 'bg-slate-900 text-white'}>
+                -- Seleccione una opción --
               </option>
-            ))}
-          </select>
+              {opciones.map((opc, oIdx) => (
+                <option 
+                  key={oIdx} 
+                  value={opc}
+                  className={theme === 'light' ? 'bg-white text-slate-900 font-medium' : 'bg-slate-900 text-white font-medium'}
+                >
+                  {opc}
+                </option>
+              ))}
+            </select>
+
+            {/* Input adicional si selecciona "Otros:" o variante para especificar */}
+            {opciones.some(o => o.toLowerCase().startsWith('otro')) && 
+             (valor.toLowerCase().startsWith('otro') || (valor && !opciones.includes(valor))) && (
+              <div className="mt-2.5 animate-fade-in">
+                <input
+                  type="text"
+                  placeholder="Especifique cuál / detalle..."
+                  value={
+                    valor.startsWith('Otros: ')
+                      ? valor.replace('Otros: ', '')
+                      : valor.startsWith('Otro: ')
+                      ? valor.replace('Otro: ', '')
+                      : valor === 'Otros:' || valor === 'Otro' || valor === 'Otros'
+                      ? ''
+                      : valor
+                  }
+                  onChange={(e) => {
+                    const customText = e.target.value;
+                    const otherOption = opciones.find(o => o.toLowerCase().startsWith('otro')) || 'Otros:';
+                    handleInputChange(campo, customText ? `${otherOption.endsWith(':') ? otherOption : otherOption + ':'} ${customText}` : otherOption);
+                  }}
+                  className={`w-full px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-medium transition-all focus:outline-none focus:ring-2 ${
+                    theme === 'light'
+                      ? 'bg-white border-indigo-300 text-slate-900 placeholder:text-slate-400 focus:ring-indigo-500 focus:border-indigo-500'
+                      : 'bg-slate-800 border-indigo-500/50 text-slate-100 placeholder:text-slate-400 focus:ring-indigo-500 focus:border-indigo-500'
+                  }`}
+                />
+              </div>
+            )}
+
+            {/* Aviso breve y de alto contraste cuando se selecciona 'No autoriza' */}
+            {isThisAutoriza && noAutorizaTratamiento && (
+              <div className={`mt-3 p-3 rounded-xl border text-xs font-semibold flex items-center gap-2.5 animate-fade-in ${
+                theme === 'light'
+                  ? 'bg-amber-100 border-amber-300 text-amber-950'
+                  : 'bg-amber-950/60 border-amber-500/50 text-amber-200'
+              }`}>
+                <AlertCircle size={17} className={theme === 'light' ? 'text-amber-800 shrink-0' : 'text-amber-400 shrink-0'} />
+                <span>No autoriza tratamiento de datos. Las demás preguntas se han ocultado y puede guardar directamente.</span>
+              </div>
+            )}
+          </div>
         ) : isDate ? (
           /* 3. INPUT DE FECHA NATIVO */
           <div>
             <input
               type="date"
               value={valor}
-              required={cfg.obligatorio}
+              required={isFieldRequired}
               onChange={(e) => handleInputChange(campo, e.target.value)}
               className={`w-full px-4 py-3 rounded-xl border text-xs sm:text-sm font-semibold transition-all focus:outline-none focus:ring-2 cursor-pointer ${
                 hasError
@@ -345,7 +484,7 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
                 type="text"
                 inputMode={esDocumento(campo) || esSoloNumeros(campo) ? 'numeric' : 'text'}
                 value={valor}
-                required={cfg.obligatorio}
+                required={isFieldRequired}
                 placeholder={
                   esDocumento(campo)
                     ? 'Solo números (ej. 1234567890)'
@@ -374,7 +513,7 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
             )}
 
             {/* Aviso especial de verificación de documento */}
-            {esDocumento(campo) && cedulaMensaje && !hasError && (
+            {esDocumento(campo) && cedulaMensaje && !hasError && !noAutorizaTratamiento && (
               <div className={`mt-2 p-2.5 rounded-xl text-xs font-bold flex items-center gap-2 border ${
                 cedulaDuplicada
                   ? 'bg-rose-500/10 border-rose-500/30 text-rose-500'
@@ -457,13 +596,71 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
           <div className={`p-6 sm:p-8 rounded-3xl border shadow-xl ${
             theme === 'light' ? 'bg-white border-slate-200' : 'bg-slate-900 border-slate-800'
           }`}>
-            <h2 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-wider mb-6 pb-3 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2">
-              <FilePlus size={18} className="text-indigo-500" />
-              Cuestionario Completo de Preguntas
+            <h2 className={`text-base font-black uppercase tracking-wider mb-6 pb-3 border-b flex items-center justify-between gap-2 ${
+              theme === 'light' ? 'text-slate-900 border-slate-200' : 'text-white border-slate-800'
+            }`}>
+              <div className="flex items-center gap-2">
+                <FilePlus size={18} className="text-indigo-500" />
+                <span>{noAutorizaTratamiento ? 'Formulario Simplificado (Sin Autorización de Datos)' : 'Cuestionario Completo de Preguntas'}</span>
+              </div>
+              {noAutorizaTratamiento && (
+                <span className={`text-xs font-bold px-3 py-1 rounded-full border ${
+                  theme === 'light'
+                    ? 'text-amber-950 bg-amber-100 border-amber-300'
+                    : 'text-amber-300 bg-amber-950/60 border-amber-500/50'
+                }`}>
+                  Demás preguntas ocultas
+                </span>
+              )}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {metadata?.configuraciones.map((cfg, idx) => renderFieldInput(cfg, idx))}
+              {metadata?.configuraciones.map((cfg, idx) => {
+                // Si la persona seleccionó que NO autoriza el tratamiento de datos, ocultar todas las demás preguntas
+                if (noAutorizaTratamiento && !isAutorizaCampo(cfg.campo) && cfg.campo.toLowerCase() !== 'marca temporal') {
+                  return null;
+                }
+
+                // Identificar sección temática
+                const matchNum = cfg.campo.match(/^(\d+)\./);
+                const qNum = matchNum ? parseInt(matchNum[1], 10) : null;
+                let sectionBanner = null;
+
+                if (!noAutorizaTratamiento && qNum !== null) {
+                  if (qNum === 1) {
+                    sectionBanner = "IDENTIFICACIÓN Y DATOS GENERALES";
+                  } else if (qNum === 21) {
+                    sectionBanner = "COMPOSICIÓN DEL HOGAR";
+                  } else if (qNum === 40) {
+                    sectionBanner = "CONDICIÓN DE VÍCTIMA";
+                  } else if (qNum === 48) {
+                    sectionBanner = "CONDICIONES SOCIOECONÓMICAS";
+                  } else if (qNum === 66) {
+                    sectionBanner = "NECESIDADES PRIORITARIAS";
+                  } else if (qNum === 69) {
+                    sectionBanner = "ATENCIÓN INSTITUCIONAL";
+                  } else if (qNum === 74) {
+                    sectionBanner = "PARTICIPACIÓN Y PERCEPCIÓN";
+                  }
+                }
+
+                return (
+                  <React.Fragment key={cfg.campo}>
+                    {sectionBanner && (
+                      <div className="md:col-span-2 mt-6 mb-2 pt-4 border-t border-slate-200 dark:border-slate-800">
+                        <div className="flex items-center gap-3">
+                          <div className="h-2.5 w-2.5 rounded-full bg-indigo-500 ring-4 ring-indigo-500/20"></div>
+                          <h3 className="text-xs sm:text-sm font-black tracking-wider uppercase text-indigo-600 dark:text-indigo-400">
+                            {sectionBanner}
+                          </h3>
+                          <div className="h-px flex-1 bg-gradient-to-r from-indigo-500/30 to-transparent"></div>
+                        </div>
+                      </div>
+                    )}
+                    {renderFieldInput(cfg, idx)}
+                  </React.Fragment>
+                );
+              })}
             </div>
           </div>
 
@@ -471,24 +668,35 @@ export default function FormularioEncuestaPage({ isPublic = false }: { isPublic?
           <div className={`p-6 rounded-3xl border shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4 sticky bottom-6 z-20 backdrop-blur-xl ${
             theme === 'light' ? 'bg-white/95 border-slate-200' : 'bg-slate-900/95 border-slate-800'
           }`}>
-            <div className="text-xs text-slate-500 dark:text-slate-400">
-              <span className="font-bold text-slate-800 dark:text-slate-200">Verifique los datos:</span> Las preguntas marcadas con <span className="text-rose-500 font-bold">*</span> son obligatorias.
+            <div className="text-xs">
+              {noAutorizaTratamiento ? (
+                <span className={`font-bold text-xs sm:text-sm flex items-center gap-2 ${
+                  theme === 'light' ? 'text-amber-950' : 'text-amber-300'
+                }`}>
+                  <AlertCircle size={17} className={theme === 'light' ? 'text-amber-800 shrink-0' : 'text-amber-400 shrink-0'} />
+                  <span>No se autorizó el tratamiento de datos personales: Puede guardar el formulario directamente.</span>
+                </span>
+              ) : (
+                <span className={theme === 'light' ? 'text-slate-700' : 'text-slate-300'}>
+                  <span className="font-bold">Verifique los datos:</span> Las preguntas marcadas con <span className="text-rose-500 font-bold">*</span> son obligatorias.
+                </span>
+              )}
             </div>
 
             <button
               type="submit"
-              disabled={submitting || cedulaDuplicada === true}
+              disabled={submitting || (!noAutorizaTratamiento && cedulaDuplicada === true)}
               className="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white font-black text-sm rounded-2xl shadow-xl shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               {submitting ? (
                 <>
                   <Loader2 className="animate-spin" size={18} />
-                  <span>Guardando encuesta...</span>
+                  <span>Guardando...</span>
                 </>
               ) : (
                 <>
                   <Save size={18} />
-                  <span>GUARDAR ENCUESTA</span>
+                  <span>GUARDAR FORMULARIO</span>
                 </>
               )}
             </button>

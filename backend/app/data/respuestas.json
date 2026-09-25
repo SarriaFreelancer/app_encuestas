@@ -79,7 +79,8 @@
     "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?",
     "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?",
     "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?",
-    "¿Cómo califica la atención brindada por las instituciones?"
+    "¿Cómo califica la atención brindada por las instituciones?",
+    "Filtro_Activo"
   ],
   "rows": [
     {
@@ -163,7 +164,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 3,
@@ -246,7 +248,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 4,
@@ -329,7 +332,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 5,
@@ -412,7 +416,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 6,
@@ -495,7 +500,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 7,
@@ -578,7 +584,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 8,
@@ -661,7 +668,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 9,
@@ -744,7 +752,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 10,
@@ -827,7 +836,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 11,
@@ -910,7 +920,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 12,
@@ -993,7 +1004,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 13,
@@ -1076,7 +1088,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 14,
@@ -1159,7 +1172,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 15,
@@ -1242,7 +1256,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 16,
@@ -1325,7 +1340,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 17,
@@ -1408,7 +1424,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 18,
@@ -1491,7 +1508,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 19,
@@ -1574,7 +1592,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 20,
@@ -1657,7 +1676,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 21,
@@ -1740,7 +1760,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 22,
@@ -1823,7 +1844,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 23,
@@ -1906,7 +1928,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 24,
@@ -1989,7 +2012,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 25,
@@ -2072,7 +2096,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 26,
@@ -2155,7 +2180,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 27,
@@ -2238,7 +2264,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 28,
@@ -2321,7 +2348,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 29,
@@ -2404,7 +2432,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 30,
@@ -2487,7 +2516,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 31,
@@ -2570,7 +2600,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 32,
@@ -2653,7 +2684,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 33,
@@ -2736,7 +2768,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 34,
@@ -2819,7 +2852,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 35,
@@ -2902,7 +2936,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 36,
@@ -2985,7 +3020,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 37,
@@ -3068,7 +3104,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 38,
@@ -3151,7 +3188,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 39,
@@ -3234,7 +3272,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 40,
@@ -3317,7 +3356,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 41,
@@ -3400,7 +3440,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 42,
@@ -3483,7 +3524,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 43,
@@ -3566,7 +3608,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 44,
@@ -3649,7 +3692,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 45,
@@ -3732,7 +3776,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 46,
@@ -3815,7 +3860,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 47,
@@ -3898,7 +3944,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 48,
@@ -3981,7 +4028,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 49,
@@ -4064,7 +4112,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 50,
@@ -4147,7 +4196,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 51,
@@ -4230,7 +4280,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 52,
@@ -4313,7 +4364,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 53,
@@ -4396,7 +4448,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 54,
@@ -4479,7 +4532,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 55,
@@ -4562,7 +4616,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 56,
@@ -4645,7 +4700,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 57,
@@ -4728,7 +4784,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 58,
@@ -4811,7 +4868,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 59,
@@ -4894,7 +4952,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 60,
@@ -4977,7 +5036,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 61,
@@ -5060,7 +5120,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 62,
@@ -5143,7 +5204,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 63,
@@ -5226,7 +5288,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 64,
@@ -5309,7 +5372,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 65,
@@ -5392,7 +5456,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 66,
@@ -5475,7 +5540,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 67,
@@ -5558,7 +5624,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 68,
@@ -5641,7 +5708,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 69,
@@ -5724,7 +5792,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 70,
@@ -5807,7 +5876,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 71,
@@ -5890,7 +5960,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 72,
@@ -5973,7 +6044,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 73,
@@ -6056,7 +6128,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 74,
@@ -6139,7 +6212,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 75,
@@ -6222,7 +6296,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 76,
@@ -6305,7 +6380,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 77,
@@ -6388,7 +6464,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 78,
@@ -6471,7 +6548,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 79,
@@ -6554,7 +6632,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 80,
@@ -6637,7 +6716,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 81,
@@ -6720,7 +6800,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 82,
@@ -6803,7 +6884,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "",
-      "¿Cómo califica la atención brindada por las instituciones?": ""
+      "¿Cómo califica la atención brindada por las instituciones?": "",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 83,
@@ -6886,7 +6968,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 84,
@@ -6969,7 +7052,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 85,
@@ -7052,7 +7136,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 86,
@@ -7135,7 +7220,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 87,
@@ -7218,7 +7304,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 88,
@@ -7301,7 +7388,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 89,
@@ -7384,7 +7472,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 90,
@@ -7467,7 +7556,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 91,
@@ -7550,7 +7640,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 92,
@@ -7633,7 +7724,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 93,
@@ -7716,7 +7808,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 94,
@@ -7799,7 +7892,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 95,
@@ -7882,7 +7976,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 96,
@@ -7965,7 +8060,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 97,
@@ -8048,7 +8144,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 98,
@@ -8131,7 +8228,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 99,
@@ -8214,7 +8312,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 100,
@@ -8297,7 +8396,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 101,
@@ -8380,7 +8480,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 102,
@@ -8463,7 +8564,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 103,
@@ -8546,7 +8648,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 104,
@@ -8629,7 +8732,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 105,
@@ -8712,7 +8816,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 106,
@@ -8795,7 +8900,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 107,
@@ -8878,7 +8984,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 108,
@@ -8961,7 +9068,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 109,
@@ -9044,7 +9152,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 110,
@@ -9127,7 +9236,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 111,
@@ -9210,7 +9320,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 112,
@@ -9293,7 +9404,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 113,
@@ -9376,7 +9488,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 114,
@@ -9459,7 +9572,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 115,
@@ -9542,7 +9656,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 116,
@@ -9625,7 +9740,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 117,
@@ -9708,7 +9824,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 118,
@@ -9791,7 +9908,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 119,
@@ -9874,7 +9992,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 120,
@@ -9957,7 +10076,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 121,
@@ -10040,7 +10160,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 122,
@@ -10123,7 +10244,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 123,
@@ -10206,7 +10328,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 124,
@@ -10289,7 +10412,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 125,
@@ -10372,7 +10496,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 126,
@@ -10455,7 +10580,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 127,
@@ -10538,7 +10664,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 128,
@@ -10621,7 +10748,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 129,
@@ -10704,7 +10832,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 130,
@@ -10787,7 +10916,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 131,
@@ -10870,7 +11000,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 132,
@@ -10953,7 +11084,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 133,
@@ -11036,7 +11168,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 134,
@@ -11119,7 +11252,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 135,
@@ -11202,7 +11336,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 136,
@@ -11285,7 +11420,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 137,
@@ -11368,7 +11504,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 138,
@@ -11451,7 +11588,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 139,
@@ -11534,7 +11672,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 140,
@@ -11617,7 +11756,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 141,
@@ -11700,7 +11840,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 142,
@@ -11783,7 +11924,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 143,
@@ -11866,7 +12008,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 144,
@@ -11949,7 +12092,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 145,
@@ -12032,7 +12176,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 146,
@@ -12115,7 +12260,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 147,
@@ -12198,7 +12344,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 148,
@@ -12281,7 +12428,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 149,
@@ -12364,7 +12512,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 150,
@@ -12447,7 +12596,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 151,
@@ -12530,7 +12680,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 152,
@@ -12613,7 +12764,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 153,
@@ -12696,7 +12848,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 154,
@@ -12779,7 +12932,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 155,
@@ -12862,7 +13016,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 156,
@@ -12945,7 +13100,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 157,
@@ -13028,7 +13184,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 158,
@@ -13111,7 +13268,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 159,
@@ -13194,7 +13352,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 160,
@@ -13277,7 +13436,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 161,
@@ -13360,7 +13520,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 162,
@@ -13443,7 +13604,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 163,
@@ -13526,7 +13688,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 164,
@@ -13609,7 +13772,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 165,
@@ -13692,7 +13856,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 166,
@@ -13775,7 +13940,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 167,
@@ -13858,7 +14024,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 168,
@@ -13941,7 +14108,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 169,
@@ -14024,7 +14192,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 170,
@@ -14107,7 +14276,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 171,
@@ -14190,7 +14360,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 172,
@@ -14273,7 +14444,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 173,
@@ -14356,7 +14528,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 174,
@@ -14439,7 +14612,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 175,
@@ -14522,7 +14696,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 176,
@@ -14605,7 +14780,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 177,
@@ -14688,7 +14864,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 178,
@@ -14771,7 +14948,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 179,
@@ -14854,7 +15032,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 180,
@@ -14937,7 +15116,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 181,
@@ -15020,7 +15200,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 182,
@@ -15103,7 +15284,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 183,
@@ -15186,7 +15368,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 184,
@@ -15269,7 +15452,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 185,
@@ -15352,7 +15536,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 186,
@@ -15435,7 +15620,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 187,
@@ -15518,7 +15704,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 188,
@@ -15601,7 +15788,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 189,
@@ -15684,7 +15872,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 190,
@@ -15767,7 +15956,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 191,
@@ -15850,7 +16040,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 192,
@@ -15933,7 +16124,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 193,
@@ -16016,7 +16208,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 194,
@@ -16099,7 +16292,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 195,
@@ -16182,7 +16376,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 196,
@@ -16265,7 +16460,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 197,
@@ -16348,7 +16544,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 198,
@@ -16431,7 +16628,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 199,
@@ -16514,7 +16712,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "2"
+      "¿Cómo califica la atención brindada por las instituciones?": "2",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 200,
@@ -16597,7 +16796,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 201,
@@ -16680,7 +16880,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 202,
@@ -16763,7 +16964,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 203,
@@ -16846,7 +17048,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 204,
@@ -16929,7 +17132,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 205,
@@ -17012,7 +17216,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 206,
@@ -17095,7 +17300,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 207,
@@ -17178,7 +17384,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 208,
@@ -17261,7 +17468,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 209,
@@ -17344,7 +17552,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 210,
@@ -17427,7 +17636,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 211,
@@ -17510,7 +17720,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 212,
@@ -17593,7 +17804,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 213,
@@ -17676,7 +17888,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 214,
@@ -17759,7 +17972,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 215,
@@ -17842,7 +18056,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 216,
@@ -17925,7 +18140,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 217,
@@ -18008,7 +18224,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 218,
@@ -18091,7 +18308,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 219,
@@ -18174,7 +18392,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 220,
@@ -18257,7 +18476,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 221,
@@ -18340,7 +18560,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 222,
@@ -18423,7 +18644,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 223,
@@ -18506,7 +18728,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "5"
+      "¿Cómo califica la atención brindada por las instituciones?": "5",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 224,
@@ -18589,7 +18812,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 225,
@@ -18672,7 +18896,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 226,
@@ -18755,7 +18980,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 227,
@@ -18838,7 +19064,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 228,
@@ -18921,7 +19148,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 229,
@@ -19004,7 +19232,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "4"
+      "¿Cómo califica la atención brindada por las instituciones?": "4",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 230,
@@ -19087,7 +19316,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "Sí",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 231,
@@ -19170,7 +19400,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "1"
+      "¿Cómo califica la atención brindada por las instituciones?": "1",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 232,
@@ -19253,7 +19484,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 233,
@@ -19336,7 +19568,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "Sí",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     },
     {
       "__row_index": 234,
@@ -19419,7 +19652,8 @@
       "74. ¿Conoce la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "75. ¿Participa en la Mesa Municipal de Participación Efectiva de las Víctimas?": "No",
       "76. ¿Ha sentido situaciones de revictimización durante la atención institucional?": "No",
-      "¿Cómo califica la atención brindada por las instituciones?": "3"
+      "¿Cómo califica la atención brindada por las instituciones?": "3",
+      "Filtro_Activo": "1"
     }
   ]
 }

@@ -1,0 +1,31 @@
+﻿# Dependencies
+node_modules/
+frontend/node_modules/
+.pnp
+.pnp.js
+
+# Next.js build output
+frontend/.next/
+frontend/out/
+.next/
+out/
+
+# Python / FastAPI
+__pycache__/
+*.py[cod]
+*.class
+backend/venv/
+venv/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+services.log
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

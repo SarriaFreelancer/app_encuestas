@@ -174,11 +174,39 @@ class PermissiveSheetsRepository(BaseRepository):
     GOOGLE_SHEETS_CSV_URL = "https://docs.google.com/spreadsheets/d/18hVTcC1_ylED47qIfeuHm1rP7cyNW-9wJykhQoNoIrY/export?format=csv&gid=1325247630"
     GOOGLE_APPS_SCRIPT_URL = os.getenv("GOOGLE_APPS_SCRIPT_URL", "")
 
+    def _get_apps_script_url(self) -> str:
+        config_file = os.path.join(DATA_DIR, "config.json")
+        if os.path.exists(config_file):
+            try:
+                with open(config_file, "r", encoding="utf-8") as f:
+                    cfg = json.load(f)
+                    url = cfg.get("google_apps_script_url", "").strip()
+                    if url:
+                        return url
+            except Exception:
+                pass
+        return os.getenv("GOOGLE_APPS_SCRIPT_URL", self.GOOGLE_APPS_SCRIPT_URL).strip()
+
+    def set_apps_script_url(self, url: str):
+        config_file = os.path.join(DATA_DIR, "config.json")
+        cfg = {}
+        if os.path.exists(config_file):
+            try:
+                with open(config_file, "r", encoding="utf-8") as f:
+                    cfg = json.load(f)
+            except Exception:
+                cfg = {}
+        cfg["google_apps_script_url"] = url.strip()
+        with open(config_file, "w", encoding="utf-8") as f:
+            json.dump(cfg, f, ensure_ascii=False, indent=2)
+
     def _send_to_google_apps_script(self, action: str, data: Dict[str, Any], doc_number: str = ""):
         """
         Envía la actualización o creación a Google Apps Script para modificar la celda en la hoja en la nube.
         """
-        if not self.GOOGLE_APPS_SCRIPT_URL:
+        script_url = self._get_apps_script_url()
+        if not script_url:
+            print("[Google Sheets Sync]: No hay GOOGLE_APPS_SCRIPT_URL configurada. El registro se guardó localmente.")
             return
 
         import urllib.request
@@ -192,11 +220,12 @@ class PermissiveSheetsRepository(BaseRepository):
             }).encode('utf-8')
 
             req = urllib.request.Request(
-                self.GOOGLE_APPS_SCRIPT_URL,
+                script_url,
                 data=payload,
                 headers={'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0'}
             )
-            urllib.request.urlopen(req, timeout=10)
+            res = urllib.request.urlopen(req, timeout=12)
+            print(f"[Google Apps Script Success]: Fila enviada a Google Sheets ({res.status})")
         except Exception as e:
             print(f"[Google Apps Script Webhook Error]: {e}")
 
