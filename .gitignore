@@ -1,4 +1,4 @@
-﻿# Dependencies
+# Dependencies
 node_modules/
 frontend/node_modules/
 .pnp
@@ -29,3 +29,9 @@ services.log
 Thumbs.db
 .vscode/
 .idea/
+
+# Local Config / Secrets
+backend/app/data/config.json
+.env
+*.env
+
